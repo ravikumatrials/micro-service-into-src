@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Plus, Search, FileDown, Filter, Check, X } from "lucide-react";
 import { FaceScanner } from "@/components/face/FaceScanner";
+import { useNavigate } from "react-router-dom";
 
 // Mock data
 const initialEmployees = [
@@ -90,6 +91,7 @@ const Employees = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [photoTaken, setPhotoTaken] = useState(false);
+  const navigate = useNavigate();
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     employeeId: "",
@@ -206,6 +208,11 @@ const Employees = () => {
     );
     
     setEmployees(updatedEmployees);
+  };
+
+  const handleViewFullAttendanceHistory = (employeeId) => {
+    setIsViewModalOpen(false);
+    navigate(`/attendance-history?employeeId=${employeeId}`);
   };
 
   return (
@@ -679,7 +686,10 @@ const Employees = () => {
                     </table>
                   </div>
                   <div className="mt-3 text-center">
-                    <button className="text-sm text-proscape hover:text-proscape-dark">
+                    <button 
+                      onClick={() => handleViewFullAttendanceHistory(selectedEmployee.employeeId)}
+                      className="text-sm text-proscape hover:text-proscape-dark"
+                    >
                       View Full Attendance History
                     </button>
                   </div>
@@ -773,8 +783,6 @@ const Employees = () => {
           </div>
         </div>
       )}
-
-      {/* View Employee Modal */}
     </div>
   );
 };
