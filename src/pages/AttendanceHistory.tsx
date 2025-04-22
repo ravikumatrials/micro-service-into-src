@@ -1,13 +1,31 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Calendar, Camera, Clock, Download, Filter, Search, User } from "lucide-react";
+import { 
+  Calendar, 
+  Camera, 
+  Clock, 
+  Download, 
+  Filter, 
+  Search, 
+  User 
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const AttendanceHistory = () => {
   const [dateFilter, setDateFilter] = useState("");
   const [employeeFilter, setEmployeeFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("");
   const [methodFilter, setMethodFilter] = useState("all");
+  const [selectedRecord, setSelectedRecord] = useState(null);
   
   // Mock attendance data
   const attendanceRecords = [
@@ -133,6 +151,10 @@ const AttendanceHistory = () => {
     return dateMatch && employeeMatch && projectMatch && methodMatch;
   });
 
+  const viewDetails = (record) => {
+    setSelectedRecord(record);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -224,27 +246,28 @@ const AttendanceHistory = () => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th scope="col" className="px-4 py-3">Date</th>
-                <th scope="col" className="px-4 py-3">Employee ID</th>
-                <th scope="col" className="px-4 py-3">Employee Name</th>
-                <th scope="col" className="px-4 py-3">Check In</th>
-                <th scope="col" className="px-4 py-3">Check Out</th>
-                <th scope="col" className="px-4 py-3">Total Hours</th>
-                <th scope="col" className="px-4 py-3">Project</th>
-                <th scope="col" className="px-4 py-3">Comment</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Employee ID</TableHead>
+                <TableHead>Employee Name</TableHead>
+                <TableHead>Check In</TableHead>
+                <TableHead>Check Out</TableHead>
+                <TableHead>Total Hours</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Comment</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredRecords.length > 0 ? (
                 filteredRecords.map(record => (
-                  <tr key={record.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3">{record.date}</td>
-                    <td className="px-4 py-3">{record.employeeId}</td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{record.employee}</td>
-                    <td className="px-4 py-3">
+                  <TableRow key={record.id} className="hover:bg-gray-50">
+                    <TableCell>{record.date}</TableCell>
+                    <TableCell>{record.employeeId}</TableCell>
+                    <TableCell className="font-medium text-gray-900">{record.employee}</TableCell>
+                    <TableCell>
                       <div className="flex items-center">
                         <span>{record.checkInTime}</span>
                         <span 
@@ -257,8 +280,8 @@ const AttendanceHistory = () => {
                           {record.checkInMethod}
                         </span>
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center">
                         <span>{record.checkOutTime}</span>
                         <span 
@@ -271,10 +294,10 @@ const AttendanceHistory = () => {
                           {record.checkOutMethod}
                         </span>
                       </div>
-                    </td>
-                    <td className="px-4 py-3">{record.totalHours}</td>
-                    <td className="px-4 py-3">{record.project}</td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell>{record.totalHours}</TableCell>
+                    <TableCell>{record.project}</TableCell>
+                    <TableCell>
                       {record.comment ? (
                         <div className="max-w-xs truncate" title={record.comment}>
                           {record.comment}
@@ -282,18 +305,95 @@ const AttendanceHistory = () => {
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button 
+                            onClick={() => viewDetails(record)}
+                            className="text-proscape hover:text-proscape-dark font-medium"
+                          >
+                            View Details
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Attendance Details</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            {selectedRecord && (
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-gray-500">Date</p>
+                                  <p className="text-sm">{record.date}</p>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-gray-500">Employee ID</p>
+                                  <p className="text-sm">{record.employeeId}</p>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-gray-500">Employee Name</p>
+                                  <p className="text-sm">{record.employee}</p>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-gray-500">Project</p>
+                                  <p className="text-sm">{record.project}</p>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-gray-500">Check In Time</p>
+                                  <p className="text-sm">
+                                    {record.checkInTime}
+                                    <span 
+                                      className={`ml-2 inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${
+                                        record.checkInMethod === "Face" 
+                                          ? "bg-green-100 text-green-800" 
+                                          : "bg-amber-100 text-amber-800"
+                                      }`}
+                                    >
+                                      {record.checkInMethod}
+                                    </span>
+                                  </p>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-gray-500">Check Out Time</p>
+                                  <p className="text-sm">
+                                    {record.checkOutTime}
+                                    <span 
+                                      className={`ml-2 inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${
+                                        record.checkOutMethod === "Face" 
+                                          ? "bg-green-100 text-green-800" 
+                                          : "bg-amber-100 text-amber-800"
+                                      }`}
+                                    >
+                                      {record.checkOutMethod}
+                                    </span>
+                                  </p>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-gray-500">Total Hours</p>
+                                  <p className="text-sm">{record.totalHours}</p>
+                                </div>
+                                <div className="space-y-1 col-span-2">
+                                  <p className="text-sm font-medium text-gray-500">Comment</p>
+                                  <p className="text-sm">{record.comment || "-"}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={8} className="px-4 py-6 text-center text-gray-500">
+                <TableRow>
+                  <TableCell colSpan={9} className="h-24 text-center">
                     No attendance records found matching the search criteria
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         
         <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 bg-gray-50">
