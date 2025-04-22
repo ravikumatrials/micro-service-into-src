@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Plus, Search, FileDown, Filter, Check, X } from "lucide-react";
+import { FaceScanner } from "@/components/face/FaceScanner";
 
 // Mock data
 const initialEmployees = [
@@ -162,6 +162,16 @@ const Employees = () => {
     setIsEnrollModalOpen(true);
     setCameraActive(false);
     setPhotoTaken(false);
+  };
+
+  const handlePhotoCapture = (imageBlob: Blob) => {
+    // Update the employee's face enrollment status
+    const updatedEmployees = employees.map(emp => 
+      emp.id === selectedEmployee?.id ? {...emp, faceEnrolled: true} : emp
+    );
+    
+    setEmployees(updatedEmployees);
+    setPhotoTaken(true);
   };
 
   const activateCamera = () => {
@@ -724,71 +734,47 @@ const Employees = () => {
                   </p>
                   
                   <button
-                    onClick={activateCamera}
+                    onClick={() => setCameraActive(true)}
                     className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                   >
                     {selectedEmployee.faceEnrolled ? "Update Face Data" : "Capture Face"}
                   </button>
                 </div>
               ) : (
-                <div>
-                  <div className="bg-black rounded-lg overflow-hidden aspect-video relative mb-4">
-                    {!photoTaken ? (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="w-64 h-64 border-4 border-white rounded-full opacity-50"></div>
-                        <p className="text-white mt-4">Position face within the circle</p>
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 bg-green-500 bg-opacity-20 flex items-center justify-center">
-                        <div className="bg-white p-4 rounded-lg shadow-lg">
-                          <div className="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-                            <Check className="h-10 w-10 text-green-600" />
-                          </div>
-                          <p className="mt-2 font-bold">Face Captured Successfully</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex justify-center space-x-4">
-                    {!photoTaken ? (
-                      <>
-                        <button
-                          onClick={cancelEnrollment}
-                          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={capturePhoto}
-                          className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium"
-                        >
-                          Capture
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => setPhotoTaken(false)}
-                          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50"
-                        >
-                          Retake
-                        </button>
-                        <button
-                          onClick={saveEnrollment}
-                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                        >
-                          Save & Enroll
-                        </button>
-                      </>
-                    )}
-                  </div>
+                <FaceScanner 
+                  onCapture={handlePhotoCapture}
+                  onCancel={() => {
+                    setCameraActive(false);
+                    setPhotoTaken(false);
+                  }}
+                />
+              )}
+
+              {photoTaken && (
+                <div className="mt-4 flex justify-center space-x-4">
+                  <button
+                    onClick={() => {
+                      setCameraActive(true);
+                      setPhotoTaken(false);
+                    }}
+                    className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50"
+                  >
+                    Retake
+                  </button>
+                  <button
+                    onClick={saveEnrollment}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  >
+                    Save & Enroll
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </div>
       )}
+
+      {/* View Employee Modal */}
     </div>
   );
 };
