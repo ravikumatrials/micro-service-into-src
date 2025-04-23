@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Camera, User, Check } from "lucide-react";
+import { Camera, Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 
@@ -17,7 +17,7 @@ interface FaceCheckInDialogProps {
   onOpenChange: (open: boolean) => void;
   employee: Employee | null;
   projects: { id: number; name: string }[];
-  onComplete: () => void;
+  onComplete: (projectId: string) => void;
 }
 
 const FaceCheckInDialog = ({
@@ -75,7 +75,7 @@ const FaceCheckInDialog = ({
   }, [open, step]);
   
   const handleComplete = () => {
-    onComplete();
+    onComplete(selectedProject || projects[0]?.id.toString() || "1");
   };
   
   return (
