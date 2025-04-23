@@ -329,17 +329,11 @@ const Employees = () => {
         <h1 className="text-2xl font-bold text-gray-800">Employees</h1>
         <div className="flex space-x-3">
           <button className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+            {/* Use Import icon */}
             <Import className="h-4 w-4 mr-2" />
             Import
           </button>
-          
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            <User className="h-4 w-4 mr-2" />
-            Add Employee
-          </button>
+          {/* REMOVED: Add Employee button */}
         </div>
       </div>
       <Card className="p-0 overflow-hidden">
@@ -406,7 +400,6 @@ const Employees = () => {
                 <th scope="col" className="px-4 py-3">Employee ID</th>
                 <th scope="col" className="px-4 py-3">Name</th>
                 <th scope="col" className="px-4 py-3">Role</th>
-                
                 <th scope="col" className="px-4 py-3">Face Enrolled</th>
                 <th scope="col" className="px-4 py-3">Status</th>
                 <th scope="col" className="px-4 py-3">Actions</th>
@@ -419,7 +412,6 @@ const Employees = () => {
                     <td className="px-4 py-3">{employee.employeeId}</td>
                     <td className="px-4 py-3 font-medium text-gray-900">{employee.name}</td>
                     <td className="px-4 py-3">{employee.role}</td>
-                    
                     <td className="px-4 py-3">
                       {employee.faceEnrolled ? (
                         <span className="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -444,37 +436,35 @@ const Employees = () => {
                         {employee.status}
                       </span>
                     </td>
-                    
-                <td className="px-4 py-3">
-                  <div className="flex space-x-2">
-                    <button 
-                      onClick={() => handleEmployeeView(employee)}
-                      className="text-blue-500 hover:text-blue-700"
-                      title="View Employee"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleFaceEnrollment(employee)}
-                      className="text-proscape hover:text-proscape-dark"
-                      title="Face Enrollment"
-                    >
-                      <Camera className="h-4 w-4" />
-                    </button>
-                    
-                    <button 
-                      onClick={() => toggleEmployeeStatus(employee.id)}
-                      className={
-                        employee.status === "Active" 
-                          ? "text-red-500 hover:text-red-700" 
-                          : "text-green-500 hover:text-green-700"
-                      }
-                      title={employee.status === "Active" ? "Deactivate Employee" : "Activate Employee"}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => handleEmployeeView(employee)}
+                          className="text-blue-500 hover:text-blue-700"
+                          title="View Employee"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleFaceEnrollment(employee)}
+                          className="text-proscape hover:text-proscape-dark"
+                          title="Face Enrollment"
+                        >
+                          <Camera className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => toggleEmployeeStatus(employee.id)}
+                          className={
+                            employee.status === "Active" 
+                              ? "text-red-500 hover:text-red-700" 
+                              : "text-green-500 hover:text-green-700"
+                          }
+                          title={employee.status === "Active" ? "Deactivate Employee" : "Activate Employee"}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -705,7 +695,6 @@ const Employees = () => {
                     <Camera className="h-3 w-3 mr-1" />
                     {selectedEmployee.faceEnrolled ? "Update Face" : "Enroll Face"}
                   </button>
-                  
                 </div>
               </div>
               
@@ -736,8 +725,7 @@ const Employees = () => {
                     <p className="text-sm font-medium">01/07/2023</p>
                   </div>
                 </div>
-                
-                {/* All Attendance Records Table */}
+                {/* ALL Attendance Records Table */}
                 <div className="mt-6">
                   <h4 className="font-medium text-gray-900 mb-3">Attendance History</h4>
                   <div className="border rounded-md overflow-hidden max-h-60 overflow-y-auto">
@@ -756,25 +744,30 @@ const Employees = () => {
                         {mockAttendanceRecords
                           .filter(r => r.employeeId === selectedEmployee.employeeId)
                           .map(record => (
-                          <tr key={record.id} className="border-b">
-                            <td className="px-4 py-3">{record.date}</td>
-                            <td className="px-4 py-3">{record.project}</td>
-                            <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded text-xs ${
-                                record.checkInMethod === "Face"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-amber-100 text-amber-800"
-                              }`}>
-                                {record.checkInTime} <span className="italic">({record.checkInMethod})</span>
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded text-xs ${
-                                record.checkOutMethod === "Face"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-amber-100 text-amber-800"
-                              }`}>
-                                {record.checkOutTime} <span className="italic">({record.checkOutMethod})</span>
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">{record.totalHours}
+                            <tr key={record.id} className="border-b">
+                              <td className="px-4 py-3">{record.date}</td>
+                              <td className="px-4 py-3">{record.project}</td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-1 rounded text-xs ${
+                                  record.checkInMethod === "Face"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-amber-100 text-amber-800"
+                                }`}>
+                                  {record.checkInTime} <span className="italic">({record.checkInMethod})</span>
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-1 rounded text-xs ${
+                                  record.checkOutMethod === "Face"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-amber-100 text-amber-800"
+                                }`}>
+                                  {record.checkOutTime} <span className="italic">({record.checkOutMethod})</span>
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">{record.totalHours}</td>
+                              <td className="px-4 py-3">{record.comment || <span className="text-gray-400">-</span>}</td>
+                            </tr>
+                          ))}
+                        {mockAttendanceRecords.filter(r => r.employeeId === selectedEmployee.employeeId).length === 0 && (
+                          <tr>
