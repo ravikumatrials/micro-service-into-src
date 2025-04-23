@@ -1,6 +1,11 @@
 
 import { Eye, Trash } from "lucide-react";
-import { Tooltip } from "@/components/ui/tooltip";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -44,23 +49,23 @@ export default function ProjectTable({
                 {/* Employees */}
                 <td className="px-4 py-3 max-w-[180px]">
                   {project.assignedEmployees && project.assignedEmployees.length ? (
-                    <Tooltip.Provider>
+                    <TooltipProvider>
                       <Tooltip>
-                        <Tooltip.Trigger asChild>
+                        <TooltipTrigger asChild>
                           <span className="truncate" title={project.assignedEmployees.map(e=>e.name).join(", ")}>
                             {project.assignedEmployees.length > 2
                               ? `${project.assignedEmployees.slice(0,2).map(e=>e.name).join(", ")} +${project.assignedEmployees.length - 2}`
                               : project.assignedEmployees.map(e=>e.name).join(", ")
                             }
                           </span>
-                        </Tooltip.Trigger>
-                        <Tooltip.Content side="top" align="center">
+                        </TooltipTrigger>
+                        <TooltipContent side="top" align="center">
                           {project.assignedEmployees.map((e, i) => (
                             <div key={e.id} className="text-xs">{e.name}</div>
                           ))}
-                        </Tooltip.Content>
+                        </TooltipContent>
                       </Tooltip>
-                    </Tooltip.Provider>
+                    </TooltipProvider>
                   ) : (
                     <span className="italic text-xs text-gray-400">None</span>
                   )}
