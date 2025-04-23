@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
@@ -78,6 +77,113 @@ const initialEmployees = [
     project: "Highway Renovation", 
     faceEnrolled: false,
     status: "Active" 
+  },
+];
+
+const mockAttendanceRecords = [
+  { 
+    id: 1, 
+    employee: "John Smith", 
+    employeeId: "EMP001", 
+    date: "22 Apr 2025", 
+    checkInTime: "08:30 AM", 
+    checkInMethod: "Face", 
+    checkOutTime: "05:15 PM", 
+    checkOutMethod: "Face", 
+    project: "Main Building Construction",
+    totalHours: "8h 45m",
+    comment: ""
+  },
+  { 
+    id: 2, 
+    employee: "Sarah Johnson", 
+    employeeId: "EMP002", 
+    date: "22 Apr 2025", 
+    checkInTime: "08:45 AM", 
+    checkInMethod: "Face", 
+    checkOutTime: "05:30 PM", 
+    checkOutMethod: "Manual", 
+    project: "Bridge Expansion Project",
+    totalHours: "8h 45m",
+    comment: "Employee forgot to check out. Manual checkout by supervisor."
+  },
+  { 
+    id: 3, 
+    employee: "Robert Williams", 
+    employeeId: "EMP003", 
+    date: "22 Apr 2025", 
+    checkInTime: "09:15 AM", 
+    checkInMethod: "Manual", 
+    checkOutTime: "05:45 PM", 
+    checkOutMethod: "Face", 
+    project: "Highway Renovation",
+    totalHours: "8h 30m",
+    comment: "Late arrival due to transportation issue."
+  },
+  { 
+    id: 4, 
+    employee: "Emily Davis", 
+    employeeId: "EMP004", 
+    date: "22 Apr 2025", 
+    checkInTime: "08:15 AM", 
+    checkInMethod: "Face", 
+    checkOutTime: "04:30 PM", 
+    checkOutMethod: "Face", 
+    project: "Main Building Construction",
+    totalHours: "8h 15m",
+    comment: ""
+  },
+  { 
+    id: 5, 
+    employee: "James Miller", 
+    employeeId: "EMP005", 
+    date: "22 Apr 2025", 
+    checkInTime: "08:30 AM", 
+    checkInMethod: "Face", 
+    checkOutTime: "05:00 PM", 
+    checkOutMethod: "Face", 
+    project: "Highway Renovation",
+    totalHours: "8h 30m",
+    comment: ""
+  },
+  { 
+    id: 6, 
+    employee: "Jennifer Wilson", 
+    employeeId: "EMP006", 
+    date: "21 Apr 2025", 
+    checkInTime: "08:30 AM", 
+    checkInMethod: "Face", 
+    checkOutTime: "05:15 PM", 
+    checkOutMethod: "Face", 
+    project: "Bridge Expansion Project",
+    totalHours: "8h 45m",
+    comment: ""
+  },
+  { 
+    id: 7, 
+    employee: "Michael Brown", 
+    employeeId: "EMP007", 
+    date: "21 Apr 2025", 
+    checkInTime: "08:45 AM", 
+    checkInMethod: "Face", 
+    checkOutTime: "05:30 PM", 
+    checkOutMethod: "Manual", 
+    project: "Main Building Construction",
+    totalHours: "8h 45m",
+    comment: "Employee forgot to check out. Manual checkout by supervisor."
+  },
+  { 
+    id: 8, 
+    employee: "David Thompson", 
+    employeeId: "EMP008", 
+    date: "21 Apr 2025", 
+    checkInTime: "08:15 AM", 
+    checkInMethod: "Face", 
+    checkOutTime: "05:00 PM", 
+    checkOutMethod: "Face", 
+    project: "Highway Renovation",
+    totalHours: "8h 45m",
+    comment: ""
   },
 ];
 
@@ -226,7 +332,14 @@ const Employees = () => {
             <Import className="h-4 w-4 mr-2" />
             Import
           </button>
-          {/* REMOVED: Add Employee button */}
+          
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Add Employee
+          </button>
         </div>
       </div>
       <Card className="p-0 overflow-hidden">
@@ -293,7 +406,7 @@ const Employees = () => {
                 <th scope="col" className="px-4 py-3">Employee ID</th>
                 <th scope="col" className="px-4 py-3">Name</th>
                 <th scope="col" className="px-4 py-3">Role</th>
-                {/* REMOVED Project column */}
+                
                 <th scope="col" className="px-4 py-3">Face Enrolled</th>
                 <th scope="col" className="px-4 py-3">Status</th>
                 <th scope="col" className="px-4 py-3">Actions</th>
@@ -306,7 +419,7 @@ const Employees = () => {
                     <td className="px-4 py-3">{employee.employeeId}</td>
                     <td className="px-4 py-3 font-medium text-gray-900">{employee.name}</td>
                     <td className="px-4 py-3">{employee.role}</td>
-                    {/* REMOVED Project column */}
+                    
                     <td className="px-4 py-3">
                       {employee.faceEnrolled ? (
                         <span className="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -331,41 +444,37 @@ const Employees = () => {
                         {employee.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button 
-                          onClick={() => handleEmployeeView(employee)}
-                          className="text-blue-500 hover:text-blue-700"
-                          title="View Employee"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleFaceEnrollment(employee)}
-                          className="text-proscape hover:text-proscape-dark"
-                          title="Face Enrollment"
-                        >
-                          <Camera className="h-4 w-4" />
-                        </button>
-                        <button 
-                          className="text-gray-500 hover:text-gray-700"
-                          title="Edit Employee"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button 
-                          onClick={() => toggleEmployeeStatus(employee.id)}
-                          className={
-                            employee.status === "Active" 
-                              ? "text-red-500 hover:text-red-700" 
-                              : "text-green-500 hover:text-green-700"
-                          }
-                          title={employee.status === "Active" ? "Deactivate Employee" : "Activate Employee"}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
+                    
+                <td className="px-4 py-3">
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handleEmployeeView(employee)}
+                      className="text-blue-500 hover:text-blue-700"
+                      title="View Employee"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleFaceEnrollment(employee)}
+                      className="text-proscape hover:text-proscape-dark"
+                      title="Face Enrollment"
+                    >
+                      <Camera className="h-4 w-4" />
+                    </button>
+                    
+                    <button 
+                      onClick={() => toggleEmployeeStatus(employee.id)}
+                      className={
+                        employee.status === "Active" 
+                          ? "text-red-500 hover:text-red-700" 
+                          : "text-green-500 hover:text-green-700"
+                      }
+                      title={employee.status === "Active" ? "Deactivate Employee" : "Activate Employee"}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
                   </tr>
                 ))
               ) : (
@@ -585,7 +694,6 @@ const Employees = () => {
                 >
                   {selectedEmployee.status}
                 </span>
-                
                 <div className="mt-4 w-full flex justify-center space-x-2">
                   <button 
                     onClick={() => {
@@ -597,10 +705,7 @@ const Employees = () => {
                     <Camera className="h-3 w-3 mr-1" />
                     {selectedEmployee.faceEnrolled ? "Update Face" : "Enroll Face"}
                   </button>
-                  <button className="flex items-center text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </button>
+                  
                 </div>
               </div>
               
@@ -632,164 +737,44 @@ const Employees = () => {
                   </div>
                 </div>
                 
+                {/* All Attendance Records Table */}
                 <div className="mt-6">
-                  <h4 className="font-medium text-gray-900 mb-3">Recent Attendance</h4>
-                  <div className="border rounded-md overflow-hidden">
+                  <h4 className="font-medium text-gray-900 mb-3">Attendance History</h4>
+                  <div className="border rounded-md overflow-hidden max-h-60 overflow-y-auto">
                     <table className="w-full text-sm text-left text-gray-500">
                       <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                         <tr>
-                          <th scope="col" className="px-4 py-3">Date</th>
-                          <th scope="col" className="px-4 py-3">Check In</th>
-                          <th scope="col" className="px-4 py-3">Check Out</th>
-                          <th scope="col" className="px-4 py-3">Hours</th>
+                          <th className="px-4 py-3">Date</th>
+                          <th className="px-4 py-3">Project</th>
+                          <th className="px-4 py-3">Check In</th>
+                          <th className="px-4 py-3">Check Out</th>
+                          <th className="px-4 py-3">Hours</th>
+                          <th className="px-4 py-3">Comment</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="border-b">
-                          <td className="px-4 py-3">22 Apr 2025</td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                              08:30 AM (Face)
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                              05:15 PM (Face)
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">8h 45m</td>
-                        </tr>
-                        <tr className="border-b">
-                          <td className="px-4 py-3">21 Apr 2025</td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                              08:45 AM (Face)
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs">
-                              05:30 PM (Manual)
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">8h 45m</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">20 Apr 2025</td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                              08:15 AM (Face)
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                              05:00 PM (Face)
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">8h 45m</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="mt-3 text-center">
-                    <button 
-                      onClick={() => handleViewFullAttendanceHistory(selectedEmployee.employeeId)}
-                      className="text-sm text-proscape hover:text-proscape-dark"
-                    >
-                      View Full Attendance History
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Face Enrollment Modal */}
-      {isEnrollModalOpen && selectedEmployee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">
-                Face Enrollment - {selectedEmployee.name}
-              </h2>
-              <button 
-                onClick={cancelEnrollment}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <div className="text-center">
-              {!cameraActive ? (
-                <div>
-                  <div className="mb-6">
-                    <div className="w-24 h-24 rounded-full mx-auto bg-gray-200 flex items-center justify-center overflow-hidden">
-                      {selectedEmployee.faceEnrolled ? (
-                        <img 
-                          src={`https://i.pravatar.cc/128?u=${selectedEmployee.id}`} 
-                          alt={selectedEmployee.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-12 w-12 text-gray-400" />
-                      )}
-                    </div>
-                    <p className="mt-2 text-sm text-gray-500">
-                      {selectedEmployee.employeeId}
-                    </p>
-                  </div>
-                  
-                  <p className="mb-6 text-gray-700">
-                    {selectedEmployee.faceEnrolled 
-                      ? "This employee's face is already enrolled. You can update their face data if needed."
-                      : "Capture the employee's face to enable facial recognition for attendance."
-                    }
-                  </p>
-                  
-                  <button
-                    onClick={() => setCameraActive(true)}
-                    className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    {selectedEmployee.faceEnrolled ? "Update Face Data" : "Capture Face"}
-                  </button>
-                </div>
-              ) : (
-                <FaceScanner 
-                  onCapture={handlePhotoCapture}
-                  onCancel={() => {
-                    setCameraActive(false);
-                    setPhotoTaken(false);
-                  }}
-                />
-              )}
-
-              {photoTaken && (
-                <div className="mt-4 flex justify-center space-x-4">
-                  <button
-                    onClick={() => {
-                      setCameraActive(true);
-                      setPhotoTaken(false);
-                    }}
-                    className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50"
-                  >
-                    Retake
-                  </button>
-                  <button
-                    onClick={saveEnrollment}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    Save
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default Employees;
+                        {mockAttendanceRecords
+                          .filter(r => r.employeeId === selectedEmployee.employeeId)
+                          .map(record => (
+                          <tr key={record.id} className="border-b">
+                            <td className="px-4 py-3">{record.date}</td>
+                            <td className="px-4 py-3">{record.project}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                record.checkInMethod === "Face"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-amber-100 text-amber-800"
+                              }`}>
+                                {record.checkInTime} <span className="italic">({record.checkInMethod})</span>
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                record.checkOutMethod === "Face"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-amber-100 text-amber-800"
+                              }`}>
+                                {record.checkOutTime} <span className="italic">({record.checkOutMethod})</span>
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">{record.totalHours}
