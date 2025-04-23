@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface ReportFiltersProps {
   projectFilter: string;
@@ -22,10 +21,6 @@ interface ReportFiltersProps {
   setAttendanceTypeFilter: (value: string) => void;
   entryMethodFilter: string;
   setEntryMethodFilter: (value: string) => void;
-  approvalStatusFilter: string;
-  setApprovalStatusFilter: (value: string) => void;
-  showExceptionsOnly: boolean;
-  setShowExceptionsOnly: (value: boolean) => void;
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   startDate: string;
@@ -45,10 +40,6 @@ export function ReportFilters({
   setAttendanceTypeFilter,
   entryMethodFilter,
   setEntryMethodFilter,
-  approvalStatusFilter,
-  setApprovalStatusFilter,
-  showExceptionsOnly,
-  setShowExceptionsOnly,
   searchTerm,
   setSearchTerm,
   startDate,
@@ -132,7 +123,7 @@ export function ReportFilters({
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Role
@@ -182,40 +173,8 @@ export function ReportFilters({
             </SelectContent>
           </Select>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Approval Status
-          </label>
-          <Select value={approvalStatusFilter} onValueChange={setApprovalStatusFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-end">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="exceptions"
-              checked={showExceptionsOnly}
-              onCheckedChange={(checked) => setShowExceptionsOnly(checked as boolean)}
-            />
-            <label
-              htmlFor="exceptions"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Show Exceptions Only
-            </label>
-          </div>
-        </div>
       </div>
     </div>
   );
 }
+

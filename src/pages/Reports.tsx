@@ -23,8 +23,6 @@ const Reports = () => {
   const [roleFilter, setRoleFilter] = useState("all");
   const [attendanceTypeFilter, setAttendanceTypeFilter] = useState("all");
   const [entryMethodFilter, setEntryMethodFilter] = useState("all");
-  const [approvalStatusFilter, setApprovalStatusFilter] = useState("all");
-  const [showExceptionsOnly, setShowExceptionsOnly] = useState(false);
 
   // Mock stats data
   const stats = {
@@ -114,10 +112,6 @@ const Reports = () => {
           setAttendanceTypeFilter={setAttendanceTypeFilter}
           entryMethodFilter={entryMethodFilter}
           setEntryMethodFilter={setEntryMethodFilter}
-          approvalStatusFilter={approvalStatusFilter}
-          setApprovalStatusFilter={setApprovalStatusFilter}
-          showExceptionsOnly={showExceptionsOnly}
-          setShowExceptionsOnly={setShowExceptionsOnly}
         />
 
         <div className="overflow-x-auto">
@@ -135,7 +129,6 @@ const Reports = () => {
                 <th scope="col" className="px-4 py-3">Total Hours</th>
                 <th scope="col" className="px-4 py-3">Type</th>
                 <th scope="col" className="px-4 py-3">Entry Method</th>
-                <th scope="col" className="px-4 py-3">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -172,19 +165,6 @@ const Reports = () => {
                       </Tooltip>
                     </TooltipProvider>
                   </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${
-                        row.approvalStatus === "Approved"
-                          ? "bg-green-100 text-green-800"
-                          : row.approvalStatus === "Pending"
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {row.approvalStatus}
-                    </span>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -196,3 +176,4 @@ const Reports = () => {
 };
 
 export default Reports;
+
