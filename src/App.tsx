@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import { Layout } from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
@@ -21,26 +22,28 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout><Dashboard /></Layout>} />
-          <Route path="/attendance" element={<Layout><Attendance /></Layout>} />
-          <Route path="/attendance-history" element={<Layout><AttendanceHistory /></Layout>} />
-          <Route path="/role-mapping" element={<Layout><RoleMapping /></Layout>} />
-          <Route path="/reports" element={<Layout><Reports /></Layout>} />
-          <Route path="/profile" element={<Layout><Profile /></Layout>} />
-          <Route path="/master/employees" element={<Layout><Employees /></Layout>} />
-          <Route path="/master/roles" element={<Layout><Roles /></Layout>} />
-          <Route path="/master/location" element={<Layout><Location /></Layout>} />
-          <Route path="/master/projects" element={<Layout><Projects /></Layout>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout><Dashboard /></Layout>} />
+            <Route path="/attendance" element={<Layout><Attendance /></Layout>} />
+            <Route path="/attendance-history" element={<Layout><AttendanceHistory /></Layout>} />
+            <Route path="/role-mapping" element={<Layout><RoleMapping /></Layout>} />
+            <Route path="/reports" element={<Layout><Reports /></Layout>} />
+            <Route path="/profile" element={<Layout><Profile /></Layout>} />
+            <Route path="/master/employees" element={<Layout><Employees /></Layout>} />
+            <Route path="/master/roles" element={<Layout><Roles /></Layout>} />
+            <Route path="/master/location" element={<Layout><Location /></Layout>} />
+            <Route path="/master/projects" element={<Layout><Projects /></Layout>} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
