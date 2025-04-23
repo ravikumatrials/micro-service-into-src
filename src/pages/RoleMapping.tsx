@@ -32,9 +32,9 @@ const mockRoles = [
 const RoleMapping = () => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
-  const [projectFilter, setProjectFilter] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [projectFilter, setProjectFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
@@ -45,9 +45,9 @@ const RoleMapping = () => {
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation = !locationFilter || employee.location === locationFilter;
-    const matchesProject = !projectFilter || employee.project === projectFilter;
-    const matchesRole = !roleFilter || employee.currentRole === roleFilter;
+    const matchesLocation = locationFilter === "all" || employee.location === locationFilter;
+    const matchesProject = projectFilter === "all" || employee.project === projectFilter;
+    const matchesRole = roleFilter === "all" || employee.currentRole === roleFilter;
     
     return matchesSearch && matchesLocation && matchesProject && matchesRole;
   });

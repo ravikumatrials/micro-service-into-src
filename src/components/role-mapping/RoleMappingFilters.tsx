@@ -65,7 +65,7 @@ export function RoleMappingFilters({
             <SelectValue placeholder="All Locations" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Locations</SelectItem>
+            <SelectItem value="all">All Locations</SelectItem>
             {locations.map((location) => (
               <SelectItem key={location} value={location}>
                 {location}
@@ -84,7 +84,7 @@ export function RoleMappingFilters({
             <SelectValue placeholder="All Projects" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Projects</SelectItem>
+            <SelectItem value="all">All Projects</SelectItem>
             {projects.map((project) => (
               <SelectItem key={project} value={project}>
                 {project}
@@ -103,7 +103,7 @@ export function RoleMappingFilters({
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Roles</SelectItem>
+            <SelectItem value="all">All Roles</SelectItem>
             {roles.map((role) => (
               <SelectItem key={role.name} value={role.name}>
                 {role.name}
