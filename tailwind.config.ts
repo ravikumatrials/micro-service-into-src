@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -24,17 +25,14 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				heading: 'hsl(var(--heading))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
+					DEFAULT: 'hsl(var(--secondary-bg))',
 					foreground: 'hsl(var(--secondary-foreground))'
-				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
 				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
@@ -53,21 +51,21 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				proscape: {
-					DEFAULT: '#1B6F54',
+					DEFAULT: '#00A859',
 					light: '#2C8C6A',
 					dark: '#0F5A40',
 					lighter: '#E0F2ED',
 					foreground: '#FFFFFF'
 				},
 				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+					DEFAULT: 'hsl(var(--sidebar-background, 158 60% 22%))',
+					foreground: 'hsl(var(--sidebar-foreground, 0 0% 100%))',
+					primary: 'hsl(var(--sidebar-primary, 158 80% 35%))',
+					'primary-foreground': 'hsl(var(--sidebar-primary-foreground, 0 0% 100%))',
+					accent: 'hsl(var(--sidebar-accent, 158 35% 15%))',
+					'accent-foreground': 'hsl(var(--sidebar-accent-foreground, 0 0% 92%))',
+					border: 'hsl(var(--sidebar-border, 158 35% 30%))',
+					ring: 'hsl(var(--sidebar-ring, 158 60% 28%))'
 				}
 			},
 			borderRadius: {
@@ -132,3 +130,4 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+
