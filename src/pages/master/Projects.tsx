@@ -98,7 +98,7 @@ export default function ProjectsPage() {
     name: "",
     location: "",
     status: "All",
-    dateRange: { start: null, end: null },
+    dateRange: undefined,
     employee: ""
   });
   const [importOpen, setImportOpen] = useState(false);
@@ -108,17 +108,42 @@ export default function ProjectsPage() {
   // Filtering logic
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
-      if (filters.name && !p.name.toLowerCase().includes(filters.name.trim().toLowerCase())) return false;
-      if (filters.location && filters.location !== "All" && p.location !== filters.location) return false;
-      if (filters.status && filters.status !== "All" && p.status !== filters.status) return false;
+      // Name filter
+      if (filters.name && !p.name.toLowerCase().includes(filters.name.trim().toLowerCase())) 
+        return false;
+      
+      // Location filter
+      if (filters.location && filters.location !== "All" && p.location !== filters.location) 
+        return false;
+      
+      // Status filter
+      if (filters.status && filters.status !== "All" && p.status !== filters.status) 
+        return false;
+      
+      // Employee filter
       if (filters.employee) {
         const found = p.assignedEmployees.some(e =>
           e.name.toLowerCase().includes(filters.employee.trim().toLowerCase())
         );
         if (!found) return false;
       }
-      if (filters.dateRange?.start && new Date(p.startDate) < filters.dateRange.start) return false;
-      if (filters.dateRange?.end && new Date(p.endDate) > filters.dateRange.end) return false;
+      
+      // Date range filter - parse dates properly for comparison
+      if (filters.dateRange?.start || filters.dateRange?.end) {
+        const projectStartDate = new Date(p.startDate);
+        const projectEndDate = new Date(p.endDate);
+        
+        // Filter by start date
+        if (filters.dateRange?.start && projectStartDate < filters.dateRange.start) {
+          return false;
+        }
+        
+        // Filter by end date
+        if (filters.dateRange?.end && projectEndDate > filters.dateRange.end) {
+          return false;
+        }
+      }
+      
       return true;
     });
   }, [projects, filters]);

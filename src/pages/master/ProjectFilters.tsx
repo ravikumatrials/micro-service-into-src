@@ -3,9 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, Search } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronDown, Search } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function ProjectFilters({
   filters,
@@ -62,7 +63,7 @@ export default function ProjectFilters({
         <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start text-left" type="button">
-              <Calendar className="w-4 h-4 mr-2" />
+              <CalendarIcon className="w-4 h-4 mr-2" />
               {filters.dateRange?.start && filters.dateRange?.end
                 ? `${format(filters.dateRange.start, "dd-MMM-yyyy")} ~ ${format(filters.dateRange.end, "dd-MMM-yyyy")}`
                 : <span className="text-gray-400">Pick range</span>}
@@ -73,20 +74,28 @@ export default function ProjectFilters({
             <Calendar
               mode="range"
               selected={filters.dateRange}
-              onSelect={range => setFilters(f => ({ ...f, dateRange: range }))}
+              onSelect={(range) => {
+                setFilters(f => ({ ...f, dateRange: range }));
+              }}
               initialFocus
               className="p-3 pointer-events-auto"
             />
-            {filters.dateRange?.start && (
-              <div className="flex justify-between mt-2 px-2">
-                <Button variant="link" className="px-0 text-xs text-gray-700" onClick={() => setFilters(f => ({ ...f, dateRange: {start:null, end:null} }))}>
-                  Clear Selection
-                </Button>
-                <Button variant="link" className="px-0 text-xs text-proscape" onClick={() => setDatePopoverOpen(false)}>
-                  Done
-                </Button>
-              </div>
-            )}
+            <div className="flex justify-between p-2 border-t">
+              <Button 
+                variant="link" 
+                className="px-0 text-xs text-gray-700" 
+                onClick={() => setFilters(f => ({ ...f, dateRange: undefined }))}
+              >
+                Clear Selection
+              </Button>
+              <Button 
+                variant="link" 
+                className="px-0 text-xs text-proscape" 
+                onClick={() => setDatePopoverOpen(false)}
+              >
+                Done
+              </Button>
+            </div>
           </PopoverContent>
         </Popover>
       </div>
