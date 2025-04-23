@@ -1,52 +1,20 @@
-import { useState, useEffect } from "react";
-import { User, Sun, Moon, LogOut } from "lucide-react";
-import { useTheme } from "next-themes";
+
+import { useState } from "react";
+import { User, LogOut } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 export function TopBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme, resolvedTheme } = useTheme();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const toggleProfile = () => {
     setIsProfileOpen(!isProfileOpen);
-  };
-
-  const handleThemeToggle = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
   const handleLogout = () => {
     navigate("/");
     setIsProfileOpen(false);
   };
-
-  if (!mounted) {
-    return (
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-30">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <div className="flex-shrink-0">
-                  <h1 className="text-lg sm:text-xl font-bold text-proscape dark:text-proscape-light">Proscape Facial Attendance System</h1>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-              <div className="h-8 w-8 rounded-full bg-proscape"></div>
-            </div>
-          </div>
-        </div>
-      </header>
-    );
-  }
 
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-30">
@@ -60,17 +28,6 @@ export function TopBar() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <button
-              aria-label="Toggle theme"
-              onClick={handleThemeToggle}
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none transition"
-            >
-              {resolvedTheme === "dark" ? (
-                <Sun className="h-5 w-5 text-yellow-400" />
-              ) : (
-                <Moon className="h-5 w-5 text-gray-600" />
-              )}
-            </button>
             <div className="relative">
               <button
                 onClick={toggleProfile}
