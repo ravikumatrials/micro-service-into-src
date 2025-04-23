@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
@@ -777,4 +778,18 @@ const Employees = () => {
                   </button>
                   <button
                     onClick={saveEnrollment}
-                    className="bg-green-6
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Employees;
