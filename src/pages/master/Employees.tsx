@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
@@ -329,11 +330,9 @@ const Employees = () => {
         <h1 className="text-2xl font-bold text-gray-800">Employees</h1>
         <div className="flex space-x-3">
           <button className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-            {/* Use Import icon */}
             <Import className="h-4 w-4 mr-2" />
             Import
           </button>
-          {/* REMOVED: Add Employee button */}
         </div>
       </div>
       <Card className="p-0 overflow-hidden">
@@ -771,3 +770,112 @@ const Employees = () => {
                           ))}
                         {mockAttendanceRecords.filter(r => r.employeeId === selectedEmployee.employeeId).length === 0 && (
                           <tr>
+                            <td colSpan={6} className="px-4 py-3 text-center text-gray-500">No attendance records found</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-3 text-center">
+                    <button 
+                      onClick={() => handleViewFullAttendanceHistory(selectedEmployee.employeeId)}
+                      className="text-sm text-proscape hover:text-proscape-dark"
+                    >
+                      View Full Attendance History
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Face Enrollment Modal */}
+      {isEnrollModalOpen && selectedEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900">
+                Face Enrollment - {selectedEmployee.name}
+              </h2>
+              <button 
+                onClick={cancelEnrollment}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="text-center">
+              {!cameraActive ? (
+                <div>
+                  <div className="mb-6">
+                    <div className="w-24 h-24 rounded-full mx-auto bg-gray-200 flex items-center justify-center overflow-hidden">
+                      {selectedEmployee.faceEnrolled ? (
+                        <img 
+                          src={`https://i.pravatar.cc/128?u=${selectedEmployee.id}`} 
+                          alt={selectedEmployee.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-12 w-12 text-gray-400" />
+                      )}
+                    </div>
+                    <p className="mt-2 text-sm text-gray-500">
+                      {selectedEmployee.employeeId}
+                    </p>
+                  </div>
+                  
+                  <p className="mb-6 text-gray-700">
+                    {selectedEmployee.faceEnrolled 
+                      ? "This employee's face is already enrolled. You can update their face data if needed."
+                      : "Capture the employee's face to enable facial recognition for attendance."
+                    }
+                  </p>
+                  
+                  <button
+                    onClick={() => setCameraActive(true)}
+                    className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    {selectedEmployee.faceEnrolled ? "Update Face Data" : "Capture Face"}
+                  </button>
+                </div>
+              ) : (
+                <FaceScanner 
+                  onCapture={handlePhotoCapture}
+                  onCancel={() => {
+                    setCameraActive(false);
+                    setPhotoTaken(false);
+                  }}
+                />
+              )}
+
+              {photoTaken && (
+                <div className="mt-4 flex justify-center space-x-4">
+                  <button
+                    onClick={() => {
+                      setCameraActive(true);
+                      setPhotoTaken(false);
+                    }}
+                    className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50"
+                  >
+                    Retake
+                  </button>
+                  <button
+                    onClick={saveEnrollment}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Employees;
