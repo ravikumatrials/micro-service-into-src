@@ -99,7 +99,7 @@ const CheckOutTab = ({
   const handleFaceCheckOutComplete = () => {
     setOpenFaceDialog(false);
     toast.success(`${selectedEmployee?.name} has been successfully checked out`, {
-      description: `Checked out at ${new Date().toLocaleTimeString()}`
+      description: `Checked out from ${selectedEmployee?.project} at ${new Date().toLocaleTimeString()}`
     });
     setSelectedEmployee(null);
   };
@@ -114,13 +114,13 @@ const CheckOutTab = ({
     const selectedProjectName = projects.find(p => p.id.toString() === projectId)?.name;
     
     toast.success(`${selectedEmployee?.name} has been manually checked out`, {
-      description: `Project: ${selectedProjectName}, Time: ${time}`
+      description: `Project: ${selectedProjectName}, Time: ${time}, Reason: ${reason.substring(0, 30)}${reason.length > 30 ? '...' : ''}`
     });
     setSelectedEmployee(null);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -166,17 +166,19 @@ const CheckOutTab = ({
                       <Button 
                         onClick={() => handleFaceCheckOut(employee)} 
                         variant="outline" 
-                        className="flex items-center space-x-1 bg-proscape/5 hover:bg-proscape/10 border-proscape/20"
+                        size="sm"
+                        className="flex items-center space-x-1 bg-proscape/5 hover:bg-proscape/10 border-proscape/20 text-xs"
                       >
-                        <Camera className="h-4 w-4" />
+                        <Camera className="h-3 w-3" />
                         <span>Face</span>
                       </Button>
                       <Button 
                         onClick={() => handleManualCheckOut(employee)} 
                         variant="outline"
-                        className="flex items-center space-x-1"
+                        size="sm"
+                        className="flex items-center space-x-1 text-xs"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                         <span>Manual</span>
                       </Button>
                     </div>

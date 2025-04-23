@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Camera, Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
 import FaceCheckInDialog from "./dialogs/FaceCheckInDialog";
@@ -13,12 +12,13 @@ interface Employee {
   id: number;
   name: string;
   role: string;
-  project: string;
-  projectId: number;
-  location: string;
-  locationId: number;
+  project?: string;
+  projectId?: number;
+  location?: string;
+  locationId?: number;
   status: "checkedin" | "notcheckedin";
   imageUrl: string;
+  checkedInProject?: string;
 }
 
 interface CheckInTabProps {
@@ -42,14 +42,12 @@ const CheckInTab = ({
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   
-  // Mock employees data
+  // Mock employees data - note that employees don't have pre-assigned projects
   const mockEmployees: Employee[] = [
     {
       id: 1,
       name: "John Smith",
       role: "Construction Worker",
-      project: "Main Building Construction",
-      projectId: 1,
       location: "Site A",
       locationId: 1,
       status: "notcheckedin",
@@ -59,8 +57,6 @@ const CheckInTab = ({
       id: 2,
       name: "Sarah Johnson",
       role: "Supervisor",
-      project: "Bridge Expansion Project",
-      projectId: 2,
       location: "Site B",
       locationId: 2,
       status: "notcheckedin",
@@ -70,19 +66,16 @@ const CheckInTab = ({
       id: 3,
       name: "Michael Brown",
       role: "Engineer",
-      project: "Highway Renovation",
-      projectId: 3,
+      status: "checkedin",
+      checkedInProject: "Highway Renovation",
       location: "Office",
       locationId: 3,
-      status: "checkedin",
       imageUrl: "https://randomuser.me/api/portraits/men/2.jpg"
     },
     {
       id: 4,
       name: "Emily Davis",
       role: "Architect",
-      project: "Main Building Construction",
-      projectId: 1,
       location: "Site A",
       locationId: 1,
       status: "notcheckedin",
@@ -92,8 +85,7 @@ const CheckInTab = ({
       id: 5,
       name: "David Wilson",
       role: "Construction Worker",
-      project: "Bridge Expansion Project",
-      projectId: 2,
+      checkedInProject: "Bridge Expansion Project",
       location: "Site B",
       locationId: 2,
       status: "checkedin",
@@ -105,11 +97,11 @@ const CheckInTab = ({
   const filteredEmployees = mockEmployees.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.id.toString().includes(searchQuery);
-    const matchesProject = selectedProject === "all" || employee.projectId.toString() === selectedProject;
-    const matchesLocation = selectedLocation === "all" || employee.locationId.toString() === selectedLocation;
+    const matchesProject = selectedProject === "all" || (employee.projectId?.toString() === selectedProject);
+    const matchesLocation = selectedLocation === "all" || (employee.locationId?.toString() === selectedLocation);
     const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
     
-    return matchesSearch && matchesProject && matchesLocation && matchesStatus;
+    return matchesSearch && (matchesProject || !employee.projectId) && matchesLocation && matchesStatus;
   });
 
   const handleFaceCheckIn = (employee: Employee) => {
@@ -122,11 +114,23 @@ const CheckInTab = ({
     setOpenManualDialog(true);
   };
 
-  const handleFaceCheckInComplete = () => {
+  const handleFaceCheckInComplete = (projectId: string) => {
     setOpenFaceDialog(false);
+    
+    // Get the selected project name
+    const selectedProjectName = projects.find(p => p.id.toString() === projectId)?.name;
+    
+    // Handle auto check-out logic if employee was checked into another project
+    if (selectedEmployee?.status === "checkedin" && selectedEmployee.checkedInProject) {
+      toast.info(`${selectedEmployee.name} has been automatically checked out from ${selectedEmployee.checkedInProject}`, {
+        description: `Auto checked-out at ${new Date().toLocaleTimeString()}`
+      });
+    }
+    
     toast.success(`${selectedEmployee?.name} has been successfully checked in`, {
-      description: `Checked in at ${new Date().toLocaleTimeString()}`
+      description: `Project: ${selectedProjectName}, Time: ${new Date().toLocaleTimeString()}`
     });
+    
     setSelectedEmployee(null);
   };
 
@@ -141,6 +145,13 @@ const CheckInTab = ({
     const selectedProjectName = projects.find(p => p.id.toString() === projectId)?.name;
     const selectedLocationName = locations.find(l => l.id.toString() === locationId)?.name;
     
+    // Handle auto check-out logic if employee was checked into another project
+    if (selectedEmployee?.status === "checkedin" && selectedEmployee.checkedInProject) {
+      toast.info(`${selectedEmployee.name} has been automatically checked out from ${selectedEmployee.checkedInProject}`, {
+        description: `Auto checked-out at ${time}`
+      });
+    }
+    
     toast.success(`${selectedEmployee?.name} has been manually checked in`, {
       description: `Project: ${selectedProjectName}, Location: ${selectedLocationName}`
     });
@@ -148,14 +159,13 @@ const CheckInTab = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[250px]">Employee</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Project</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -163,7 +173,7 @@ const CheckInTab = ({
           <TableBody>
             {filteredEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={4} className="text-center py-10 text-gray-500">
                   No employees found matching your filters
                 </TableCell>
               </TableRow>
@@ -182,12 +192,14 @@ const CheckInTab = ({
                     </div>
                   </TableCell>
                   <TableCell>{employee.role}</TableCell>
-                  <TableCell>{employee.project}</TableCell>
                   <TableCell>
                     {employee.status === "checkedin" ? (
                       <div className="flex items-center text-green-600">
                         <UserCheck className="h-4 w-4 mr-1" />
                         <span>Checked In</span>
+                        {employee.checkedInProject && (
+                          <span className="ml-1 text-xs text-gray-500">({employee.checkedInProject})</span>
+                        )}
                       </div>
                     ) : (
                       <div className="flex items-center text-gray-500">
@@ -200,20 +212,20 @@ const CheckInTab = ({
                     <div className="flex justify-end space-x-2">
                       <Button 
                         onClick={() => handleFaceCheckIn(employee)} 
-                        disabled={employee.status === "checkedin"}
                         variant="outline" 
-                        className="flex items-center space-x-1 bg-proscape/5 hover:bg-proscape/10 border-proscape/20"
+                        size="sm"
+                        className="flex items-center space-x-1 bg-proscape/5 hover:bg-proscape/10 border-proscape/20 text-xs"
                       >
-                        <Camera className="h-4 w-4" />
+                        <Camera className="h-3 w-3" />
                         <span>Face</span>
                       </Button>
                       <Button 
                         onClick={() => handleManualCheckIn(employee)} 
-                        disabled={employee.status === "checkedin"}
                         variant="outline"
-                        className="flex items-center space-x-1"
+                        size="sm"
+                        className="flex items-center space-x-1 text-xs"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                         <span>Manual</span>
                       </Button>
                     </div>
