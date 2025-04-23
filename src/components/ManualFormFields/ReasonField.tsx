@@ -1,19 +1,44 @@
 
 import React from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface ReasonFieldProps {
   label: string;
   placeholder: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  error?: boolean;
+  errorMessage?: string;
+  id?: string;
 }
 
-const ReasonField = ({ label, placeholder }: ReasonFieldProps) => (
-  <div className="w-full">
-    <label className="block text-xl font-medium text-gray-700 mb-3">{label}</label>
-    <textarea
-      className="w-full px-5 py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-proscape text-xl shadow-sm"
+const ReasonField = ({ 
+  label, 
+  placeholder, 
+  value, 
+  onChange, 
+  error = false, 
+  errorMessage = "", 
+  id 
+}: ReasonFieldProps) => (
+  <div className="w-full space-y-2">
+    <Label htmlFor={id || "reason-input"} className="block text-xl font-medium text-gray-700">
+      {label}
+    </Label>
+    <Textarea
+      id={id || "reason-input"}
+      className={`w-full px-5 py-4 text-xl min-h-[120px] ${
+        error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-proscape"
+      }`}
       placeholder={placeholder}
       rows={5}
+      value={value}
+      onChange={(e) => onChange && onChange(e.target.value)}
     />
+    {error && errorMessage && (
+      <p className="text-sm text-red-500">{errorMessage}</p>
+    )}
   </div>
 );
 
