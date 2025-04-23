@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Edit, Eye, Trash, User, Camera, Plus, Search, FileDown, Filter, Check, X } from "lucide-react";
+import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
 import { FaceScanner } from "@/components/face/FaceScanner";
 import { useNavigate } from "react-router-dom";
 
@@ -85,6 +85,8 @@ const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  // New filter state for face enrollment
+  const [enrolledFilter, setEnrolledFilter] = useState("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
@@ -103,24 +105,23 @@ const Employees = () => {
     joiningDate: ""
   });
 
-  // Filter employees based on search term and filters
+  // Filter employees based on search term and filters, now includes enrolledFilter
   const filteredEmployees = employees.filter((employee) => {
-    // Search term filter
     const searchMatch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Status filter
     const statusMatch = 
       statusFilter === "all" || 
       employee.status.toLowerCase() === statusFilter.toLowerCase();
-    
-    // Role filter
     const roleMatch = 
       roleFilter === "all" || 
       employee.role.toLowerCase() === roleFilter.toLowerCase();
-    
-    return searchMatch && statusMatch && roleMatch;
+    const enrolledMatch =
+      enrolledFilter === "all" ||
+      (enrolledFilter === "enrolled" && employee.faceEnrolled) ||
+      (enrolledFilter === "not-enrolled" && !employee.faceEnrolled);
+
+    return searchMatch && statusMatch && roleMatch && enrolledMatch;
   });
 
   const handleCreateEmployee = () => {
@@ -221,19 +222,12 @@ const Employees = () => {
         <h1 className="text-2xl font-bold text-gray-800">Employees</h1>
         <div className="flex space-x-3">
           <button className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-            <FileDown className="h-4 w-4 mr-2" />
-            Export
+            <Import className="h-4 w-4 mr-2" />
+            Import
           </button>
-          <button 
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Employee
-          </button>
+          {/* REMOVED: Add Employee button */}
         </div>
       </div>
-
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="relative flex-1">
@@ -248,7 +242,6 @@ const Employees = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
           <div className="flex flex-col md:flex-row gap-4 md:items-center">
             <div className="flex items-center">
               <Filter className="h-5 w-5 text-gray-400 mr-2" />
@@ -263,7 +256,6 @@ const Employees = () => {
                 <option value="inactive">Inactive</option>
               </select>
             </div>
-            
             <div className="flex items-center">
               <span className="text-sm text-gray-600 mr-2">Role:</span>
               <select
@@ -278,9 +270,21 @@ const Employees = () => {
                 <option value="report admin">Report Admin</option>
               </select>
             </div>
+            {/* Enrolled Filter */}
+            <div className="flex items-center">
+              <span className="text-sm text-gray-600 mr-2">Enrolled:</span>
+              <select
+                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
+                value={enrolledFilter}
+                onChange={(e) => setEnrolledFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="enrolled">Enrolled</option>
+                <option value="not-enrolled">Not Enrolled</option>
+              </select>
+            </div>
           </div>
         </div>
-        
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
@@ -288,7 +292,7 @@ const Employees = () => {
                 <th scope="col" className="px-4 py-3">Employee ID</th>
                 <th scope="col" className="px-4 py-3">Name</th>
                 <th scope="col" className="px-4 py-3">Role</th>
-                <th scope="col" className="px-4 py-3">Project</th>
+                {/* REMOVED Project column */}
                 <th scope="col" className="px-4 py-3">Face Enrolled</th>
                 <th scope="col" className="px-4 py-3">Status</th>
                 <th scope="col" className="px-4 py-3">Actions</th>
@@ -301,7 +305,7 @@ const Employees = () => {
                     <td className="px-4 py-3">{employee.employeeId}</td>
                     <td className="px-4 py-3 font-medium text-gray-900">{employee.name}</td>
                     <td className="px-4 py-3">{employee.role}</td>
-                    <td className="px-4 py-3">{employee.project}</td>
+                    {/* REMOVED Project column */}
                     <td className="px-4 py-3">
                       {employee.faceEnrolled ? (
                         <span className="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -365,7 +369,7 @@ const Employees = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
                     No employees found matching the search criteria
                   </td>
                 </tr>
@@ -773,18 +777,4 @@ const Employees = () => {
                   </button>
                   <button
                     onClick={saveEnrollment}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                  >
-                    Save & Enroll
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default Employees;
+                    className="bg-green-6
