@@ -105,9 +105,9 @@ const CheckInTab = ({
   const filteredEmployees = mockEmployees.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.id.toString().includes(searchQuery);
-    const matchesProject = selectedProject === "" || employee.projectId.toString() === selectedProject;
-    const matchesLocation = selectedLocation === "" || employee.locationId.toString() === selectedLocation;
-    const matchesStatus = selectedStatus === "" || employee.status === selectedStatus;
+    const matchesProject = selectedProject === "all" || employee.projectId.toString() === selectedProject;
+    const matchesLocation = selectedLocation === "all" || employee.locationId.toString() === selectedLocation;
+    const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
     
     return matchesSearch && matchesProject && matchesLocation && matchesStatus;
   });

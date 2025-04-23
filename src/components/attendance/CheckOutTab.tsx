@@ -80,8 +80,8 @@ const CheckOutTab = ({
   const filteredEmployees = mockCheckedInEmployees.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.id.toString().includes(searchQuery);
-    const matchesProject = selectedProject === "" || employee.projectId.toString() === selectedProject;
-    const matchesLocation = selectedLocation === "" || employee.locationId.toString() === selectedLocation;
+    const matchesProject = selectedProject === "all" || employee.projectId.toString() === selectedProject;
+    const matchesLocation = selectedLocation === "all" || employee.locationId.toString() === selectedLocation;
     
     return matchesSearch && matchesProject && matchesLocation;
   });

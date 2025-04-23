@@ -17,9 +17,9 @@ const Attendance = () => {
   const [tab, setTab] = useState("checkin");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProject, setSelectedProject] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedProject, setSelectedProject] = useState("all");
+  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   // Mock projects
   const projects = [
@@ -87,7 +87,7 @@ const Attendance = () => {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Projects</SelectItem>
+                <SelectItem value="all">All Projects</SelectItem>
                 {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id.toString()}>
                     {project.name}
@@ -105,7 +105,7 @@ const Attendance = () => {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 {locations.map((location) => (
                   <SelectItem key={location.id} value={location.id.toString()}>
                     {location.name}
@@ -123,7 +123,7 @@ const Attendance = () => {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="checkedin">Checked In</SelectItem>
                 <SelectItem value="notcheckedin">Not Checked In</SelectItem>
               </SelectContent>

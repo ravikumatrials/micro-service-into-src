@@ -30,7 +30,7 @@ const ManualCheckOutDialog = ({
   projects,
   onComplete
 }: ManualCheckOutDialogProps) => {
-  const [selectedProject, setSelectedProject] = useState("");
+  const [selectedProject, setSelectedProject] = useState("select-project");
   const [checkOutTime, setCheckOutTime] = useState("");
   const [reason, setReason] = useState("");
   
@@ -45,7 +45,7 @@ const ManualCheckOutDialog = ({
     if (open) {
       // Set current time as default
       setCheckOutTime(format(new Date(), "HH:mm"));
-      setSelectedProject("");
+      setSelectedProject("select-project");
       setReason("");
       setErrors({
         project: false,
@@ -58,7 +58,7 @@ const ManualCheckOutDialog = ({
   const handleSubmit = () => {
     // Validation
     const newErrors = {
-      project: !selectedProject,
+      project: selectedProject === "select-project",
       time: !checkOutTime,
       reason: !reason
     };
@@ -108,6 +108,7 @@ const ManualCheckOutDialog = ({
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="select-project">Select project</SelectItem>
                 {projects.map(project => (
                   <SelectItem key={project.id} value={project.id.toString()}>
                     {project.name}

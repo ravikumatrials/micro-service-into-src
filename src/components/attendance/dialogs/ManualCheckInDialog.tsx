@@ -32,8 +32,8 @@ const ManualCheckInDialog = ({
   locations,
   onComplete
 }: ManualCheckInDialogProps) => {
-  const [selectedProject, setSelectedProject] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedProject, setSelectedProject] = useState("select-project");
+  const [selectedLocation, setSelectedLocation] = useState("select-location");
   const [checkInTime, setCheckInTime] = useState("");
   const [reason, setReason] = useState("");
   
@@ -49,8 +49,8 @@ const ManualCheckInDialog = ({
     if (open) {
       // Set current time as default
       setCheckInTime(format(new Date(), "HH:mm"));
-      setSelectedProject("");
-      setSelectedLocation("");
+      setSelectedProject("select-project");
+      setSelectedLocation("select-location");
       setReason("");
       setErrors({
         project: false,
@@ -64,8 +64,8 @@ const ManualCheckInDialog = ({
   const handleSubmit = () => {
     // Validation
     const newErrors = {
-      project: !selectedProject,
-      location: !selectedLocation,
+      project: selectedProject === "select-project",
+      location: selectedLocation === "select-location",
       time: !checkInTime,
       reason: !reason
     };
@@ -115,6 +115,7 @@ const ManualCheckInDialog = ({
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="select-project">Select project</SelectItem>
                 {projects.map(project => (
                   <SelectItem key={project.id} value={project.id.toString()}>
                     {project.name}
@@ -135,6 +136,7 @@ const ManualCheckInDialog = ({
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="select-location">Select location</SelectItem>
                 {locations.map(location => (
                   <SelectItem key={location.id} value={location.id.toString()}>
                     {location.name}
