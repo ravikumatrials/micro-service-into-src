@@ -1,18 +1,17 @@
 
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Upload, FileInput } from "lucide-react";
-
-interface ImportProjectsModalProps {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  onImport: () => void;
-}
+import { Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SAMPLE_URL =
   "https://docs.google.com/spreadsheets/d/1Yv8w9K9tQMVOuO7A4tuL0k5cF_fmY7Fsj6t4HZH7vmfM/export?format=csv";
 
-export default function ImportProjectsModal({ open, onOpenChange, onImport }: ImportProjectsModalProps) {
+export default function ImportProjectsModal({ open, onOpenChange, onImport }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onImport: () => void;
+}) {
   const [file, setFile] = useState<File | null>(null);
 
   return (
@@ -59,14 +58,17 @@ export default function ImportProjectsModal({ open, onOpenChange, onImport }: Im
               Cancel
             </button>
           </DialogClose>
-          <button
-            className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
-            onClick={onImport}
+          <Button
+            className="bg-proscape hover:bg-proscape-dark text-white"
+            onClick={() => {
+              onImport();
+              setFile(null);
+            }}
             disabled={!file}
             type="button"
           >
             Import
-          </button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

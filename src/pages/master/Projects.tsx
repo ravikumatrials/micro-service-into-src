@@ -1,184 +1,196 @@
 
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Eye, Edit, Trash, MapPin, Calendar, X, Upload } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Upload, Eye, Trash, Search } from "lucide-react";
+import ProjectFilters from "./ProjectFilters";
+import ProjectTable from "./ProjectTable";
+import ProjectCardMobile from "./ProjectCardMobile";
 import ImportProjectsModal from "./ImportProjectsModal";
-import ProjectCard from "./ProjectCard";
+import ProjectViewModal from "./ProjectViewModal";
+import DeleteProjectDialog from "./DeleteProjectDialog";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
-// Dummy data for initial projects
-const initialProjects = [
+const DUMMY_PROJECTS = [
   {
-    id: 1,
+    id: "1",
     name: "Main Building Construction",
     location: "Downtown Site",
-    employees: ["John Smith", "Sarah Johnson"],
-    status: "In Progress"
+    assignedEmployees: [
+      { id: "e1", name: "John Smith" },
+      { id: "e2", name: "Sarah Johnson" }
+    ],
+    startDate: "2024-12-20",
+    endDate: "2025-02-20",
+    status: "Active"
   },
   {
-    id: 2,
+    id: "2",
     name: "Bridge Expansion",
     location: "Bridge Zone A",
-    employees: ["Emily Davis"],
-    status: "Planning"
+    assignedEmployees: [{ id: "e3", name: "Emily Davis" }],
+    startDate: "2025-01-15",
+    endDate: "2025-06-01",
+    status: "Inactive"
   },
   {
-    id: 3,
+    id: "3",
     name: "Warehouse Project",
     location: "East Industrial",
-    employees: ["Robert Williams"],
-    status: "Completed"
+    assignedEmployees: [{ id: "e4", name: "Robert Williams" }],
+    startDate: "2025-02-10",
+    endDate: "2025-04-01",
+    status: "Active"
   }
 ];
 
-// Dummy data for simulation on import
-const dummyImportedProjects = [
+const DUMMY_EMPLOYEES = [
+  { id: "e1", name: "John Smith" },
+  { id: "e2", name: "Sarah Johnson" },
+  { id: "e3", name: "Emily Davis" },
+  { id: "e4", name: "Robert Williams" },
+  { id: "e5", name: "Brian Carson" },
+  { id: "e6", name: "Amy Howard" }
+];
+
+const DUMMY_LOCATIONS = [
+  "Downtown Site", "Bridge Zone A", "East Industrial", "North Express", "Greenfield", "Central Med"
+];
+
+const DUMMY_IMPORTED_PROJECTS = [
   {
-    id: 101,
+    id: "np101",
     name: "Highway Renovation",
     location: "North Express",
-    employees: ["Brian Carson", "Amy Howard"],
-    status: "In Progress"
+    assignedEmployees: [
+      { id: "e5", name: "Brian Carson" },
+      { id: "e6", name: "Amy Howard" }
+    ],
+    startDate: "2025-03-10",
+    endDate: "2025-09-15",
+    status: "Active"
   },
   {
-    id: 102,
+    id: "np102",
     name: "School Campus",
     location: "Greenfield",
-    employees: ["Lisa Moore"],
-    status: "On Hold"
+    assignedEmployees: [{ id: "e2", name: "Sarah Johnson" }],
+    startDate: "2025-07-01",
+    endDate: "2026-02-15",
+    status: "Inactive"
   },
   {
-    id: 103,
+    id: "np103",
     name: "Hospital Wing",
     location: "Central Med",
-    employees: ["Jake Turner", "Wendy Black"],
-    status: "Planning"
+    assignedEmployees: [
+      { id: "e4", name: "Robert Williams" },
+      { id: "e3", name: "Emily Davis" }
+    ],
+    startDate: "2025-05-15",
+    endDate: "2026-01-10",
+    status: "Active"
   }
 ];
 
-const statusBadge = (status: string) => {
-  if (status === "In Progress")
-    return "bg-blue-100 text-blue-800";
-  if (status === "Planning")
-    return "bg-purple-100 text-purple-800";
-  if (status === "On Hold")
-    return "bg-amber-100 text-amber-800";
-  if (status === "Completed")
-    return "bg-green-100 text-green-800";
-  return "bg-gray-100 text-gray-800";
-};
+export default function ProjectsPage() {
+  const [projects, setProjects] = useState(DUMMY_PROJECTS);
+  const [filters, setFilters] = useState({
+    name: "",
+    location: "",
+    status: "All",
+    dateRange: { start: null, end: null },
+    employee: ""
+  });
+  const [importOpen, setImportOpen] = useState(false);
+  const [viewProject, setViewProject] = useState(null);
+  const [deleteProject, setDeleteProject] = useState(null);
 
-const Projects = () => {
-  const [projects, setProjects] = useState(initialProjects);
-  const [isImportOpen, setIsImportOpen] = useState(false);
+  // Filtering logic
+  const filteredProjects = useMemo(() => {
+    return projects.filter((p) => {
+      if (filters.name && !p.name.toLowerCase().includes(filters.name.trim().toLowerCase())) return false;
+      if (filters.location && filters.location !== "All" && p.location !== filters.location) return false;
+      if (filters.status && filters.status !== "All" && p.status !== filters.status) return false;
+      if (filters.employee) {
+        const found = p.assignedEmployees.some(e =>
+          e.name.toLowerCase().includes(filters.employee.trim().toLowerCase())
+        );
+        if (!found) return false;
+      }
+      if (filters.dateRange?.start && new Date(p.startDate) < filters.dateRange.start) return false;
+      if (filters.dateRange?.end && new Date(p.endDate) > filters.dateRange.end) return false;
+      return true;
+    });
+  }, [projects, filters]);
 
-  // Simulate import — add dummy projects to current projects
+  // Simulate import (append dummy projects)
   const handleImport = () => {
-    setProjects((prev) => [
+    setProjects(prev => [
       ...prev,
-      ...dummyImportedProjects.map(p => ({ ...p, id: prev.length + Math.random() }))
+      ...DUMMY_IMPORTED_PROJECTS.map(p => ({
+        ...p,
+        id: p.id + "-" + Math.random().toString(36).substring(2, 6)
+      }))
     ]);
-    setIsImportOpen(false);
+    setImportOpen(false);
   };
 
-  // Responsive mode: cards for mobile, table for md+
+  // Handle project deletion
+  const handleDelete = (project) => {
+    setProjects((prev) => prev.filter(p => p.id !== project.id));
+    setDeleteProject(null);
+  };
+
+  // Responsive check
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Projects</h1>
-        <button
-          className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          onClick={() => setIsImportOpen(true)}
+    <div className="space-y-5 px-1 pt-5">
+      <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-end">
+        <h1 className="text-2xl font-bold text-gray-800 mb-1 md:mb-0">Projects</h1>
+        <Button
+          className="bg-proscape hover:bg-proscape-dark text-white font-medium flex gap-2"
+          onClick={() => setImportOpen(true)}
         >
-          <Upload className="h-4 w-4 mr-2" />
-          Import Projects
-        </button>
+          <Upload className="w-4 h-4" /> Import Projects
+        </Button>
       </div>
-
-      {/* DESKTOP TABLE */}
-      <div className="hidden md:block">
-        <Card className="p-0 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3">Project Name</th>
-                  <th className="px-4 py-3">Location</th>
-                  <th className="px-4 py-3">Assigned Employees</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projects.length > 0 ? (
-                  projects.map((project) => (
-                    <tr key={project.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-900">{project.name}</td>
-                      <td className="px-4 py-3">{project.location}</td>
-                      <td className="px-4 py-3">
-                        {project.employees && project.employees.length > 0
-                          ? project.employees.join(", ")
-                          : <span className="text-xs text-gray-400 italic">None</span>}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${statusBadge(project.status)}`}>
-                          {project.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex space-x-2">
-                          <button
-                            className="text-blue-500 hover:text-blue-700"
-                            title="View Project"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="text-gray-500 hover:text-gray-700"
-                            title="Edit Project"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="text-red-500 hover:text-red-700"
-                            title="Delete Project"
-                          >
-                            <Trash className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
-                      No projects found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </div>
-
-      {/* MOBILE CARD LIST */}
-      <div className="block md:hidden space-y-4">
-        {projects.length === 0 ? (
-          <Card className="p-8 text-center text-gray-500">No projects found</Card>
-        ) : (
-          projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))
-        )}
-      </div>
-
-      <ImportProjectsModal
-        open={isImportOpen}
-        onOpenChange={setIsImportOpen}
-        onImport={handleImport}
+      <ProjectFilters
+        filters={filters}
+        setFilters={setFilters}
+        locations={DUMMY_LOCATIONS}
+        employees={DUMMY_EMPLOYEES}
       />
+      <div>
+        {/* Desktop Table and Mobile Cards */}
+        <div className="hidden md:block">
+          <ProjectTable
+            projects={filteredProjects}
+            onView={setViewProject}
+            onDelete={setDeleteProject}
+          />
+        </div>
+        <div className="block md:hidden">
+          {filteredProjects.length === 0 ? (
+            <Card className="p-8 text-center text-gray-500">No projects found</Card>
+          ) : (
+            <div className="space-y-4">
+              {filteredProjects.map((project) => (
+                <ProjectCardMobile
+                  key={project.id}
+                  project={project}
+                  onView={setViewProject}
+                  onDelete={setDeleteProject}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Modals/Dialogs */}
+      <ImportProjectsModal open={importOpen} onOpenChange={setImportOpen} onImport={handleImport} />
+      <ProjectViewModal project={viewProject} onClose={() => setViewProject(null)} />
+      <DeleteProjectDialog project={deleteProject} onCancel={() => setDeleteProject(null)} onConfirm={() => handleDelete(deleteProject)} />
     </div>
   );
-};
-
-export default Projects;
+}
