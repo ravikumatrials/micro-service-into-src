@@ -53,9 +53,7 @@ const Dashboard = () => {
           <button className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
             Sync Data
           </button>
-          <button className="border border-proscape text-proscape hover:bg-proscape hover:text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-            Export Summary
-          </button>
+          {/* Removed Export Summary button here */}
         </div>
       </div>
 
