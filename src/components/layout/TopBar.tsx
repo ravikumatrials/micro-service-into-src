@@ -1,11 +1,14 @@
+
 import { useState, useEffect } from "react";
 import { User, Search, LogOut, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useNavigate } from "react-router-dom";
 
 export function TopBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
@@ -17,6 +20,12 @@ export function TopBar() {
 
   const handleThemeToggle = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
+
+  const handleLogout = () => {
+    // For now, we'll just redirect to the index page
+    // In a real app, you'd clear authentication state here
+    navigate("/");
   };
 
   if (!mounted) {
@@ -107,7 +116,10 @@ export function TopBar() {
                   <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Your Profile</a>
                   <a href="/settings" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Settings</a>
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <button className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <button 
+                    onClick={handleLogout}
+                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign out
                   </button>
