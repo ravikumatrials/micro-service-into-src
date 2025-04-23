@@ -1,4 +1,8 @@
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer utilities {
   /* Utility: Force card and button contrast */
   .card-gradient {
