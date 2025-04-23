@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
@@ -193,7 +192,6 @@ const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
-  // New filter state for face enrollment
   const [enrolledFilter, setEnrolledFilter] = useState("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -213,7 +211,6 @@ const Employees = () => {
     joiningDate: ""
   });
 
-  // Filter employees based on search term and filters, now includes enrolledFilter
   const filteredEmployees = employees.filter((employee) => {
     const searchMatch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -233,7 +230,6 @@ const Employees = () => {
   });
 
   const handleCreateEmployee = () => {
-    // Generate a new ID that's one higher than the current max ID
     const maxId = Math.max(...employees.map(e => e.id));
     const newId = maxId + 1;
     
@@ -250,7 +246,6 @@ const Employees = () => {
     setEmployees([...employees, employeeToAdd]);
     setIsCreateModalOpen(false);
     
-    // Reset form
     setNewEmployee({
       name: "",
       employeeId: "",
@@ -276,7 +271,6 @@ const Employees = () => {
   };
 
   const handlePhotoCapture = (imageBlob: Blob) => {
-    // Update the employee's face enrollment status
     const updatedEmployees = employees.map(emp => 
       emp.id === selectedEmployee?.id ? {...emp, faceEnrolled: true} : emp
     );
@@ -294,7 +288,6 @@ const Employees = () => {
   };
 
   const saveEnrollment = () => {
-    // Update the employee's face enrollment status
     const updatedEmployees = employees.map(emp => 
       emp.id === selectedEmployee.id ? {...emp, faceEnrolled: true} : emp
     );
@@ -377,7 +370,6 @@ const Employees = () => {
                 <option value="report admin">Report Admin</option>
               </select>
             </div>
-            {/* Enrolled Filter */}
             <div className="flex items-center">
               <span className="text-sm text-gray-600 mr-2">Enrolled:</span>
               <select
@@ -493,7 +485,6 @@ const Employees = () => {
         </div>
       </Card>
 
-      {/* Create Employee Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -645,7 +636,6 @@ const Employees = () => {
         </div>
       )}
 
-      {/* View Employee Modal */}
       {isViewModalOpen && selectedEmployee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -724,7 +714,6 @@ const Employees = () => {
                     <p className="text-sm font-medium">01/07/2023</p>
                   </div>
                 </div>
-                {/* ALL Attendance Records Table */}
                 <div className="mt-6">
                   <h4 className="font-medium text-gray-900 mb-3">Attendance History</h4>
                   <div className="border rounded-md overflow-hidden max-h-60 overflow-y-auto">
@@ -791,7 +780,6 @@ const Employees = () => {
         </div>
       )}
 
-      {/* Face Enrollment Modal */}
       {isEnrollModalOpen && selectedEmployee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
