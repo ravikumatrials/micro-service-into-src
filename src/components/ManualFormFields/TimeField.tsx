@@ -4,6 +4,7 @@ import React from "react";
 interface TimeFieldProps {
   label: string;
 }
+
 const TimeField = ({ label }: TimeFieldProps) => (
   <div>
     <label className="block text-lg font-medium text-gray-700 mb-2">{label}</label>
@@ -13,4 +14,5 @@ const TimeField = ({ label }: TimeFieldProps) => (
     />
   </div>
 );
+
 export default TimeField;

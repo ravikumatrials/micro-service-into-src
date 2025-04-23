@@ -5,6 +5,7 @@ interface ReasonFieldProps {
   label: string;
   placeholder: string;
 }
+
 const ReasonField = ({ label, placeholder }: ReasonFieldProps) => (
   <div>
     <label className="block text-lg font-medium text-gray-700 mb-2">{label}</label>
@@ -15,4 +16,5 @@ const ReasonField = ({ label, placeholder }: ReasonFieldProps) => (
     />
   </div>
 );
+
 export default ReasonField;
