@@ -1,5 +1,9 @@
 
 import { User } from "lucide-react";
+import EmployeeField from "../ManualFormFields/EmployeeField";
+import ProjectField from "../ManualFormFields/ProjectField";
+import TimeField from "../ManualFormFields/TimeField";
+import ReasonField from "../ManualFormFields/ReasonField";
 
 interface ManualCheckOutFormProps {
   projects: { id: number; name: string }[];
@@ -7,63 +11,27 @@ interface ManualCheckOutFormProps {
 
 const ManualCheckOutForm = ({ projects }: ManualCheckOutFormProps) => {
   return (
-    <div className="border rounded-lg p-6 bg-white shadow-md">
-      <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-        <User className="h-5 w-5 text-proscape" />
+    <div className="max-w-xl mx-auto border-2 rounded-2xl p-10 bg-white shadow-2xl animate-fade-in lg:max-w-2xl">
+      <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center gap-4">
+        <User className="h-8 w-8 text-proscape" />
         Manual Check Out
       </h3>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Employee ID or Name
-          </label>
-          <input
-            type="text"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-            placeholder="Enter employee ID or name"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Project
-          </label>
-          <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape">
-            <option value="">Select project</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Check Out Time
-          </label>
-          <input
-            type="time"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Reason for Manual Check Out
-          </label>
-          <textarea
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-            placeholder="Enter reason"
-            rows={4}
-          ></textarea>
-        </div>
-        <div className="flex justify-end">
-          <button className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+      <form className="space-y-7">
+        <EmployeeField label="Employee ID or Name" placeholder="Enter employee ID or name" />
+        <ProjectField projects={projects} />
+        <TimeField label="Check Out Time" />
+        <ReasonField label="Reason for Manual Check Out" placeholder="Enter reason" />
+        <div className="flex justify-end pt-2">
+          <button
+            type="submit"
+            className="bg-proscape hover:bg-proscape-dark text-white px-8 py-3 rounded-xl text-lg font-medium transition-colors shadow-md"
+          >
             Submit
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };
 
 export default ManualCheckOutForm;
-
