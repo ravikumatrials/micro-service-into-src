@@ -29,30 +29,30 @@ const Attendance = () => {
 
       <Card className="p-0 overflow-hidden shadow-2xl border-0">
         <Tabs defaultValue="checkin" className="w-full" onValueChange={setTab}>
-          <div className="flex justify-center px-6 py-6 border-b border-gray-200 bg-gradient-to-r from-proscape/10 to-proscape/5">
-            <TabsList className="grid w-[450px] rounded-xl grid-cols-3 mx-auto bg-white/90 p-2 shadow-lg">
-              <TabsTrigger value="checkin" className="text-xl py-4 rounded-xl">
+          <div className="flex justify-center px-6 py-8 border-b border-gray-200 bg-gradient-to-r from-proscape/10 to-proscape/5">
+            <TabsList className="grid w-[600px] rounded-xl grid-cols-3 mx-auto bg-white/90 p-3 shadow-lg">
+              <TabsTrigger value="checkin" className="text-xl py-5 rounded-xl">
                 Check In
               </TabsTrigger>
-              <TabsTrigger value="checkout" className="text-xl py-4 rounded-xl">
+              <TabsTrigger value="checkout" className="text-xl py-5 rounded-xl">
                 Check Out
               </TabsTrigger>
-              <TabsTrigger value="exception" className="text-xl py-4 rounded-xl">
+              <TabsTrigger value="exception" className="text-xl py-5 rounded-xl">
                 Exceptions
               </TabsTrigger>
             </TabsList>
           </div>
-          <TabsContent value="checkin" className="p-10">
+          <TabsContent value="checkin" className="p-16">
             <div className="flex flex-col items-center justify-center">
               <ManualCheckInForm projects={projects} />
             </div>
           </TabsContent>
-          <TabsContent value="checkout" className="p-10">
+          <TabsContent value="checkout" className="p-16">
             <div className="flex flex-col items-center justify-center">
               <ManualCheckOutForm projects={projects} />
             </div>
           </TabsContent>
-          <TabsContent value="exception" className="p-10">
+          <TabsContent value="exception" className="p-16">
             <ExceptionTables />
           </TabsContent>
         </Tabs>

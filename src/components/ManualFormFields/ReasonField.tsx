@@ -7,12 +7,12 @@ interface ReasonFieldProps {
 }
 
 const ReasonField = ({ label, placeholder }: ReasonFieldProps) => (
-  <div>
-    <label className="block text-lg font-medium text-gray-700 mb-2">{label}</label>
+  <div className="w-full">
+    <label className="block text-xl font-medium text-gray-700 mb-3">{label}</label>
     <textarea
-      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-proscape text-lg"
+      className="w-full px-5 py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-proscape text-xl shadow-sm"
       placeholder={placeholder}
-      rows={4}
+      rows={5}
     />
   </div>
 );

@@ -11,20 +11,20 @@ interface ManualCheckInFormProps {
 
 const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
   return (
-    <div className="max-w-xl mx-auto border-2 rounded-2xl p-10 bg-white shadow-2xl animate-fade-in lg:max-w-2xl">
-      <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center gap-4">
-        <User className="h-8 w-8 text-proscape" />
+    <div className="w-full max-w-3xl mx-auto border-2 rounded-2xl p-12 bg-white shadow-2xl animate-fade-in">
+      <h3 className="text-3xl font-semibold text-gray-900 mb-10 flex items-center gap-4">
+        <User className="h-10 w-10 text-proscape" />
         Manual Check In
       </h3>
-      <form className="space-y-7">
+      <form className="space-y-8">
         <EmployeeField label="Employee ID or Name" placeholder="Enter employee ID or name" />
         <ProjectField projects={projects} />
         <TimeField label="Check In Time" />
         <ReasonField label="Reason for Manual Check In" placeholder="Enter reason" />
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end pt-4">
           <button
             type="submit"
-            className="bg-proscape hover:bg-proscape-dark text-white px-8 py-3 rounded-xl text-lg font-medium transition-colors shadow-md"
+            className="bg-proscape hover:bg-proscape-dark text-white px-10 py-4 rounded-xl text-xl font-medium transition-colors shadow-md"
           >
             Submit
           </button>
