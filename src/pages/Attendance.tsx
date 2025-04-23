@@ -17,7 +17,6 @@ const Attendance = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
-  const [selectedStatus, setSelectedStatus] = useState("all");
 
   // Mock projects
   const projects = [
@@ -57,7 +56,7 @@ const Attendance = () => {
         
         {/* Filter controls */}
         <div className="bg-gray-50 p-3 border-b border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-2 top-2 h-4 w-4 text-gray-400" />
@@ -104,21 +103,6 @@ const Attendance = () => {
                 ))}
               </SelectContent>
             </Select>
-
-            {/* Status Filter */}
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="h-8 text-sm">
-                <div className="flex items-center gap-2">
-                  <UserCheck className="h-3 w-3 text-gray-500" />
-                  <SelectValue placeholder="Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="checkedin">Checked In</SelectItem>
-                <SelectItem value="notcheckedin">Not Checked In</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
@@ -152,7 +136,7 @@ const Attendance = () => {
               searchQuery={searchQuery} 
               selectedProject={selectedProject} 
               selectedLocation={selectedLocation} 
-              selectedStatus={selectedStatus} 
+              selectedStatus="all"
               projects={projects}
               locations={locations}
             />
@@ -184,3 +168,4 @@ const Attendance = () => {
 };
 
 export default Attendance;
+
