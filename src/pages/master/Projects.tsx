@@ -186,12 +186,6 @@ export default function ProjectsPage() {
           >
             <Upload className="w-4 h-4" /> Import from Tanseeq API
           </Button>
-          <Button
-            className="bg-proscape hover:bg-proscape-dark text-white font-medium flex gap-2"
-            onClick={() => setImportOpen(true)}
-          >
-            <Upload className="w-4 h-4" /> Import Projects
-          </Button>
         </div>
       </div>
       <ProjectFilters
