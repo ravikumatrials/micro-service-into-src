@@ -70,28 +70,33 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        
-        <div className="flex items-center gap-4">
-          {quickActions.map((action, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="flex items-center gap-2 text-gray-700 hover:text-proscape hover:border-proscape transition-colors"
-              onClick={action.onClick}
-            >
-              {action.icon}
-              <span className="hidden sm:inline">{action.label}</span>
-            </Button>
-          ))}
-        </div>
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+          
+          <div className="flex items-center gap-2 px-4 min-w-0">
+            {quickActions.map((action, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 text-gray-700 hover:text-proscape hover:border-proscape transition-colors whitespace-nowrap"
+                onClick={action.onClick}
+              >
+                {action.icon}
+                <span className="hidden sm:inline">{action.label}</span>
+              </Button>
+            ))}
+          </div>
 
-        <Button 
-          className="bg-proscape hover:bg-proscape-dark text-white"
-        >
-          Sync Data
-        </Button>
+          <div className="flex justify-end">
+            <Button 
+              className="bg-proscape hover:bg-proscape-dark text-white"
+            >
+              Sync Data
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
