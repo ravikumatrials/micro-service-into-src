@@ -1,10 +1,10 @@
-
 import { useState, useMemo } from "react";
 import { Upload, Eye, Trash, Search } from "lucide-react";
 import ProjectFilters from "./ProjectFilters";
 import ProjectTable from "./ProjectTable";
 import ProjectCardMobile from "./ProjectCardMobile";
 import ImportProjectsModal from "./ImportProjectsModal";
+import TanseeqImportModal from "./TanseeqProjectsImportModal";
 import ProjectViewModal from "./ProjectViewModal";
 import DeleteProjectDialog from "./DeleteProjectDialog";
 import { Button } from "@/components/ui/button";
@@ -102,25 +102,21 @@ export default function ProjectsPage() {
     employee: ""
   });
   const [importOpen, setImportOpen] = useState(false);
+  const [tanseeqImportOpen, setTanseeqImportOpen] = useState(false);
   const [viewProject, setViewProject] = useState(null);
   const [deleteProject, setDeleteProject] = useState(null);
 
-  // Filtering logic
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
-      // Name filter
       if (filters.name && !p.name.toLowerCase().includes(filters.name.trim().toLowerCase())) 
         return false;
       
-      // Location filter
       if (filters.location && filters.location !== "All" && p.location !== filters.location) 
         return false;
       
-      // Status filter
       if (filters.status && filters.status !== "All" && p.status !== filters.status) 
         return false;
       
-      // Employee filter
       if (filters.employee) {
         const found = p.assignedEmployees.some(e =>
           e.name.toLowerCase().includes(filters.employee.trim().toLowerCase())
@@ -128,17 +124,14 @@ export default function ProjectsPage() {
         if (!found) return false;
       }
       
-      // Date range filter - parse dates properly for comparison
       if (filters.dateRange?.start || filters.dateRange?.end) {
         const projectStartDate = new Date(p.startDate);
         const projectEndDate = new Date(p.endDate);
         
-        // Filter by start date
         if (filters.dateRange?.start && projectStartDate < filters.dateRange.start) {
           return false;
         }
         
-        // Filter by end date
         if (filters.dateRange?.end && projectEndDate > filters.dateRange.end) {
           return false;
         }
@@ -148,7 +141,6 @@ export default function ProjectsPage() {
     });
   }, [projects, filters]);
 
-  // Simulate import (append dummy projects)
   const handleImport = () => {
     setProjects(prev => [
       ...prev,
@@ -160,25 +152,47 @@ export default function ProjectsPage() {
     setImportOpen(false);
   };
 
-  // Handle project deletion
+  const handleTanseeqImport = (tanseeqProjects) => {
+    const maxId = Math.max(...projects.map(p => Number(p.id)));
+    
+    const projectsToAdd = tanseeqProjects.map((project, index) => ({
+      id: String(maxId + index + 1),
+      name: project.name,
+      location: project.location,
+      assignedEmployees: [],
+      startDate: project.startDate,
+      endDate: project.endDate,
+      status: project.status === "Approved" ? "Active" : "Inactive"
+    }));
+    
+    setProjects([...projects, ...projectsToAdd]);
+  };
+
   const handleDelete = (project) => {
     setProjects((prev) => prev.filter(p => p.id !== project.id));
     setDeleteProject(null);
   };
 
-  // Responsive check
   const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
   return (
     <div className="space-y-5 px-1 pt-5">
       <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-end">
         <h1 className="text-2xl font-bold text-gray-800 mb-1 md:mb-0">Projects</h1>
-        <Button
-          className="bg-proscape hover:bg-proscape-dark text-white font-medium flex gap-2"
-          onClick={() => setImportOpen(true)}
-        >
-          <Upload className="w-4 h-4" /> Import Projects
-        </Button>
+        <div className="flex flex-col md:flex-row gap-3">
+          <Button
+            className="bg-proscape hover:bg-proscape-dark text-white font-medium flex gap-2"
+            onClick={() => setTanseeqImportOpen(true)}
+          >
+            <Upload className="w-4 h-4" /> Import from Tanseeq API
+          </Button>
+          <Button
+            className="bg-proscape hover:bg-proscape-dark text-white font-medium flex gap-2"
+            onClick={() => setImportOpen(true)}
+          >
+            <Upload className="w-4 h-4" /> Import Projects
+          </Button>
+        </div>
       </div>
       <ProjectFilters
         filters={filters}
@@ -187,7 +201,6 @@ export default function ProjectsPage() {
         employees={DUMMY_EMPLOYEES}
       />
       <div>
-        {/* Desktop Table and Mobile Cards */}
         <div className="hidden md:block">
           <ProjectTable
             projects={filteredProjects}
@@ -212,10 +225,25 @@ export default function ProjectsPage() {
           )}
         </div>
       </div>
-      {/* Modals/Dialogs */}
-      <ImportProjectsModal open={importOpen} onOpenChange={setImportOpen} onImport={handleImport} />
-      <ProjectViewModal project={viewProject} onClose={() => setViewProject(null)} />
-      <DeleteProjectDialog project={deleteProject} onCancel={() => setDeleteProject(null)} onConfirm={() => handleDelete(deleteProject)} />
+      <ImportProjectsModal 
+        open={importOpen} 
+        onOpenChange={setImportOpen} 
+        onImport={handleImport} 
+      />
+      <TanseeqImportModal
+        open={tanseeqImportOpen}
+        onOpenChange={setTanseeqImportOpen}
+        onImport={handleTanseeqImport}
+      />
+      <ProjectViewModal 
+        project={viewProject} 
+        onClose={() => setViewProject(null)} 
+      />
+      <DeleteProjectDialog 
+        project={deleteProject} 
+        onCancel={() => setDeleteProject(null)} 
+        onConfirm={() => handleDelete(deleteProject)} 
+      />
     </div>
   );
 }
