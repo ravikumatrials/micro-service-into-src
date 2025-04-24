@@ -6,7 +6,8 @@ export const mockTanseeqEmployees = [
     employeeId: "TEQ123",
     role: "Labour",
     project: "Main Building Construction",
-    location: "Site A"
+    location: "Site A",
+    department: "Construction"
   },
   {
     id: "T002",
@@ -14,7 +15,8 @@ export const mockTanseeqEmployees = [
     employeeId: "TEQ124",
     role: "Supervisor",
     project: "Bridge Expansion Project",
-    location: "Site B"
+    location: "Site B",
+    department: "Engineering"
   },
   {
     id: "T003",
@@ -22,7 +24,8 @@ export const mockTanseeqEmployees = [
     employeeId: "TEQ125",
     role: "Labour",
     project: "Highway Renovation",
-    location: "Site C"
+    location: "Site C",
+    department: "Construction"
   },
   {
     id: "T004",
@@ -30,6 +33,23 @@ export const mockTanseeqEmployees = [
     employeeId: "TEQ126",
     role: "Labour",
     project: "Main Building Construction",
-    location: "Site A"
+    location: "Site A",
+    department: "Construction"
   }
+];
+
+export const departments = [
+  "All Departments",
+  "Construction",
+  "Engineering",
+  "Administration",
+  "Safety"
+];
+
+export const projects = [
+  "All Projects",
+  "Main Building Construction",
+  "Bridge Expansion Project",
+  "Highway Renovation",
+  "Site Preparation"
 ];

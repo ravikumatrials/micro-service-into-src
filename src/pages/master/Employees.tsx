@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
 import { FaceScanner } from "@/components/face/FaceScanner";
 import { useNavigate } from "react-router-dom";
-import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
+import { TanseeqImportDrawer } from "@/components/employees/TanseeqImportDrawer";
+import { CloudDownload } from "lucide-react";
 
 const initialEmployees = [
   { 
@@ -343,8 +344,8 @@ const Employees = () => {
             onClick={() => setIsTanseeqModalOpen(true)}
             className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
           >
-            <Import className="h-4 w-4 mr-2" />
-            Import from Tanseeq API
+            <CloudDownload className="h-4 w-4 mr-2" />
+            Import from Tanseeq
           </button>
         </div>
       </div>
@@ -884,7 +885,7 @@ const Employees = () => {
       )}
 
       {isTanseeqModalOpen && (
-        <TanseeqImportModal
+        <TanseeqImportDrawer
           open={isTanseeqModalOpen}
           onOpenChange={setIsTanseeqModalOpen}
           onImportComplete={handleTanseeqImport}
