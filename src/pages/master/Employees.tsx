@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
@@ -773,3 +774,124 @@ const Employees = () => {
                                 }`}>
                                   {record.checkOutTime} <span className="italic">({record.checkOutMethod})</span>
                                 </span>
+                              </td>
+                              <td className="px-4 py-3">{record.totalHours}</td>
+                              <td className="px-4 py-3">{record.comment}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <button 
+                      onClick={() => handleViewFullAttendanceHistory(selectedEmployee.employeeId)}
+                      className="text-sm text-proscape hover:underline"
+                    >
+                      View Full Attendance History
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEnrollModalOpen && selectedEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Face Enrollment</h2>
+              <button 
+                onClick={cancelEnrollment}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="text-center mb-6">
+              <h3 className="font-bold text-lg">{selectedEmployee.name}</h3>
+              <p className="text-gray-500 text-sm">{selectedEmployee.employeeId}</p>
+            </div>
+            
+            <div className="flex flex-col items-center space-y-6">
+              {!cameraActive && !photoTaken ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-40 h-40 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
+                    {selectedEmployee.faceEnrolled ? (
+                      <img 
+                        src={`https://i.pravatar.cc/160?u=${selectedEmployee.id}`} 
+                        alt={selectedEmployee.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-20 w-20 text-gray-400" />
+                    )}
+                  </div>
+                  <button
+                    onClick={activateCamera}
+                    className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
+                  >
+                    Start Camera
+                  </button>
+                </div>
+              ) : cameraActive && !photoTaken ? (
+                <div className="w-full flex flex-col items-center">
+                  <div className="border rounded-lg overflow-hidden w-full max-w-md aspect-square mb-4">
+                    <FaceScanner onCapture={handlePhotoCapture} />
+                  </div>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={capturePhoto}
+                      className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
+                    >
+                      Capture
+                    </button>
+                    <button
+                      onClick={cancelEnrollment}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full flex flex-col items-center">
+                  <div className="border rounded-lg overflow-hidden w-full max-w-md aspect-square mb-4 bg-green-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <Check className="h-16 w-16 text-green-500 mx-auto mb-2" />
+                      <p className="text-green-700 font-medium">Face captured successfully</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={saveEnrollment}
+                      className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={cancelEnrollment}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <TanseeqImportModal
+        open={isTanseeqModalOpen}
+        onOpenChange={setIsTanseeqModalOpen}
+        onImportComplete={handleTanseeqImport}
+      />
+    </div>
+  );
+};
+
+export default Employees;
