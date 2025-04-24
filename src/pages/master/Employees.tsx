@@ -3,8 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
 import { FaceScanner } from "@/components/face/FaceScanner";
 import { useNavigate } from "react-router-dom";
+import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
 
-// Mock data
 const initialEmployees = [
   { 
     id: 1, 
@@ -210,6 +210,7 @@ const Employees = () => {
     address: "",
     joiningDate: ""
   });
+  const [isTanseeqModalOpen, setIsTanseeqModalOpen] = useState(false);
 
   const filteredEmployees = employees.filter((employee) => {
     const searchMatch = 
@@ -317,14 +318,33 @@ const Employees = () => {
     navigate(`/attendance-history?employeeId=${employeeId}`);
   };
 
+  const handleTanseeqImport = (newEmployees) => {
+    const maxId = Math.max(...employees.map(e => e.id));
+    
+    const employeesToAdd = newEmployees.map((emp, index) => ({
+      id: maxId + index + 1,
+      name: emp.name,
+      employeeId: emp.employeeId,
+      role: emp.role,
+      project: emp.project,
+      faceEnrolled: false,
+      status: "Active"
+    }));
+    
+    setEmployees([...employees, ...employeesToAdd]);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Employees</h1>
         <div className="flex space-x-3">
-          <button className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+          <button 
+            onClick={() => setIsTanseeqModalOpen(true)}
+            className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          >
             <Import className="h-4 w-4 mr-2" />
-            Import
+            Import from Tanseeq API
           </button>
         </div>
       </div>
@@ -659,7 +679,7 @@ const Employees = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User className="h-16 w-16 text-gray-400" />
+                    <User className="h-12 w-12 text-gray-400" />
                   )}
                 </div>
                 <h3 className="mt-4 font-bold text-lg">{selectedEmployee.name}</h3>
@@ -861,6 +881,14 @@ const Employees = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {isTanseeqModalOpen && (
+        <TanseeqImportModal
+          open={isTanseeqModalOpen}
+          onOpenChange={setIsTanseeqModalOpen}
+          onImportComplete={handleTanseeqImport}
+        />
       )}
     </div>
   );
