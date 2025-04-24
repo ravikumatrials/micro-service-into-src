@@ -1,11 +1,17 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,12 +21,16 @@ const Login = () => {
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetEmailError, setResetEmailError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Simulate authentication
     if (
       credentials.email === "admin@proscape.com" &&
       credentials.password === "123456"
@@ -35,6 +45,41 @@ const Login = () => {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetEmailError("");
+
+    if (!resetEmail) {
+      setResetEmailError("Email is required");
+      return;
+    }
+
+    if (!validateEmail(resetEmail)) {
+      setResetEmailError("Please enter a valid email address");
+      return;
+    }
+
+    setIsLoading(true);
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const demoPassword = `PSCP@${Math.floor(1000 + Math.random() * 9000)}`;
+    
+    setIsLoading(false);
+    setForgotPasswordOpen(false);
+    setResetEmail("");
+
+    toast.success("Password reset email sent successfully");
+    toast("Demo Credentials", {
+      description: `Email: ${resetEmail}\nPassword: ${demoPassword}`,
+      duration: 5000,
+    });
   };
 
   return (
@@ -76,6 +121,7 @@ const Login = () => {
                 <Label htmlFor="password">Password</Label>
                 <button
                   type="button"
+                  onClick={() => setForgotPasswordOpen(true)}
                   className="text-sm text-proscape hover:text-proscape-dark"
                 >
                   Forgot password?
@@ -127,6 +173,45 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Forgot Password</DialogTitle>
+            <DialogDescription>
+              Enter your registered email. We'll send you a system-generated password.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email">Email address</Label>
+              <div className="relative">
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className={resetEmailError ? "border-red-500" : ""}
+                />
+                <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
+              </div>
+              {resetEmailError && (
+                <p className="text-sm text-red-500">{resetEmailError}</p>
+              )}
+            </div>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="bg-proscape hover:bg-proscape-dark text-white"
+              >
+                {isLoading ? "Sending..." : "Send Password"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
