@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -12,8 +11,7 @@ import {
   ChevronDown, 
   ChevronRight,
   ChevronLeft,
-  MapPin,
-  Briefcase
+  MapPin
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -51,10 +49,6 @@ const menuItems: MenuItem[] = [
       {
         name: "Location",
         path: "/master/location"
-      },
-      {
-        name: "Projects",
-        path: "/master/projects"
       }
     ]
   },
@@ -214,4 +208,3 @@ export function Sidebar() {
     </div>
   );
 }
-
