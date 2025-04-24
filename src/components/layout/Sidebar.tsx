@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -41,8 +40,8 @@ const menuItems: MenuItem[] = [
     icon: <Settings className="h-5 w-5" />,
     subMenus: [
       {
-        name: "Employees",
-        path: "/master/employees"
+        name: "Projects",
+        path: "/master/projects"
       },
       {
         name: "Roles",
@@ -51,10 +50,6 @@ const menuItems: MenuItem[] = [
       {
         name: "Location",
         path: "/master/location"
-      },
-      {
-        name: "Projects",
-        path: "/master/projects"
       }
     ]
   },
@@ -214,4 +209,3 @@ export function Sidebar() {
     </div>
   );
 }
-
