@@ -1,6 +1,6 @@
-
 import { Card } from "@/components/ui/card";
-import { Users, Calendar, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, Calendar, Clock, AlertTriangle, CheckCircle, FileText, UserCheck, PenSquare } from "lucide-react";
 
 const Dashboard = () => {
   // Mock data for dashboard
@@ -45,16 +45,53 @@ const Dashboard = () => {
     { id: 3, count: 124, location: "South Tower", lastSync: "1 day ago" }
   ];
 
+  const quickActions = [
+    { 
+      label: "Mark Attendance", 
+      icon: <CheckCircle className="h-5 w-5" />,
+      onClick: () => console.log("Mark Attendance clicked")
+    },
+    { 
+      label: "Face Enrollment", 
+      icon: <UserCheck className="h-5 w-5" />,
+      onClick: () => console.log("Face Enrollment clicked")
+    },
+    { 
+      label: "Manual Entry", 
+      icon: <PenSquare className="h-5 w-5" />,
+      onClick: () => console.log("Manual Entry clicked")
+    },
+    { 
+      label: "Export Report", 
+      icon: <FileText className="h-5 w-5" />,
+      onClick: () => console.log("Export Report clicked")
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
         <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        <div className="flex space-x-2">
-          <button className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-            Sync Data
-          </button>
-          {/* Removed Export Summary button here */}
+        
+        <div className="flex items-center gap-4">
+          {quickActions.map((action, index) => (
+            <Button
+              key={index}
+              variant="outline"
+              className="flex items-center gap-2 text-gray-700 hover:text-proscape hover:border-proscape transition-colors"
+              onClick={action.onClick}
+            >
+              {action.icon}
+              <span className="hidden sm:inline">{action.label}</span>
+            </Button>
+          ))}
         </div>
+
+        <Button 
+          className="bg-proscape hover:bg-proscape-dark text-white"
+        >
+          Sync Data
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
