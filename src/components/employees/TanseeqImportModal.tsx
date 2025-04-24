@@ -2,10 +2,10 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, CloudDownload } from "lucide-react";
 import { mockTanseeqEmployees } from "./tanseeq-mock-data";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TanseeqImportModalProps {
   open: boolean;
@@ -18,9 +18,9 @@ export function TanseeqImportModal({
   onOpenChange,
   onImportComplete 
 }: TanseeqImportModalProps) {
-  const [projectId, setProjectId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [fetchedEmployees, setFetchedEmployees] = useState<typeof mockTanseeqEmployees | null>(null);
+  const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const handleFetch = () => {
@@ -28,19 +28,43 @@ export function TanseeqImportModal({
     // Simulate API call
     setTimeout(() => {
       setFetchedEmployees(mockTanseeqEmployees);
+      setSelectedEmployees(new Set(mockTanseeqEmployees.map(emp => emp.id)));
       setIsLoading(false);
-    }, 3000);
+    }, 2000);
   };
 
   const handleImport = () => {
     if (fetchedEmployees) {
-      onImportComplete(fetchedEmployees);
+      const selectedRecords = fetchedEmployees.filter(emp => 
+        selectedEmployees.has(emp.id)
+      );
+      onImportComplete(selectedRecords);
       toast({
         title: "Import Successful",
-        description: `Successfully imported ${fetchedEmployees.length} employees from Tanseeq.`,
+        description: `Successfully imported ${selectedRecords.length} employees from Tanseeq.`,
       });
       onOpenChange(false);
     }
+  };
+
+  const toggleSelectAll = () => {
+    if (fetchedEmployees) {
+      if (selectedEmployees.size === fetchedEmployees.length) {
+        setSelectedEmployees(new Set());
+      } else {
+        setSelectedEmployees(new Set(fetchedEmployees.map(emp => emp.id)));
+      }
+    }
+  };
+
+  const toggleEmployee = (id: string) => {
+    const newSelected = new Set(selectedEmployees);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedEmployees(newSelected);
   };
 
   return (
@@ -59,74 +83,93 @@ export function TanseeqImportModal({
 
         <div className="space-y-6">
           <p className="text-sm text-gray-600">
-            Use this tool to import employee records directly from the Tanseeq system.
+            Click below to fetch the latest employee data from the Tanseeq system.
           </p>
 
-          <div>
-            <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 mb-1">
-              Department/Project ID (Optional)
-            </label>
-            <div className="flex gap-4">
-              <Input
-                id="projectId"
-                value={projectId}
-                onChange={(e) => setProjectId(e.target.value)}
-                placeholder="Enter ID to filter results"
-                className="flex-1"
-              />
-              <Button 
-                onClick={handleFetch}
-                disabled={isLoading}
-                className="bg-proscape hover:bg-proscape-dark"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Fetching...
-                  </>
-                ) : (
-                  "Fetch from Tanseeq API"
-                )}
-              </Button>
-            </div>
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleFetch}
+              disabled={isLoading}
+              className="bg-proscape hover:bg-proscape-dark"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Fetching...
+                </>
+              ) : (
+                <>
+                  <CloudDownload className="mr-2 h-4 w-4" />
+                  Fetch Employees
+                </>
+              )}
+            </Button>
           </div>
 
           {fetchedEmployees && (
-            <div className="border rounded-lg overflow-hidden">
-              <table className="w-full text-sm text-left text-gray-500">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-4 py-3">Name</th>
-                    <th scope="col" className="px-4 py-3">Employee ID</th>
-                    <th scope="col" className="px-4 py-3">Role</th>
-                    <th scope="col" className="px-4 py-3">Project</th>
-                    <th scope="col" className="px-4 py-3">Location</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {fetchedEmployees.map((employee) => (
-                    <tr key={employee.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">{employee.name}</td>
-                      <td className="px-4 py-3">{employee.employeeId}</td>
-                      <td className="px-4 py-3">{employee.role}</td>
-                      <td className="px-4 py-3">{employee.project}</td>
-                      <td className="px-4 py-3">{employee.location}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+            <>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="selectAll"
+                  checked={selectedEmployees.size === fetchedEmployees.length}
+                  onCheckedChange={toggleSelectAll}
+                  className="border-proscape data-[state=checked]:bg-proscape"
+                />
+                <label 
+                  htmlFor="selectAll" 
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Select All
+                </label>
+              </div>
 
-          {fetchedEmployees && (
-            <div className="flex justify-end">
-              <Button
-                onClick={handleImport}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                Import Selected Records
-              </Button>
-            </div>
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm text-left text-gray-500">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-4 py-3">Select</th>
+                      <th scope="col" className="px-4 py-3">Name</th>
+                      <th scope="col" className="px-4 py-3">Employee ID</th>
+                      <th scope="col" className="px-4 py-3">Role</th>
+                      <th scope="col" className="px-4 py-3">Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fetchedEmployees.map((employee) => (
+                      <tr key={employee.id} className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <Checkbox 
+                            checked={selectedEmployees.has(employee.id)}
+                            onCheckedChange={() => toggleEmployee(employee.id)}
+                            className="border-proscape data-[state=checked]:bg-proscape"
+                          />
+                        </td>
+                        <td className="px-4 py-3">{employee.name}</td>
+                        <td className="px-4 py-3">{employee.employeeId}</td>
+                        <td className="px-4 py-3">{employee.role}</td>
+                        <td className="px-4 py-3">{employee.location}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleImport}
+                  disabled={selectedEmployees.size === 0}
+                  className="bg-proscape hover:bg-proscape-dark"
+                >
+                  Import Selected
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </DialogContent>
