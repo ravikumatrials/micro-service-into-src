@@ -839,7 +839,10 @@ const Employees = () => {
               ) : cameraActive && !photoTaken ? (
                 <div className="w-full flex flex-col items-center">
                   <div className="border rounded-lg overflow-hidden w-full max-w-md aspect-square mb-4">
-                    <FaceScanner onCapture={handlePhotoCapture} />
+                    <FaceScanner 
+                      onCapture={handlePhotoCapture} 
+                      onCancel={cancelEnrollment}
+                    />
                   </div>
                   <div className="flex space-x-4">
                     <button
