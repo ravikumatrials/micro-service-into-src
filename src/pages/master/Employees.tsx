@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
@@ -13,7 +12,6 @@ const initialEmployees = [
     name: "John Smith", 
     employeeId: "EMP001", 
     role: "Labour", 
-    project: "Main Building Construction", 
     faceEnrolled: true,
     status: "Active" 
   },
@@ -22,7 +20,6 @@ const initialEmployees = [
     name: "Sarah Johnson", 
     employeeId: "EMP002", 
     role: "Supervisor", 
-    project: "Bridge Expansion Project", 
     faceEnrolled: true,
     status: "Active" 
   },
@@ -31,7 +28,6 @@ const initialEmployees = [
     name: "Robert Williams", 
     employeeId: "EMP003", 
     role: "Labour", 
-    project: "Highway Renovation", 
     faceEnrolled: false,
     status: "Active" 
   },
@@ -40,7 +36,6 @@ const initialEmployees = [
     name: "Emily Davis", 
     employeeId: "EMP004", 
     role: "Labour", 
-    project: "Main Building Construction", 
     faceEnrolled: true,
     status: "Active" 
   },
@@ -49,7 +44,6 @@ const initialEmployees = [
     name: "James Miller", 
     employeeId: "EMP005", 
     role: "Report Admin", 
-    project: "Highway Renovation", 
     faceEnrolled: true,
     status: "Active" 
   },
@@ -58,7 +52,6 @@ const initialEmployees = [
     name: "Jennifer Wilson", 
     employeeId: "EMP006", 
     role: "Labour", 
-    project: "Bridge Expansion Project", 
     faceEnrolled: false,
     status: "Inactive" 
   },
@@ -67,7 +60,6 @@ const initialEmployees = [
     name: "Michael Brown", 
     employeeId: "EMP007", 
     role: "Super Admin", 
-    project: "Main Building Construction", 
     faceEnrolled: true,
     status: "Active" 
   },
@@ -76,7 +68,6 @@ const initialEmployees = [
     name: "David Thompson", 
     employeeId: "EMP008", 
     role: "Labour", 
-    project: "Highway Renovation", 
     faceEnrolled: false,
     status: "Active" 
   },
@@ -206,7 +197,6 @@ const Employees = () => {
     name: "",
     employeeId: "",
     role: "Labour",
-    project: "",
     contactNumber: "",
     email: "",
     address: "",
@@ -241,7 +231,6 @@ const Employees = () => {
       name: newEmployee.name,
       employeeId: newEmployee.employeeId,
       role: newEmployee.role,
-      project: newEmployee.project,
       faceEnrolled: false,
       status: "Active"
     };
@@ -253,7 +242,6 @@ const Employees = () => {
       name: "",
       employeeId: "",
       role: "Labour",
-      project: "",
       contactNumber: "",
       email: "",
       address: "",
@@ -328,7 +316,6 @@ const Employees = () => {
       name: emp.name,
       employeeId: emp.employeeId,
       role: emp.role,
-      project: emp.project,
       faceEnrolled: false,
       status: "Active"
     }));
@@ -566,23 +553,6 @@ const Employees = () => {
                     <option value="Report Admin">Report Admin</option>
                   </select>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Project *
-                  </label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                    value={newEmployee.project}
-                    onChange={(e) => setNewEmployee({...newEmployee, project: e.target.value})}
-                    required
-                  >
-                    <option value="">Select Project</option>
-                    <option value="Main Building Construction">Main Building Construction</option>
-                    <option value="Bridge Expansion Project">Bridge Expansion Project</option>
-                    <option value="Highway Renovation">Highway Renovation</option>
-                  </select>
-                </div>
               </div>
               
               <div className="space-y-4">
@@ -649,7 +619,7 @@ const Employees = () => {
               <button
                 onClick={handleCreateEmployee}
                 className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
-                disabled={!newEmployee.name || !newEmployee.employeeId || !newEmployee.role || !newEmployee.project}
+                disabled={!newEmployee.name || !newEmployee.employeeId || !newEmployee.role}
               >
                 Create Employee
               </button>
@@ -714,10 +684,6 @@ const Employees = () => {
                   <div>
                     <p className="text-sm text-gray-500">Role</p>
                     <p className="text-sm font-medium">{selectedEmployee.role}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Project</p>
-                    <p className="text-sm font-medium">{selectedEmployee.project}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Face Enrolled</p>
@@ -812,89 +778,3 @@ const Employees = () => {
             
             <div className="text-center mb-6">
               <h3 className="font-bold text-lg">{selectedEmployee.name}</h3>
-              <p className="text-gray-500 text-sm">{selectedEmployee.employeeId}</p>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-6">
-              {!cameraActive && !photoTaken ? (
-                <div className="flex flex-col items-center">
-                  <div className="w-40 h-40 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
-                    {selectedEmployee.faceEnrolled ? (
-                      <img 
-                        src={`https://i.pravatar.cc/160?u=${selectedEmployee.id}`} 
-                        alt={selectedEmployee.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User className="h-20 w-20 text-gray-400" />
-                    )}
-                  </div>
-                  <button
-                    onClick={activateCamera}
-                    className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
-                  >
-                    Start Camera
-                  </button>
-                </div>
-              ) : cameraActive && !photoTaken ? (
-                <div className="w-full flex flex-col items-center">
-                  <div className="border rounded-lg overflow-hidden w-full max-w-md aspect-square mb-4">
-                    <FaceScanner 
-                      onCapture={handlePhotoCapture} 
-                      onCancel={cancelEnrollment}
-                    />
-                  </div>
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={capturePhoto}
-                      className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
-                    >
-                      Capture
-                    </button>
-                    <button
-                      onClick={cancelEnrollment}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full flex flex-col items-center">
-                  <div className="border rounded-lg overflow-hidden w-full max-w-md aspect-square mb-4 bg-green-100 flex items-center justify-center">
-                    <div className="text-center">
-                      <Check className="h-16 w-16 text-green-500 mx-auto mb-2" />
-                      <p className="text-green-700 font-medium">Face captured successfully</p>
-                    </div>
-                  </div>
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={saveEnrollment}
-                      className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={cancelEnrollment}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <TanseeqImportModal
-        open={isTanseeqModalOpen}
-        onOpenChange={setIsTanseeqModalOpen}
-        onImportComplete={handleTanseeqImport}
-      />
-    </div>
-  );
-};
-
-export default Employees;
