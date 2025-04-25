@@ -2,7 +2,7 @@
 export const mockTanseeqEmployees = [
   {
     id: "T001",
-    name: "Mohammed Al-Rashid",
+    name: "Abdulrahman Al-Faisal",
     employeeId: "TEQ123",
     role: "Labour",
     project: "Main Building Construction",
@@ -11,27 +11,27 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "T002",
-    name: "Sarah Al-Mahmoud",
+    name: "Layla Hassan",
     employeeId: "TEQ124",
     role: "Supervisor",
-    project: "Bridge Expansion Project",
+    project: "Bridge Expansion Project", 
     location: "Site B",
     department: "Engineering"
   },
   {
     id: "T003",
-    name: "Ahmed Al-Nasser",
-    employeeId: "TEQ125",
+    name: "Omar bin Khalid",
+    employeeId: "TEQ125", 
     role: "Labour",
     project: "Highway Renovation",
-    location: "Site C",
+    location: "Site C", 
     department: "Construction"
   },
   {
     id: "T004",
     name: "Fatima Al-Sayed",
     employeeId: "TEQ126",
-    role: "Labour",
+    role: "Labour", 
     project: "Main Building Construction",
     location: "Site A",
     department: "Construction"
