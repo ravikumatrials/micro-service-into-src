@@ -1,7 +1,8 @@
+
 import { useState } from "react";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, X, CloudDownload } from "lucide-react";
+import { Loader2, X, CloudDownload, Search } from "lucide-react";
 import { mockTanseeqEmployees } from "./tanseeq-mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,6 +21,7 @@ export function TanseeqImportModal({
   const [isLoading, setIsLoading] = useState(false);
   const [fetchedEmployees, setFetchedEmployees] = useState<typeof mockTanseeqEmployees | null>(null);
   const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   const handleFetch = () => {
@@ -31,6 +33,16 @@ export function TanseeqImportModal({
       setIsLoading(false);
     }, 2000);
   };
+
+  const filteredEmployees = fetchedEmployees?.filter(employee => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      employee.name.toLowerCase().includes(searchLower) ||
+      employee.employeeId.toLowerCase().includes(searchLower) ||
+      employee.role.toLowerCase().includes(searchLower) ||
+      employee.location.toLowerCase().includes(searchLower)
+    );
+  }) || [];
 
   const handleImport = () => {
     if (fetchedEmployees) {
@@ -82,41 +94,58 @@ export function TanseeqImportModal({
             Click below to fetch the latest employee data from the Tanseeq system.
           </p>
 
-          <div className="flex justify-center">
-            <Button 
-              onClick={handleFetch}
-              disabled={isLoading}
-              className="bg-proscape hover:bg-proscape-dark"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Fetching...
-                </>
-              ) : (
-                <>
-                  <CloudDownload className="mr-2 h-4 w-4" />
-                  Fetch Employees
-                </>
-              )}
-            </Button>
-          </div>
+          {!fetchedEmployees && (
+            <div className="flex justify-center">
+              <Button 
+                onClick={handleFetch}
+                disabled={isLoading}
+                className="bg-proscape hover:bg-proscape-dark"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Fetching...
+                  </>
+                ) : (
+                  <>
+                    <CloudDownload className="mr-2 h-4 w-4" />
+                    Fetch Employees
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
 
           {fetchedEmployees && (
             <>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="selectAll"
-                  checked={selectedEmployees.size === fetchedEmployees.length}
-                  onCheckedChange={toggleSelectAll}
-                  className="border-proscape data-[state=checked]:bg-proscape"
-                />
-                <label 
-                  htmlFor="selectAll" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Select All
-                </label>
+              <div className="flex justify-between items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="selectAll"
+                    checked={selectedEmployees.size === fetchedEmployees.length}
+                    onCheckedChange={toggleSelectAll}
+                    className="border-proscape data-[state=checked]:bg-proscape"
+                  />
+                  <label 
+                    htmlFor="selectAll" 
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Select All
+                  </label>
+                </div>
+
+                <div className="relative flex-1 max-w-xs">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search employees..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-3 py-2 w-full border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-proscape"
+                  />
+                </div>
               </div>
 
               <div className="border rounded-lg overflow-hidden">
@@ -131,21 +160,29 @@ export function TanseeqImportModal({
                     </tr>
                   </thead>
                   <tbody>
-                    {fetchedEmployees.map((employee) => (
-                      <tr key={employee.id} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <Checkbox 
-                            checked={selectedEmployees.has(employee.id)}
-                            onCheckedChange={() => toggleEmployee(employee.id)}
-                            className="border-proscape data-[state=checked]:bg-proscape"
-                          />
+                    {filteredEmployees.length > 0 ? (
+                      filteredEmployees.map((employee) => (
+                        <tr key={employee.id} className="border-b hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <Checkbox 
+                              checked={selectedEmployees.has(employee.id)}
+                              onCheckedChange={() => toggleEmployee(employee.id)}
+                              className="border-proscape data-[state=checked]:bg-proscape"
+                            />
+                          </td>
+                          <td className="px-4 py-3">{employee.name}</td>
+                          <td className="px-4 py-3">{employee.employeeId}</td>
+                          <td className="px-4 py-3">{employee.role}</td>
+                          <td className="px-4 py-3">{employee.location}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
+                          No employees found matching the search criteria
                         </td>
-                        <td className="px-4 py-3">{employee.name}</td>
-                        <td className="px-4 py-3">{employee.employeeId}</td>
-                        <td className="px-4 py-3">{employee.role}</td>
-                        <td className="px-4 py-3">{employee.location}</td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -172,3 +209,4 @@ export function TanseeqImportModal({
     </Dialog>
   );
 }
+
