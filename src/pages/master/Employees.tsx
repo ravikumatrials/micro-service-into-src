@@ -763,6 +763,14 @@ const Employees = () => {
         </div>
       )}
 
+      {isTanseeqModalOpen && (
+        <TanseeqImportModal 
+          isOpen={isTanseeqModalOpen}
+          onClose={() => setIsTanseeqModalOpen(false)}
+          onImport={handleTanseeqImport}
+        />
+      )}
+
       {isEnrollModalOpen && selectedEmployee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
@@ -770,11 +778,4 @@ const Employees = () => {
               <h2 className="text-xl font-bold text-gray-900">Face Enrollment</h2>
               <button 
                 onClick={cancelEnrollment}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <div className="text-center mb-6">
-              <h3 className="font-bold text-lg">{selectedEmployee.name}</h3>
+                className="text-gray-500 hover:text-gray-7
