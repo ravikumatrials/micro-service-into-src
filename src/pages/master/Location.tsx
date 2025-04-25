@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, MapPin, Plus, Search, Trash, X } from "lucide-react";
@@ -64,7 +63,9 @@ const Location = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [editingLocation, setEditingLocation] = useState(null);
   const [newLocation, setNewLocation] = useState({
     name: "",
     address: "",
@@ -121,6 +122,31 @@ const Location = () => {
   const handleLocationView = (location) => {
     setSelectedLocation(location);
     setIsViewModalOpen(true);
+  };
+
+  const handleLocationEdit = (location) => {
+    setEditingLocation({
+      ...location,
+      latitude: location.latitude.toString(),
+      longitude: location.longitude.toString()
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateLocation = () => {
+    const updatedLocations = locations.map(loc => 
+      loc.id === editingLocation.id 
+        ? {
+            ...editingLocation,
+            latitude: parseFloat(editingLocation.latitude) || 0,
+            longitude: parseFloat(editingLocation.longitude) || 0
+          } 
+        : loc
+    );
+    
+    setLocations(updatedLocations);
+    setIsEditModalOpen(false);
+    setEditingLocation(null);
   };
 
   const toggleLocationStatus = (locationId) => {
@@ -205,6 +231,7 @@ const Location = () => {
                           <Eye className="h-4 w-4" />
                         </button>
                         <button 
+                          onClick={() => handleLocationEdit(location)}
                           className="text-gray-500 hover:text-gray-700"
                           title="Edit Location"
                         >
@@ -499,6 +526,168 @@ const Location = () => {
                 className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
               >
                 Edit Location
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Location Modal */}
+      {isEditModalOpen && editingLocation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Edit Location</h2>
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Location Name *
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                  placeholder="Enter location name"
+                  value={editingLocation.name}
+                  onChange={(e) => setEditingLocation({...editingLocation, name: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address *
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                  placeholder="Enter complete address"
+                  rows={3}
+                  value={editingLocation.address}
+                  onChange={(e) => setEditingLocation({...editingLocation, address: e.target.value})}
+                  required
+                ></textarea>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    City *
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                    placeholder="Enter city"
+                    value={editingLocation.city}
+                    onChange={(e) => setEditingLocation({...editingLocation, city: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    State/Province *
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                    placeholder="Enter state or province"
+                    value={editingLocation.state}
+                    onChange={(e) => setEditingLocation({...editingLocation, state: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Zip/Postal Code *
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                    placeholder="Enter zip or postal code"
+                    value={editingLocation.zipCode}
+                    onChange={(e) => setEditingLocation({...editingLocation, zipCode: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Country *
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                    placeholder="Enter country"
+                    value={editingLocation.country}
+                    onChange={(e) => setEditingLocation({...editingLocation, country: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Latitude
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                    placeholder="Enter latitude (e.g., 40.7128)"
+                    value={editingLocation.latitude}
+                    onChange={(e) => setEditingLocation({...editingLocation, latitude: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Longitude
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                    placeholder="Enter longitude (e.g., -74.0060)"
+                    value={editingLocation.longitude}
+                    onChange={(e) => setEditingLocation({...editingLocation, longitude: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <MapPin className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-amber-700">
+                      Tip: You can get the exact coordinates by searching for the location on Google Maps, right-clicking on the map, and selecting "What's here?".
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-end space-x-4">
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateLocation}
+                className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
+                disabled={!editingLocation.name || !editingLocation.address || !editingLocation.city || !editingLocation.state || !editingLocation.zipCode}
+              >
+                Update Location
               </button>
             </div>
           </div>
