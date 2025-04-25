@@ -110,71 +110,51 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="p-0 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-              <h2 className="font-semibold text-gray-800">Recent Activity</h2>
-            </div>
-            <div className="p-4">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-500">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-4 py-3">Employee</th>
-                      <th scope="col" className="px-4 py-3">Action</th>
-                      <th scope="col" className="px-4 py-3">Time</th>
-                      <th scope="col" className="px-4 py-3">Location</th>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
+        <Card className="p-0 overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+            <h2 className="font-semibold text-gray-800">Recent Activity</h2>
+          </div>
+          <div className="p-4">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left text-gray-500">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-4 py-3">Employee</th>
+                    <th scope="col" className="px-4 py-3">Action</th>
+                    <th scope="col" className="px-4 py-3">Time</th>
+                    <th scope="col" className="px-4 py-3">Location</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentActivity.map((activity) => (
+                    <tr key={activity.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3">{activity.employee}</td>
+                      <td className="px-4 py-3">
+                        <span 
+                          className={`px-2 py-1 rounded text-xs ${
+                            activity.action.includes('Manual') 
+                              ? 'bg-amber-100 text-amber-800' 
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {activity.action}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">{activity.time}</td>
+                      <td className="px-4 py-3">{activity.location}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {recentActivity.map((activity) => (
-                      <tr key={activity.id} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-3">{activity.employee}</td>
-                        <td className="px-4 py-3">
-                          <span 
-                            className={`px-2 py-1 rounded text-xs ${
-                              activity.action.includes('Manual') 
-                                ? 'bg-amber-100 text-amber-800' 
-                                : 'bg-green-100 text-green-800'
-                            }`}
-                          >
-                            {activity.action}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">{activity.time}</td>
-                        <td className="px-4 py-3">{activity.location}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="pt-4 flex justify-center">
-                <button className="text-sm text-proscape hover:text-proscape-dark">
-                  View All Activity
-                </button>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </Card>
-        </div>
-
-        <div>
-          <Card className="p-6">
-            <h2 className="font-semibold text-gray-800 mb-4">Quick Actions</h2>
-            <div className="space-y-3">
-              {quickActions.map((action, index) => (
-                <button 
-                  key={index}
-                  className="w-full flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors"
-                  onClick={action.onClick}
-                >
-                  <span className="font-medium">{action.label}</span>
-                  {action.icon}
-                </button>
-              ))}
+            <div className="pt-4 flex justify-center">
+              <button className="text-sm text-proscape hover:text-proscape-dark">
+                View All Activity
+              </button>
             </div>
-          </Card>
-        </div>
+          </div>
+        </Card>
       </div>
     </div>
   );
