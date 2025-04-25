@@ -1,12 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 
-// Mock data to simulate API response
 const TANSEEQ_PROJECTS = [
   {
     id: "tp1",
@@ -62,17 +60,28 @@ export default function TanseeqImportModal({ open, onOpenChange, onImport }: Tan
   const [projects, setProjects] = useState<TanseeqProject[]>([]);
   const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
   const [fetchComplete, setFetchComplete] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   const handleFetch = () => {
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setProjects(TANSEEQ_PROJECTS);
       setLoading(false);
       setFetchComplete(true);
     }, 2000);
   };
+
+  const filteredProjects = projects.filter((project) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    return (
+      project.name.toLowerCase().includes(searchTermLower) ||
+      project.location.toLowerCase().includes(searchTermLower) ||
+      project.status.toLowerCase().includes(searchTermLower) ||
+      project.startDate.includes(searchTerm) ||
+      project.endDate.includes(searchTerm)
+    );
+  });
 
   const toggleProject = (projectId: string) => {
     const newSelected = new Set(selectedProjects);
@@ -100,13 +109,11 @@ export default function TanseeqImportModal({ open, onOpenChange, onImport }: Tan
       description: "Projects imported successfully from Tanseeq API.",
     });
     onOpenChange(false);
-    // Reset state
     setProjects([]);
     setSelectedProjects(new Set());
     setFetchComplete(false);
   };
 
-  // Reset state when modal closes
   useEffect(() => {
     if (!open) {
       setProjects([]);
@@ -147,15 +154,30 @@ export default function TanseeqImportModal({ open, onOpenChange, onImport }: Tan
 
           {fetchComplete && (
             <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="select-all"
-                  checked={selectedProjects.size === projects.length}
-                  onCheckedChange={toggleAll}
-                />
-                <label htmlFor="select-all" className="text-sm font-medium">
-                  Select All Projects
-                </label>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="select-all"
+                    checked={selectedProjects.size === projects.length}
+                    onCheckedChange={toggleAll}
+                  />
+                  <label htmlFor="select-all" className="text-sm font-medium">
+                    Select All Projects
+                  </label>
+                </div>
+
+                <div className="relative w-64">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className="pl-10 pr-3 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape text-sm"
+                    placeholder="Search projects..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="border rounded-md">
@@ -171,7 +193,7 @@ export default function TanseeqImportModal({ open, onOpenChange, onImport }: Tan
                     </tr>
                   </thead>
                   <tbody>
-                    {projects.map((project) => (
+                    {filteredProjects.map((project) => (
                       <tr key={project.id} className="border-b">
                         <td className="px-4 py-2">
                           <Checkbox
@@ -186,6 +208,13 @@ export default function TanseeqImportModal({ open, onOpenChange, onImport }: Tan
                         <td className="px-4 py-2">{project.status}</td>
                       </tr>
                     ))}
+                    {filteredProjects.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-4 text-center text-gray-500">
+                          No projects found matching your search
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
