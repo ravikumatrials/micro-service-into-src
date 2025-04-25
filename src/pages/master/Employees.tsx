@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
@@ -766,9 +765,9 @@ const Employees = () => {
 
       {isTanseeqModalOpen && (
         <TanseeqImportModal 
-          isOpen={isTanseeqModalOpen}
-          onClose={() => setIsTanseeqModalOpen(false)}
-          onImport={handleTanseeqImport}
+          open={isTanseeqModalOpen}
+          onOpenChange={() => setIsTanseeqModalOpen(false)}
+          onImportComplete={handleTanseeqImport}
         />
       )}
 
@@ -805,7 +804,10 @@ const Employees = () => {
               
               {cameraActive && (
                 <div className="border rounded-md overflow-hidden">
-                  <FaceScanner onCapture={handlePhotoCapture} />
+                  <FaceScanner 
+                    onCapture={handlePhotoCapture} 
+                    onCancel={cancelEnrollment}
+                  />
                 </div>
               )}
               
