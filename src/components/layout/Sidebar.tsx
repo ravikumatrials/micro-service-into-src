@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -32,7 +31,7 @@ type MenuItem = {
 const menuItems: MenuItem[] = [
   {
     name: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: <Home className="h-5 w-5" />
   },
   {
@@ -214,4 +213,3 @@ export function Sidebar() {
     </div>
   );
 }
-
