@@ -39,56 +39,12 @@ const Dashboard = () => {
     { id: 5, employee: "David Taylor", action: "Check-in (Face)", time: "08:30 AM", location: "South Tower" }
   ];
 
-  const pendingSync = [
-    { id: 1, count: 78, location: "North Site", lastSync: "2 hours ago" },
-    { id: 2, count: 45, location: "East Wing", lastSync: "4 hours ago" },
-    { id: 3, count: 124, location: "South Tower", lastSync: "1 day ago" }
-  ];
-
-  const quickActions = [
-    { 
-      label: "Mark Attendance", 
-      icon: <CheckCircle className="h-5 w-5" />,
-      onClick: () => console.log("Mark Attendance clicked")
-    },
-    { 
-      label: "Face Enrollment", 
-      icon: <UserCheck className="h-5 w-5" />,
-      onClick: () => console.log("Face Enrollment clicked")
-    },
-    { 
-      label: "Manual Entry", 
-      icon: <PenSquare className="h-5 w-5" />,
-      onClick: () => console.log("Manual Entry clicked")
-    },
-    { 
-      label: "Export Report", 
-      icon: <FileText className="h-5 w-5" />,
-      onClick: () => console.log("Export Report clicked")
-    }
-  ];
-
   return (
     <div className="space-y-6">
       <div className="bg-white p-4 rounded-lg shadow-sm">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
           
-          <div className="flex items-center gap-2 px-4 min-w-0">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 text-gray-700 hover:text-proscape hover:border-proscape transition-colors whitespace-nowrap"
-                onClick={action.onClick}
-              >
-                {action.icon}
-                <span className="hidden sm:inline">{action.label}</span>
-              </Button>
-            ))}
-          </div>
-
           <div className="flex justify-end">
             <Button 
               className="bg-proscape hover:bg-proscape-dark text-white"
@@ -160,53 +116,6 @@ const Dashboard = () => {
                   View All Activity
                 </button>
               </div>
-            </div>
-          </Card>
-        </div>
-
-        <div>
-          <Card className="p-0 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-              <h2 className="font-semibold text-gray-800">Pending Synchronization</h2>
-            </div>
-            <div className="p-4">
-              {pendingSync.map((item) => (
-                <div 
-                  key={item.id} 
-                  className="flex items-center justify-between p-3 border-b last:border-0"
-                >
-                  <div>
-                    <p className="font-medium text-gray-700">{item.location}</p>
-                    <p className="text-xs text-gray-500">Last sync: {item.lastSync}</p>
-                  </div>
-                  <div className="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
-                    {item.count} records
-                  </div>
-                </div>
-              ))}
-              <div className="p-4 flex justify-center">
-                <button className="bg-proscape text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-proscape-dark transition-colors w-full">
-                  Sync All Records
-                </button>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="mt-6 p-6">
-            <h2 className="font-semibold text-gray-800 mb-4">Quick Actions</h2>
-            <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors">
-                <span className="font-medium">Face Attendance</span>
-                <Calendar className="h-5 w-5 text-proscape" />
-              </button>
-              <button className="w-full flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors">
-                <span className="font-medium">Manual Attendance</span>
-                <Clock className="h-5 w-5 text-proscape" />
-              </button>
-              <button className="w-full flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors">
-                <span className="font-medium">Export Reports</span>
-                <Users className="h-5 w-5 text-proscape" />
-              </button>
             </div>
           </Card>
         </div>
