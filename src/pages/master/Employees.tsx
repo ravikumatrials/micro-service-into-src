@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
@@ -778,4 +779,67 @@ const Employees = () => {
               <h2 className="text-xl font-bold text-gray-900">Face Enrollment</h2>
               <button 
                 onClick={cancelEnrollment}
-                className="text-gray-500 hover:text-gray-7
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="text-center mb-6">
+              <h3 className="font-bold text-lg">{selectedEmployee.name}</h3>
+              <p className="text-sm text-gray-500">{selectedEmployee.employeeId}</p>
+            </div>
+            
+            <div className="space-y-6">
+              {!cameraActive && !photoTaken && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={activateCamera}
+                    className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
+                  >
+                    <Camera className="h-4 w-4 mr-2 inline" />
+                    Start Camera
+                  </button>
+                </div>
+              )}
+              
+              {cameraActive && (
+                <div className="border rounded-md overflow-hidden">
+                  <FaceScanner onCapture={handlePhotoCapture} />
+                </div>
+              )}
+              
+              {photoTaken && (
+                <div className="text-center">
+                  <div className="mb-4 p-4 bg-green-50 text-green-800 rounded-md">
+                    <Check className="h-5 w-5 inline mr-2" />
+                    Face image captured successfully!
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={cancelEnrollment}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                {photoTaken && (
+                  <button
+                    onClick={saveEnrollment}
+                    className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
+                  >
+                    Save
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Employees;
