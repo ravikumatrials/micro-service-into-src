@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, Clock, AlertTriangle, CheckCircle, FileText, UserCheck, PenSquare } from "lucide-react";
+import { Users, Calendar, CheckCircle, AlertTriangle, Clock, FileText, UserCheck, PenSquare } from "lucide-react";
 
 const Dashboard = () => {
   // Mock data for dashboard
@@ -37,12 +37,6 @@ const Dashboard = () => {
     { id: 3, employee: "Emily Davis", action: "Check-in (Manual)", time: "09:10 AM", location: "North Site" },
     { id: 4, employee: "James Wilson", action: "Check-out (Manual)", time: "06:00 PM", location: "West Building" },
     { id: 5, employee: "David Taylor", action: "Check-in (Face)", time: "08:30 AM", location: "South Tower" }
-  ];
-
-  const pendingSync = [
-    { id: 1, count: 78, location: "North Site", lastSync: "2 hours ago" },
-    { id: 2, count: 45, location: "East Wing", lastSync: "4 hours ago" },
-    { id: 3, count: 124, location: "South Tower", lastSync: "1 day ago" }
   ];
 
   const quickActions = [
@@ -165,48 +159,19 @@ const Dashboard = () => {
         </div>
 
         <div>
-          <Card className="p-0 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-              <h2 className="font-semibold text-gray-800">Pending Synchronization</h2>
-            </div>
-            <div className="p-4">
-              {pendingSync.map((item) => (
-                <div 
-                  key={item.id} 
-                  className="flex items-center justify-between p-3 border-b last:border-0"
-                >
-                  <div>
-                    <p className="font-medium text-gray-700">{item.location}</p>
-                    <p className="text-xs text-gray-500">Last sync: {item.lastSync}</p>
-                  </div>
-                  <div className="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
-                    {item.count} records
-                  </div>
-                </div>
-              ))}
-              <div className="p-4 flex justify-center">
-                <button className="bg-proscape text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-proscape-dark transition-colors w-full">
-                  Sync All Records
-                </button>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="mt-6 p-6">
+          <Card className="p-6">
             <h2 className="font-semibold text-gray-800 mb-4">Quick Actions</h2>
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors">
-                <span className="font-medium">Face Attendance</span>
-                <Calendar className="h-5 w-5 text-proscape" />
-              </button>
-              <button className="w-full flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors">
-                <span className="font-medium">Manual Attendance</span>
-                <Clock className="h-5 w-5 text-proscape" />
-              </button>
-              <button className="w-full flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors">
-                <span className="font-medium">Export Reports</span>
-                <Users className="h-5 w-5 text-proscape" />
-              </button>
+              {quickActions.map((action, index) => (
+                <button 
+                  key={index}
+                  className="w-full flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors"
+                  onClick={action.onClick}
+                >
+                  <span className="font-medium">{action.label}</span>
+                  {action.icon}
+                </button>
+              ))}
             </div>
           </Card>
         </div>
