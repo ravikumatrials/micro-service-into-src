@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Edit, Eye, Trash, User, Search, Filter, Check, X } from "lucide-react";
+import { Edit, Eye, Trash, User, Search, Filter, Check, X, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
