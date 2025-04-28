@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Edit, Eye, Trash, User, Search, Filter, Check, X, Camera } from "lucide-react";
+import { Edit, Eye, Trash, User, Search, Filter, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
@@ -188,7 +187,6 @@ const Employees = () => {
   const [enrolledFilter, setEnrolledFilter] = useState("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
   const [newEmployee, setNewEmployee] = useState({
@@ -252,24 +250,6 @@ const Employees = () => {
     setIsViewModalOpen(true);
   };
 
-  const handleFaceEnrollment = (employee) => {
-    setSelectedEmployee(employee);
-    setIsEnrollModalOpen(true);
-  };
-
-  const saveEnrollment = () => {
-    const updatedEmployees = employees.map(emp => 
-      emp.id === selectedEmployee.id ? {...emp, faceEnrolled: true} : emp
-    );
-    
-    setEmployees(updatedEmployees);
-    setIsEnrollModalOpen(false);
-  };
-
-  const cancelEnrollment = () => {
-    setIsEnrollModalOpen(false);
-  };
-
   const toggleEmployeeStatus = (employeeId) => {
     const updatedEmployees = employees.map(emp => 
       emp.id === employeeId 
@@ -314,6 +294,7 @@ const Employees = () => {
           </button>
         </div>
       </div>
+      
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="relative flex-1">
@@ -377,7 +358,6 @@ const Employees = () => {
                 <th scope="col" className="px-4 py-3">Employee ID</th>
                 <th scope="col" className="px-4 py-3">Name</th>
                 <th scope="col" className="px-4 py-3">Role</th>
-                <th scope="col" className="px-4 py-3">Face Enrolled</th>
                 <th scope="col" className="px-4 py-3">Status</th>
                 <th scope="col" className="px-4 py-3">Actions</th>
               </tr>
@@ -389,19 +369,6 @@ const Employees = () => {
                     <td className="px-4 py-3">{employee.employeeId}</td>
                     <td className="px-4 py-3 font-medium text-gray-900">{employee.name}</td>
                     <td className="px-4 py-3">{employee.role}</td>
-                    <td className="px-4 py-3">
-                      {employee.faceEnrolled ? (
-                        <span className="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                          <Check className="h-3 w-3 mr-1" />
-                          Enrolled
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded-full">
-                          <X className="h-3 w-3 mr-1" />
-                          Not Enrolled
-                        </span>
-                      )}
-                    </td>
                     <td className="px-4 py-3">
                       <span 
                         className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${
@@ -423,13 +390,6 @@ const Employees = () => {
                           <Eye className="h-4 w-4" />
                         </button>
                         <button 
-                          onClick={() => handleFaceEnrollment(employee)}
-                          className="text-proscape hover:text-proscape-dark"
-                          title="Face Enrollment"
-                        >
-                          <Camera className="h-4 w-4" />
-                        </button>
-                        <button 
                           onClick={() => toggleEmployeeStatus(employee.id)}
                           className={
                             employee.status === "Active" 
@@ -446,7 +406,7 @@ const Employees = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
                     No employees found matching the search criteria
                   </td>
                 </tr>
@@ -471,140 +431,6 @@ const Employees = () => {
         </div>
       </Card>
 
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Add New Employee</h2>
-              <button 
-                onClick={() => setIsCreateModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                    placeholder="Enter full name"
-                    value={newEmployee.name}
-                    onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Employee ID *
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                    placeholder="Enter employee ID"
-                    value={newEmployee.employeeId}
-                    onChange={(e) => setNewEmployee({...newEmployee, employeeId: e.target.value})}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Role *
-                  </label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                    value={newEmployee.role}
-                    onChange={(e) => setNewEmployee({...newEmployee, role: e.target.value})}
-                    required
-                  >
-                    <option value="Labour">Labour</option>
-                    <option value="Supervisor">Supervisor</option>
-                    <option value="Super Admin">Super Admin</option>
-                    <option value="Report Admin">Report Admin</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Number
-                  </label>
-                  <input
-                    type="tel"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                    placeholder="Enter contact number"
-                    value={newEmployee.contactNumber}
-                    onChange={(e) => setNewEmployee({...newEmployee, contactNumber: e.target.value})}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                    placeholder="Enter email address"
-                    value={newEmployee.email}
-                    onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Address
-                  </label>
-                  <textarea
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                    placeholder="Enter address"
-                    rows={3}
-                    value={newEmployee.address}
-                    onChange={(e) => setNewEmployee({...newEmployee, address: e.target.value})}
-                  ></textarea>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Joining Date
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                    value={newEmployee.joiningDate}
-                    onChange={(e) => setNewEmployee({...newEmployee, joiningDate: e.target.value})}
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-8 flex justify-end space-x-4">
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateEmployee}
-                className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
-                disabled={!newEmployee.name || !newEmployee.employeeId || !newEmployee.role}
-              >
-                Create Employee
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {isViewModalOpen && selectedEmployee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -621,15 +447,7 @@ const Employees = () => {
             <div className="flex flex-col md:flex-row gap-6">
               <div className="md:w-1/3 flex flex-col items-center">
                 <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {selectedEmployee.faceEnrolled ? (
-                    <img 
-                      src={`https://i.pravatar.cc/128?u=${selectedEmployee.id}`} 
-                      alt={selectedEmployee.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User className="h-12 w-12 text-gray-400" />
-                  )}
+                  <User className="h-12 w-12 text-gray-400" />
                 </div>
                 <h3 className="mt-4 font-bold text-lg">{selectedEmployee.name}</h3>
                 <p className="text-gray-500 text-sm">{selectedEmployee.employeeId}</p>
@@ -642,18 +460,6 @@ const Employees = () => {
                 >
                   {selectedEmployee.status}
                 </span>
-                <div className="mt-4 w-full flex justify-center space-x-2">
-                  <button 
-                    onClick={() => {
-                      setIsViewModalOpen(false);
-                      handleFaceEnrollment(selectedEmployee);
-                    }}
-                    className="flex items-center text-xs bg-proscape hover:bg-proscape-dark text-white px-3 py-1 rounded"
-                  >
-                    <Camera className="h-3 w-3 mr-1" />
-                    {selectedEmployee.faceEnrolled ? "Update Face" : "Enroll Face"}
-                  </button>
-                </div>
               </div>
               
               <div className="md:w-2/3">
@@ -661,10 +467,6 @@ const Employees = () => {
                   <div>
                     <p className="text-sm text-gray-500">Role</p>
                     <p className="text-sm font-medium">{selectedEmployee.role}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Face Enrolled</p>
-                    <p className="text-sm font-medium">{selectedEmployee.faceEnrolled ? "Yes" : "No"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Contact</p>
@@ -746,44 +548,6 @@ const Employees = () => {
           onOpenChange={() => setIsTanseeqModalOpen(false)}
           onImportComplete={handleTanseeqImport}
         />
-      )}
-
-      {isEnrollModalOpen && selectedEmployee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Face Enrollment</h2>
-              <button 
-                onClick={cancelEnrollment}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <div className="text-center mb-6">
-              <h3 className="font-bold text-lg">{selectedEmployee.name}</h3>
-              <p className="text-sm text-gray-500">{selectedEmployee.employeeId}</p>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="text-center">
-                <p className="mb-4 p-4 bg-yellow-50 text-yellow-800 rounded-md">
-                  Face enrollment functionality has been removed.
-                </p>
-              </div>
-              
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={cancelEnrollment}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
