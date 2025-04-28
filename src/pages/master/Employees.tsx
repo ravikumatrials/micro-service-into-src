@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Edit, Eye, Trash, User, Camera, Import, Search, Filter, Check, X } from "lucide-react";
-import { FaceScanner } from "@/components/face/FaceScanner";
+import { Edit, Eye, Trash, User, Search, Filter, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
@@ -190,8 +189,6 @@ const Employees = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [cameraActive, setCameraActive] = useState(false);
-  const [photoTaken, setPhotoTaken] = useState(false);
   const navigate = useNavigate();
   const [newEmployee, setNewEmployee] = useState({
     name: "",
@@ -257,25 +254,6 @@ const Employees = () => {
   const handleFaceEnrollment = (employee) => {
     setSelectedEmployee(employee);
     setIsEnrollModalOpen(true);
-    setCameraActive(false);
-    setPhotoTaken(false);
-  };
-
-  const handlePhotoCapture = (imageBlob: Blob) => {
-    const updatedEmployees = employees.map(emp => 
-      emp.id === selectedEmployee?.id ? {...emp, faceEnrolled: true} : emp
-    );
-    
-    setEmployees(updatedEmployees);
-    setPhotoTaken(true);
-  };
-
-  const activateCamera = () => {
-    setCameraActive(true);
-  };
-
-  const capturePhoto = () => {
-    setPhotoTaken(true);
   };
 
   const saveEnrollment = () => {
@@ -288,8 +266,6 @@ const Employees = () => {
   };
 
   const cancelEnrollment = () => {
-    setCameraActive(false);
-    setPhotoTaken(false);
     setIsEnrollModalOpen(false);
   };
 
@@ -790,51 +766,19 @@ const Employees = () => {
             </div>
             
             <div className="space-y-6">
-              {!cameraActive && !photoTaken && (
-                <div className="flex justify-center">
-                  <button
-                    onClick={activateCamera}
-                    className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
-                  >
-                    <Camera className="h-4 w-4 mr-2 inline" />
-                    Start Camera
-                  </button>
-                </div>
-              )}
-              
-              {cameraActive && (
-                <div className="border rounded-md overflow-hidden">
-                  <FaceScanner 
-                    onCapture={handlePhotoCapture} 
-                    onCancel={cancelEnrollment}
-                  />
-                </div>
-              )}
-              
-              {photoTaken && (
-                <div className="text-center">
-                  <div className="mb-4 p-4 bg-green-50 text-green-800 rounded-md">
-                    <Check className="h-5 w-5 inline mr-2" />
-                    Face image captured successfully!
-                  </div>
-                </div>
-              )}
+              <div className="text-center">
+                <p className="mb-4 p-4 bg-yellow-50 text-yellow-800 rounded-md">
+                  Face enrollment functionality has been removed.
+                </p>
+              </div>
               
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={cancelEnrollment}
                   className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
-                  Cancel
+                  Close
                 </button>
-                {photoTaken && (
-                  <button
-                    onClick={saveEnrollment}
-                    className="px-4 py-2 bg-proscape hover:bg-proscape-dark text-white rounded-md text-sm font-medium transition-colors"
-                  >
-                    Save
-                  </button>
-                )}
               </div>
             </div>
           </div>
