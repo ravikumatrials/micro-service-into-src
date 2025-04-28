@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { User, LogOut } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 
 export function TopBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -12,7 +13,9 @@ export function TopBar() {
   };
 
   const handleLogout = () => {
-    navigate("/");
+    // Navigate to login page
+    navigate("/login");
+    toast.success("Successfully signed out");
     setIsProfileOpen(false);
   };
 
