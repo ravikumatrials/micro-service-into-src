@@ -1,10 +1,8 @@
-
 import React, { useState } from "react";
-import { Camera, Edit, UserCheck } from "lucide-react";
+import { Edit, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
-import FaceCheckOutDialog from "./dialogs/FaceCheckOutDialog";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
 
@@ -35,11 +33,9 @@ const CheckOutTab = ({
   projects,
   locations
 }: CheckOutTabProps) => {
-  const [openFaceDialog, setOpenFaceDialog] = useState(false);
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
-  // Mock checked-in employees data
   const mockCheckedInEmployees: Employee[] = [
     {
       id: 3,
@@ -76,7 +72,6 @@ const CheckOutTab = ({
     }
   ];
 
-  // Filter employees based on search query and filters
   const filteredEmployees = mockCheckedInEmployees.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.id.toString().includes(searchQuery);
@@ -86,22 +81,9 @@ const CheckOutTab = ({
     return matchesSearch && matchesProject && matchesLocation;
   });
 
-  const handleFaceCheckOut = (employee: Employee) => {
-    setSelectedEmployee(employee);
-    setOpenFaceDialog(true);
-  };
-
   const handleManualCheckOut = (employee: Employee) => {
     setSelectedEmployee(employee);
     setOpenManualDialog(true);
-  };
-
-  const handleFaceCheckOutComplete = () => {
-    setOpenFaceDialog(false);
-    toast.success(`${selectedEmployee?.name} has been successfully checked out`, {
-      description: `Checked out from ${selectedEmployee?.project} at ${new Date().toLocaleTimeString()}`
-    });
-    setSelectedEmployee(null);
   };
 
   const handleManualCheckOutComplete = (
@@ -162,26 +144,15 @@ const CheckOutTab = ({
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button 
-                        onClick={() => handleFaceCheckOut(employee)} 
-                        variant="outline" 
-                        size="sm"
-                        className="flex items-center space-x-1 bg-proscape/5 hover:bg-proscape/10 border-proscape/20 text-xs"
-                      >
-                        <Camera className="h-3 w-3" />
-                        <span>Face</span>
-                      </Button>
-                      <Button 
-                        onClick={() => handleManualCheckOut(employee)} 
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center space-x-1 text-xs"
-                      >
-                        <Edit className="h-3 w-3" />
-                        <span>Manual</span>
-                      </Button>
-                    </div>
+                    <Button 
+                      onClick={() => handleManualCheckOut(employee)} 
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-1 text-xs"
+                    >
+                      <Edit className="h-3 w-3" />
+                      <span>Manual</span>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -189,14 +160,6 @@ const CheckOutTab = ({
           </TableBody>
         </Table>
       </div>
-
-      {/* Face Check Out Dialog */}
-      <FaceCheckOutDialog
-        open={openFaceDialog}
-        onOpenChange={setOpenFaceDialog}
-        employee={selectedEmployee}
-        onComplete={handleFaceCheckOutComplete}
-      />
 
       {/* Manual Check Out Dialog */}
       <ManualCheckOutDialog

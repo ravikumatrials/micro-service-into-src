@@ -1,10 +1,8 @@
-
 import React, { useState } from "react";
-import { Camera, Edit, UserCheck, UserX } from "lucide-react";
+import { Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
-import FaceCheckInDialog from "./dialogs/FaceCheckInDialog";
 import ManualCheckInDialog from "./dialogs/ManualCheckInDialog";
 import { toast } from "sonner";
 
@@ -38,7 +36,6 @@ const CheckInTab = ({
   projects,
   locations
 }: CheckInTabProps) => {
-  const [openFaceDialog, setOpenFaceDialog] = useState(false);
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   
@@ -104,34 +101,9 @@ const CheckInTab = ({
     return matchesSearch && (matchesProject || !employee.projectId) && matchesLocation && matchesStatus;
   });
 
-  const handleFaceCheckIn = (employee: Employee) => {
-    setSelectedEmployee(employee);
-    setOpenFaceDialog(true);
-  };
-
   const handleManualCheckIn = (employee: Employee) => {
     setSelectedEmployee(employee);
     setOpenManualDialog(true);
-  };
-
-  const handleFaceCheckInComplete = (projectId: string) => {
-    setOpenFaceDialog(false);
-    
-    // Get the selected project name
-    const selectedProjectName = projects.find(p => p.id.toString() === projectId)?.name;
-    
-    // Handle auto check-out logic if employee was checked into another project
-    if (selectedEmployee?.status === "checkedin" && selectedEmployee.checkedInProject) {
-      toast.info(`${selectedEmployee.name} has been automatically checked out from ${selectedEmployee.checkedInProject}`, {
-        description: `Auto checked-out at ${new Date().toLocaleTimeString()}`
-      });
-    }
-    
-    toast.success(`${selectedEmployee?.name} has been successfully checked in`, {
-      description: `Project: ${selectedProjectName}, Time: ${new Date().toLocaleTimeString()}`
-    });
-    
-    setSelectedEmployee(null);
   };
 
   const handleManualCheckInComplete = (
@@ -209,26 +181,15 @@ const CheckInTab = ({
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button 
-                        onClick={() => handleFaceCheckIn(employee)} 
-                        variant="outline" 
-                        size="sm"
-                        className="flex items-center space-x-1 bg-proscape/5 hover:bg-proscape/10 border-proscape/20 text-xs"
-                      >
-                        <Camera className="h-3 w-3" />
-                        <span>Face</span>
-                      </Button>
-                      <Button 
-                        onClick={() => handleManualCheckIn(employee)} 
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center space-x-1 text-xs"
-                      >
-                        <Edit className="h-3 w-3" />
-                        <span>Manual</span>
-                      </Button>
-                    </div>
+                    <Button 
+                      onClick={() => handleManualCheckIn(employee)} 
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-1 text-xs"
+                    >
+                      <Edit className="h-3 w-3" />
+                      <span>Manual</span>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -236,15 +197,6 @@ const CheckInTab = ({
           </TableBody>
         </Table>
       </div>
-
-      {/* Face Check In Dialog */}
-      <FaceCheckInDialog
-        open={openFaceDialog}
-        onOpenChange={setOpenFaceDialog}
-        employee={selectedEmployee}
-        projects={projects}
-        onComplete={handleFaceCheckInComplete}
-      />
 
       {/* Manual Check In Dialog */}
       <ManualCheckInDialog
