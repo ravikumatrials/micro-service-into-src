@@ -1,9 +1,47 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Edit, Eye, Trash, User, Search, Filter, Check, X } from "lucide-react";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Eye, Trash, User, Search, Filter, Check, X, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+// Sample entities for dummy data
+const entities = [
+  "Proscape Construction Pvt Ltd",
+  "Tanseeq Landscaping LLC",
+  "Al Maha Projects",
+  "Zenith Infrastructure",
+  "Gulf Builders International"
+];
+
+// Sample categories
+const categories = ["Laborer", "Engineer", "Supervisor", "Manager", "Driver", "Consultant"];
 
 const initialEmployees = [
   { 
@@ -11,6 +49,10 @@ const initialEmployees = [
     name: "John Smith", 
     employeeId: "EMP001", 
     role: "Labour", 
+    category: "Laborer",
+    entity: "Proscape Construction Pvt Ltd",
+    contactNumber: "+971 50 123 4567",
+    email: "john.smith@proscape.ae",
     faceEnrolled: true,
     status: "Active" 
   },
@@ -19,6 +61,10 @@ const initialEmployees = [
     name: "Sarah Johnson", 
     employeeId: "EMP002", 
     role: "Supervisor", 
+    category: "Supervisor",
+    entity: "Tanseeq Landscaping LLC",
+    contactNumber: "+971 52 234 5678",
+    email: "sarah.johnson@tanseeq.ae",
     faceEnrolled: true,
     status: "Active" 
   },
@@ -27,6 +73,10 @@ const initialEmployees = [
     name: "Robert Williams", 
     employeeId: "EMP003", 
     role: "Labour", 
+    category: "Laborer",
+    entity: "Al Maha Projects",
+    contactNumber: "+971 55 345 6789",
+    email: "robert.williams@almaha.ae",
     faceEnrolled: false,
     status: "Active" 
   },
@@ -35,6 +85,10 @@ const initialEmployees = [
     name: "Emily Davis", 
     employeeId: "EMP004", 
     role: "Labour", 
+    category: "Driver",
+    entity: "Gulf Builders International",
+    contactNumber: "+971 54 456 7890",
+    email: "emily.davis@gulfbuilders.ae",
     faceEnrolled: true,
     status: "Active" 
   },
@@ -43,6 +97,10 @@ const initialEmployees = [
     name: "James Miller", 
     employeeId: "EMP005", 
     role: "Report Admin", 
+    category: "Engineer",
+    entity: "Zenith Infrastructure",
+    contactNumber: "+971 56 567 8901",
+    email: "james.miller@zenith.ae",
     faceEnrolled: true,
     status: "Active" 
   },
@@ -51,6 +109,10 @@ const initialEmployees = [
     name: "Jennifer Wilson", 
     employeeId: "EMP006", 
     role: "Labour", 
+    category: "Consultant",
+    entity: "Proscape Construction Pvt Ltd",
+    contactNumber: "+971 50 678 9012",
+    email: "jennifer.wilson@proscape.ae",
     faceEnrolled: false,
     status: "Inactive" 
   },
@@ -59,6 +121,10 @@ const initialEmployees = [
     name: "Michael Brown", 
     employeeId: "EMP007", 
     role: "Super Admin", 
+    category: "Manager",
+    entity: "Tanseeq Landscaping LLC",
+    contactNumber: "+971 52 789 0123",
+    email: "michael.brown@tanseeq.ae",
     faceEnrolled: true,
     status: "Active" 
   },
@@ -67,6 +133,10 @@ const initialEmployees = [
     name: "David Thompson", 
     employeeId: "EMP008", 
     role: "Labour", 
+    category: "Laborer",
+    entity: "Al Maha Projects",
+    contactNumber: "+971 55 890 1234",
+    email: "david.thompson@almaha.ae",
     faceEnrolled: false,
     status: "Active" 
   },
@@ -183,22 +253,17 @@ const Employees = () => {
   const [employees, setEmployees] = useState(initialEmployees);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [enrolledFilter, setEnrolledFilter] = useState("all");
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [entityFilter, setEntityFilter] = useState("all");
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isFaceEnrollmentOpen, setIsFaceEnrollmentOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
-  const [newEmployee, setNewEmployee] = useState({
-    name: "",
-    employeeId: "",
-    role: "Labour",
-    contactNumber: "",
-    email: "",
-    address: "",
-    joiningDate: ""
-  });
   const [isTanseeqModalOpen, setIsTanseeqModalOpen] = useState(false);
+  
+  // Current user role - in a real app, this would come from auth context
+  const currentUserRole = "Super Admin";
 
   const filteredEmployees = employees.filter((employee) => {
     const searchMatch = 
@@ -207,47 +272,35 @@ const Employees = () => {
     const statusMatch = 
       statusFilter === "all" || 
       employee.status.toLowerCase() === statusFilter.toLowerCase();
-    const roleMatch = 
-      roleFilter === "all" || 
-      employee.role.toLowerCase() === roleFilter.toLowerCase();
-    const enrolledMatch =
-      enrolledFilter === "all" ||
-      (enrolledFilter === "enrolled" && employee.faceEnrolled) ||
-      (enrolledFilter === "not-enrolled" && !employee.faceEnrolled);
+    const categoryMatch = 
+      categoryFilter === "all" || 
+      employee.category.toLowerCase() === categoryFilter.toLowerCase();
+    const entityMatch = 
+      entityFilter === "all" || 
+      employee.entity === entityFilter;
 
-    return searchMatch && statusMatch && roleMatch && enrolledMatch;
+    return searchMatch && statusMatch && categoryMatch && entityMatch;
   });
-
-  const handleCreateEmployee = () => {
-    const maxId = Math.max(...employees.map(e => e.id));
-    const newId = maxId + 1;
-    
-    const employeeToAdd = {
-      id: newId,
-      name: newEmployee.name,
-      employeeId: newEmployee.employeeId,
-      role: newEmployee.role,
-      faceEnrolled: false,
-      status: "Active"
-    };
-    
-    setEmployees([...employees, employeeToAdd]);
-    setIsCreateModalOpen(false);
-    
-    setNewEmployee({
-      name: "",
-      employeeId: "",
-      role: "Labour",
-      contactNumber: "",
-      email: "",
-      address: "",
-      joiningDate: ""
-    });
-  };
 
   const handleEmployeeView = (employee) => {
     setSelectedEmployee(employee);
     setIsViewModalOpen(true);
+  };
+
+  const handleFaceEnrollment = (employee) => {
+    setSelectedEmployee(employee);
+    setIsFaceEnrollmentOpen(true);
+  };
+
+  const handleDeleteConfirm = (employee) => {
+    setSelectedEmployee(employee);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = () => {
+    const updatedEmployees = employees.filter(emp => emp.id !== selectedEmployee.id);
+    setEmployees(updatedEmployees);
+    setIsDeleteDialogOpen(false);
   };
 
   const toggleEmployeeStatus = (employeeId) => {
@@ -273,6 +326,12 @@ const Employees = () => {
       name: emp.name,
       employeeId: emp.employeeId,
       role: emp.role,
+      category: categories[Math.floor(Math.random() * categories.length)],
+      entity: entities[Math.floor(Math.random() * entities.length)],
+      contactNumber: "+971 5" + Math.floor(Math.random() * 10) + " " + 
+                    Math.floor(Math.random() * 900 + 100) + " " + 
+                    Math.floor(Math.random() * 9000 + 1000),
+      email: emp.name.toLowerCase().replace(" ", ".") + "@proscape.ae",
       faceEnrolled: false,
       status: "Active"
     }));
@@ -324,95 +383,130 @@ const Employees = () => {
               </select>
             </div>
             <div className="flex items-center">
-              <span className="text-sm text-gray-600 mr-2">Role:</span>
+              <span className="text-sm text-gray-600 mr-2">Category:</span>
               <select
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
               >
-                <option value="all">All Roles</option>
-                <option value="labour">Labour</option>
-                <option value="supervisor">Supervisor</option>
-                <option value="super admin">Super Admin</option>
-                <option value="report admin">Report Admin</option>
+                <option value="all">All Categories</option>
+                {categories.map((category, index) => (
+                  <option key={index} value={category.toLowerCase()}>{category}</option>
+                ))}
               </select>
             </div>
             <div className="flex items-center">
-              <span className="text-sm text-gray-600 mr-2">Enrolled:</span>
+              <span className="text-sm text-gray-600 mr-2">Entity:</span>
               <select
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
-                value={enrolledFilter}
-                onChange={(e) => setEnrolledFilter(e.target.value)}
+                value={entityFilter}
+                onChange={(e) => setEntityFilter(e.target.value)}
               >
-                <option value="all">All</option>
-                <option value="enrolled">Enrolled</option>
-                <option value="not-enrolled">Not Enrolled</option>
+                <option value="all">All Entities</option>
+                {entities.map((entity, index) => (
+                  <option key={index} value={entity}>{entity}</option>
+                ))}
               </select>
             </div>
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th scope="col" className="px-4 py-3">Employee ID</th>
-                <th scope="col" className="px-4 py-3">Name</th>
-                <th scope="col" className="px-4 py-3">Role</th>
-                <th scope="col" className="px-4 py-3">Status</th>
-                <th scope="col" className="px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Employee ID</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Entity</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredEmployees.length > 0 ? (
                 filteredEmployees.map(employee => (
-                  <tr key={employee.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3">{employee.employeeId}</td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{employee.name}</td>
-                    <td className="px-4 py-3">{employee.role}</td>
-                    <td className="px-4 py-3">
-                      <span 
-                        className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${
+                  <TableRow key={employee.id}>
+                    <TableCell className="font-medium">{employee.employeeId}</TableCell>
+                    <TableCell>{employee.name}</TableCell>
+                    <TableCell className="max-w-[200px] truncate" title={employee.entity}>
+                      {employee.entity}
+                    </TableCell>
+                    <TableCell>{employee.category}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        className={
                           employee.status === "Active" 
-                            ? "bg-green-100 text-green-800" 
-                            : "bg-red-100 text-red-800"
-                        }`}
+                            ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                            : "bg-red-100 text-red-800 hover:bg-red-200"
+                        }
                       >
                         {employee.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button 
-                          onClick={() => handleEmployeeView(employee)}
-                          className="text-blue-500 hover:text-blue-700"
-                          title="View Employee"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button 
-                          onClick={() => toggleEmployeeStatus(employee.id)}
-                          className={
-                            employee.status === "Active" 
-                              ? "text-red-500 hover:text-red-700" 
-                              : "text-green-500 hover:text-green-700"
-                          }
-                          title={employee.status === "Active" ? "Deactivate Employee" : "Activate Employee"}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </button>
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button 
+                                onClick={() => handleEmployeeView(employee)}
+                                className="text-blue-500 hover:text-blue-700 p-1"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View Employee</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button 
+                                onClick={() => handleFaceEnrollment(employee)}
+                                className="text-proscape hover:text-proscape-dark p-1"
+                              >
+                                <Camera className="h-4 w-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Face Enrollment</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        {currentUserRole === "Super Admin" && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button 
+                                  onClick={() => handleDeleteConfirm(employee)}
+                                  className="text-red-500 hover:text-red-700 p-1"
+                                >
+                                  <Trash className="h-4 w-4" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete Employee</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-6 text-gray-500">
                     No employees found matching the search criteria
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         
         <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 bg-gray-50">
@@ -431,116 +525,137 @@ const Employees = () => {
         </div>
       </Card>
 
-      {isViewModalOpen && selectedEmployee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Employee Details</h2>
-              <button 
-                onClick={() => setIsViewModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="md:w-1/3 flex flex-col items-center">
-                <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  <User className="h-12 w-12 text-gray-400" />
+      {/* View Employee Modal */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Employee Details</DialogTitle>
+          </DialogHeader>
+          
+          {selectedEmployee && (
+            <div className="space-y-4">
+              <div className="flex justify-center mb-4">
+                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="h-10 w-10 text-gray-500" />
                 </div>
-                <h3 className="mt-4 font-bold text-lg">{selectedEmployee.name}</h3>
-                <p className="text-gray-500 text-sm">{selectedEmployee.employeeId}</p>
-                <span 
-                  className={`mt-2 inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${
-                    selectedEmployee.status === "Active" 
-                      ? "bg-green-100 text-green-800" 
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {selectedEmployee.status}
-                </span>
               </div>
               
-              <div className="md:w-2/3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Role</p>
-                    <p className="text-sm font-medium">{selectedEmployee.role}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Contact</p>
-                    <p className="text-sm font-medium">+1 (555) 123-4567</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Email</p>
-                    <p className="text-sm font-medium">{selectedEmployee.name.toLowerCase().replace(" ", ".")}@example.com</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Joining Date</p>
-                    <p className="text-sm font-medium">01/07/2023</p>
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-gray-600 font-medium">Employee ID:</div>
+                <div className="text-right">{selectedEmployee.employeeId}</div>
+                
+                <div className="text-gray-600 font-medium">Name:</div>
+                <div className="text-right">{selectedEmployee.name}</div>
+                
+                <div className="text-gray-600 font-medium">Entity:</div>
+                <div className="text-right">{selectedEmployee.entity}</div>
+                
+                <div className="text-gray-600 font-medium">Category:</div>
+                <div className="text-right">{selectedEmployee.category}</div>
+                
+                <div className="text-gray-600 font-medium">Status:</div>
+                <div className="text-right">
+                  <Badge 
+                    className={
+                      selectedEmployee.status === "Active" 
+                        ? "bg-green-100 text-green-800" 
+                        : "bg-red-100 text-red-800"
+                    }
+                  >
+                    {selectedEmployee.status}
+                  </Badge>
                 </div>
-                <div className="mt-6">
-                  <h4 className="font-medium text-gray-900 mb-3">Attendance History</h4>
-                  <div className="border rounded-md overflow-hidden max-h-60 overflow-y-auto">
-                    <table className="w-full text-sm text-left text-gray-500">
-                      <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3">Date</th>
-                          <th className="px-4 py-3">Project</th>
-                          <th className="px-4 py-3">Check In</th>
-                          <th className="px-4 py-3">Check Out</th>
-                          <th className="px-4 py-3">Hours</th>
-                          <th className="px-4 py-3">Comment</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {mockAttendanceRecords
-                          .filter(r => r.employeeId === selectedEmployee.employeeId)
-                          .map(record => (
-                            <tr key={record.id} className="border-b">
-                              <td className="px-4 py-3">{record.date}</td>
-                              <td className="px-4 py-3">{record.project}</td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-1 rounded text-xs ${
-                                  record.checkInMethod === "Face"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-amber-100 text-amber-800"
-                                }`}>
-                                  {record.checkInTime} <span className="italic">({record.checkInMethod})</span>
-                                </span>
-                              </td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-1 rounded text-xs ${
-                                  record.checkOutMethod === "Face"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-amber-100 text-amber-800"
-                                }`}>
-                                  {record.checkOutTime} <span className="italic">({record.checkOutMethod})</span>
-                                </span>
-                              </td>
-                              <td className="px-4 py-3">{record.totalHours}</td>
-                              <td className="px-4 py-3">{record.comment}</td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="mt-4 text-center">
-                    <button 
-                      onClick={() => handleViewFullAttendanceHistory(selectedEmployee.employeeId)}
-                      className="text-sm text-proscape hover:underline"
-                    >
-                      View Full Attendance History
-                    </button>
-                  </div>
-                </div>
+                
+                <div className="text-gray-600 font-medium">Contact Number:</div>
+                <div className="text-right">{selectedEmployee.contactNumber}</div>
+                
+                <div className="text-gray-600 font-medium">Email ID:</div>
+                <div className="text-right">{selectedEmployee.email}</div>
+              </div>
+              
+              <div className="pt-4">
+                <Button
+                  onClick={() => handleViewFullAttendanceHistory(selectedEmployee.employeeId)}
+                  variant="outline" 
+                  className="w-full"
+                >
+                  View Attendance History
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Face Enrollment Dialog (Simulated) */}
+      <Dialog open={isFaceEnrollmentOpen} onOpenChange={setIsFaceEnrollmentOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Face Enrollment</DialogTitle>
+          </DialogHeader>
+          
+          {selectedEmployee && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="bg-gray-100 w-64 h-64 mx-auto rounded-lg flex items-center justify-center">
+                  <Camera className="h-12 w-12 text-gray-400" />
+                </div>
+                <p className="mt-2 text-sm text-gray-500">
+                  {selectedEmployee.faceEnrolled 
+                    ? "Update existing face enrollment" 
+                    : "Position your face in the frame"}
+                </p>
+              </div>
+              
+              <div className="flex justify-center gap-4">
+                <Button
+                  onClick={() => {
+                    // Update employee face enrollment status
+                    const updatedEmployees = employees.map(emp => 
+                      emp.id === selectedEmployee.id 
+                        ? {...emp, faceEnrolled: true} 
+                        : emp
+                    );
+                    setEmployees(updatedEmployees);
+                    setIsFaceEnrollmentOpen(false);
+                  }}
+                  className="bg-proscape hover:bg-proscape-dark"
+                >
+                  {selectedEmployee.faceEnrolled ? "Update Enrollment" : "Complete Enrollment"}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => setIsFaceEnrollmentOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Employee</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedEmployee?.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {isTanseeqModalOpen && (
         <TanseeqImportModal 
