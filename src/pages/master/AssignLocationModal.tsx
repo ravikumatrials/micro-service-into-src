@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "@googlemaps/js-api-loader";
 
+// Import Google Maps types
+/// <reference types="google.maps" />
+
 interface AssignLocationProps {
   project: any;
   open: boolean;
@@ -38,7 +41,7 @@ export default function AssignLocationModal({
 
     loader
       .load()
-      .then(() => {
+      .then((google: any) => {
         const defaultPosition = { lat: 25.276987, lng: 55.296249 }; // Default to Dubai
         
         // If project already has coordinates, use them
@@ -113,7 +116,10 @@ export default function AssignLocationModal({
   useEffect(() => {
     if (open && googleMapRef.current && mapLoaded) {
       setTimeout(() => {
-        google.maps.event.trigger(googleMapRef.current!, 'resize');
+        const google = window.google;
+        if (google && googleMapRef.current) {
+          google.maps.event.trigger(googleMapRef.current, 'resize');
+        }
       }, 100);
     }
   }, [open, mapLoaded]);
