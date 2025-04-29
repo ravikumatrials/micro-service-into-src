@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Upload, Eye, Trash, Search } from "lucide-react";
 import ProjectFilters from "./ProjectFilters";
@@ -235,6 +236,7 @@ export default function ProjectsPage() {
                   project={project}
                   onView={setViewProject}
                   onDelete={setDeleteProject}
+                  onAssignLocation={setLocationProject}
                 />
               ))}
             </div>
