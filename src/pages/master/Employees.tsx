@@ -30,6 +30,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 // Sample entities for dummy data
 const entities = [
@@ -339,6 +342,11 @@ const Employees = () => {
     setEmployees([...employees, ...employeesToAdd]);
   };
 
+  // Get attendance records for selected employee
+  const getEmployeeAttendanceRecords = (employeeId) => {
+    return mockAttendanceRecords.filter(record => record.employeeId === employeeId).slice(0, 10);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -525,63 +533,142 @@ const Employees = () => {
         </div>
       </Card>
 
-      {/* View Employee Modal */}
+      {/* Enhanced View Employee Modal */}
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-4xl w-full">
           <DialogHeader>
-            <DialogTitle className="text-center">Employee Details</DialogTitle>
+            <DialogTitle className="text-xl font-bold">Employee Details</DialogTitle>
           </DialogHeader>
           
           {selectedEmployee && (
-            <div className="space-y-4">
-              <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="h-10 w-10 text-gray-500" />
+            <div className="space-y-6">
+              {/* Section 1: Personal Details */}
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="flex flex-col items-center space-y-2">
+                  <Avatar className="h-36 w-36 border-2 border-gray-200">
+                    {selectedEmployee.faceEnrolled ? (
+                      <AvatarImage src="https://source.unsplash.com/random/?portrait" alt={selectedEmployee.name} />
+                    ) : null}
+                    <AvatarFallback className="text-2xl bg-gray-100">
+                      <User className="h-16 w-16 text-gray-400" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {!selectedEmployee.faceEnrolled && (
+                    <span className="text-xs text-gray-500">Profile not available</span>
+                  )}
+                </div>
+                
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">{selectedEmployee.name}</h3>
+                      <p className="text-sm text-gray-500">{selectedEmployee.employeeId}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-[120px_1fr] gap-2">
+                      <div className="text-sm text-gray-600 font-medium">Entity:</div>
+                      <div className="text-sm">{selectedEmployee.entity}</div>
+                      
+                      <div className="text-sm text-gray-600 font-medium">Category:</div>
+                      <div className="text-sm">{selectedEmployee.category}</div>
+                      
+                      <div className="text-sm text-gray-600 font-medium">Status:</div>
+                      <div>
+                        <Badge 
+                          className={
+                            selectedEmployee.status === "Active" 
+                              ? "bg-green-100 text-green-800" 
+                              : "bg-red-100 text-red-800"
+                          }
+                        >
+                          {selectedEmployee.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-[120px_1fr] gap-2 content-start">
+                    <div className="text-sm text-gray-600 font-medium">Contact Number:</div>
+                    <div className="text-sm">{selectedEmployee.contactNumber}</div>
+                    
+                    <div className="text-sm text-gray-600 font-medium">Email ID:</div>
+                    <div className="text-sm break-all">{selectedEmployee.email}</div>
+                  </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-3">
-                <div className="text-gray-600 font-medium">Employee ID:</div>
-                <div className="text-right">{selectedEmployee.employeeId}</div>
-                
-                <div className="text-gray-600 font-medium">Name:</div>
-                <div className="text-right">{selectedEmployee.name}</div>
-                
-                <div className="text-gray-600 font-medium">Entity:</div>
-                <div className="text-right">{selectedEmployee.entity}</div>
-                
-                <div className="text-gray-600 font-medium">Category:</div>
-                <div className="text-right">{selectedEmployee.category}</div>
-                
-                <div className="text-gray-600 font-medium">Status:</div>
-                <div className="text-right">
-                  <Badge 
-                    className={
-                      selectedEmployee.status === "Active" 
-                        ? "bg-green-100 text-green-800" 
-                        : "bg-red-100 text-red-800"
-                    }
-                  >
-                    {selectedEmployee.status}
-                  </Badge>
-                </div>
-                
-                <div className="text-gray-600 font-medium">Contact Number:</div>
-                <div className="text-right">{selectedEmployee.contactNumber}</div>
-                
-                <div className="text-gray-600 font-medium">Email ID:</div>
-                <div className="text-right">{selectedEmployee.email}</div>
+              <Separator />
+              
+              {/* Section 2: Attendance History */}
+              <div>
+                <h3 className="text-md font-medium mb-3">Recent Attendance History</h3>
+                <ScrollArea className="h-[300px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Check-In Time</TableHead>
+                        <TableHead>Check-Out Time</TableHead>
+                        <TableHead>Attendance Mode</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Comments</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {getEmployeeAttendanceRecords(selectedEmployee.employeeId).map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell>{record.date}</TableCell>
+                          <TableCell>{record.checkInTime}</TableCell>
+                          <TableCell>{record.checkOutTime}</TableCell>
+                          <TableCell>
+                            <Badge
+                              className={
+                                record.checkInMethod === "Face"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }
+                            >
+                              {record.checkInMethod}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className="bg-green-100 text-green-800">
+                              Present
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {record.comment ? (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-blue-500 cursor-help">
+                                      View Note
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="max-w-xs">{record.comment}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               </div>
               
-              <div className="pt-4">
+              <DialogFooter>
                 <Button
                   onClick={() => handleViewFullAttendanceHistory(selectedEmployee.employeeId)}
                   variant="outline" 
-                  className="w-full"
                 >
-                  View Attendance History
+                  View Full Attendance History
                 </Button>
-              </div>
+              </DialogFooter>
             </div>
           )}
         </DialogContent>
