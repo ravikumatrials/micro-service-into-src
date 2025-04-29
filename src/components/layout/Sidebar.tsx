@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -11,8 +12,8 @@ import {
   ChevronDown, 
   ChevronRight,
   ChevronLeft,
-  MapPin,
-  Briefcase
+  Briefcase,
+  CheckCircle
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -48,10 +49,6 @@ const menuItems: MenuItem[] = [
         path: "/master/roles"
       },
       {
-        name: "Location",
-        path: "/master/location"
-      },
-      {
         name: "Projects",
         path: "/master/projects"
       }
@@ -61,6 +58,11 @@ const menuItems: MenuItem[] = [
     name: "Attendance",
     path: "/attendance",
     icon: <Calendar className="h-5 w-5" />
+  },
+  {
+    name: "Bulk Attendance",
+    path: "/bulk-attendance",
+    icon: <CheckCircle className="h-5 w-5" />
   },
   {
     name: "Attendance History",

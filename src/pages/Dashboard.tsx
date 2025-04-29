@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, CheckCircle, AlertTriangle, Clock, FileText, UserCheck, PenSquare } from "lucide-react";
+import { Users, Calendar, CheckCircle, AlertTriangle, Clock, FileText, PenSquare } from "lucide-react";
 
 const Dashboard = () => {
   // Mock data for dashboard
@@ -39,16 +39,12 @@ const Dashboard = () => {
     { id: 5, employee: "David Taylor", action: "Check-in (Face)", time: "08:30 AM", location: "South Tower" }
   ];
 
+  // Quick actions - Face Enrollment removed
   const quickActions = [
     { 
       label: "Mark Attendance", 
       icon: <CheckCircle className="h-5 w-5" />,
       onClick: () => console.log("Mark Attendance clicked")
-    },
-    { 
-      label: "Face Enrollment", 
-      icon: <UserCheck className="h-5 w-5" />,
-      onClick: () => console.log("Face Enrollment clicked")
     },
     { 
       label: "Manual Entry", 
@@ -68,7 +64,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
           
-          <div className="flex items-center gap-2 px-4 min-w-0">
+          <div className="flex items-center gap-3 px-4 min-w-0">
             {quickActions.map((action, index) => (
               <Button
                 key={index}
