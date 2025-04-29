@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calendar, CheckCircle, CheckCheck, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -151,7 +150,8 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Projects</SelectItem>
+                  {/* Fix: Using "all-projects" instead of empty string for the "All Projects" option */}
+                  <SelectItem value="all-projects">All Projects</SelectItem>
                   {PROJECTS.map((p) => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
@@ -167,7 +167,8 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Locations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Locations</SelectItem>
+                  {/* Fix: Using "all-locations" instead of empty string for the "All Locations" option */}
+                  <SelectItem value="all-locations">All Locations</SelectItem>
                   {LOCATIONS.map((l) => (
                     <SelectItem key={l} value={l}>{l}</SelectItem>
                   ))}
@@ -183,7 +184,8 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Roles" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  {/* Fix: Using "all-roles" instead of empty string for the "All Roles" option */}
+                  <SelectItem value="all-roles">All Roles</SelectItem>
                   {ROLES.map((r) => (
                     <SelectItem key={r} value={r}>{r}</SelectItem>
                   ))}
