@@ -7,8 +7,10 @@ import ImportProjectsModal from "./ImportProjectsModal";
 import TanseeqImportModal from "./TanseeqProjectsImportModal";
 import ProjectViewModal from "./ProjectViewModal";
 import DeleteProjectDialog from "./DeleteProjectDialog";
+import AssignLocationModal from "./AssignLocationModal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 const DUMMY_PROJECTS = [
   {
@@ -105,6 +107,8 @@ export default function ProjectsPage() {
   const [tanseeqImportOpen, setTanseeqImportOpen] = useState(false);
   const [viewProject, setViewProject] = useState(null);
   const [deleteProject, setDeleteProject] = useState(null);
+  const [locationProject, setLocationProject] = useState(null);
+  const { toast } = useToast();
 
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
@@ -173,6 +177,23 @@ export default function ProjectsPage() {
     setDeleteProject(null);
   };
 
+  const handleAssignLocation = (projectId: string, latitude: string, longitude: string) => {
+    setProjects(prev => 
+      prev.map(p => {
+        if (p.id === projectId) {
+          return {
+            ...p,
+            coordinates: {
+              latitude,
+              longitude
+            }
+          };
+        }
+        return p;
+      })
+    );
+  };
+
   const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
   return (
@@ -200,6 +221,7 @@ export default function ProjectsPage() {
             projects={filteredProjects}
             onView={setViewProject}
             onDelete={setDeleteProject}
+            onAssignLocation={setLocationProject}
           />
         </div>
         <div className="block md:hidden">
@@ -237,6 +259,12 @@ export default function ProjectsPage() {
         project={deleteProject} 
         onCancel={() => setDeleteProject(null)} 
         onConfirm={() => handleDelete(deleteProject)} 
+      />
+      <AssignLocationModal
+        project={locationProject}
+        open={!!locationProject}
+        onOpenChange={(open) => !open && setLocationProject(null)}
+        onSave={handleAssignLocation}
       />
     </div>
   );

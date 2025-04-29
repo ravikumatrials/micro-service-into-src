@@ -1,5 +1,5 @@
 
-import { Eye, Trash } from "lucide-react";
+import { Eye, Trash, MapPin } from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/tooltip";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 function formatDate(date: string) {
   const d = new Date(date);
@@ -19,10 +18,12 @@ export default function ProjectTable({
   projects,
   onView,
   onDelete,
+  onAssignLocation,
 }: {
   projects: any[];
   onView: (p: any) => void;
   onDelete: (p: any) => void;
+  onAssignLocation: (p: any) => void;
 }) {
   return (
     <Card className="p-0 overflow-x-auto shadow-sm">
@@ -45,7 +46,17 @@ export default function ProjectTable({
                 {/* Name */}
                 <td className="px-4 py-3 font-medium">{project.name}</td>
                 {/* Location */}
-                <td className="px-4 py-3">{project.location}</td>
+                <td className="px-4 py-3">
+                  {project.coordinates ? (
+                    <span className="inline-block px-2 py-0.5 rounded-full font-medium text-xs bg-proscape/10 text-proscape">
+                      Configured
+                    </span>
+                  ) : (
+                    <span className="inline-block px-2 py-0.5 rounded-full font-medium text-xs bg-gray-200 text-gray-500">
+                      Not Configured
+                    </span>
+                  )}
+                </td>
                 {/* Employees */}
                 <td className="px-4 py-3 max-w-[180px]">
                   {project.assignedEmployees && project.assignedEmployees.length ? (
@@ -86,26 +97,65 @@ export default function ProjectTable({
                 {/* Actions */}
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="View Details"
-                      onClick={() => onView(project)}
-                      className="hover:bg-proscape/10 text-proscape"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Delete Project"
-                      onClick={() => onDelete(project)}
-                      className="hover:bg-red-100 text-red-600"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="View Details"
+                            onClick={() => onView(project)}
+                            className="hover:bg-proscape/10 text-proscape"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">View Details</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Assign Location"
+                            onClick={() => onAssignLocation(project)}
+                            className="hover:bg-proscape/10 text-proscape"
+                          >
+                            <MapPin className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Assign Location</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Delete Project"
+                            onClick={() => onDelete(project)}
+                            className="hover:bg-red-100 text-red-600"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Delete Project</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </td>
               </tr>
