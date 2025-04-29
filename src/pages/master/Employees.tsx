@@ -652,55 +652,6 @@ const Employees = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Face Enrollment Dialog (Simulated) */}
-      <Dialog open={isFaceEnrollmentOpen} onOpenChange={setIsFaceEnrollmentOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Face Enrollment</DialogTitle>
-          </DialogHeader>
-          
-          {selectedEmployee && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <div className="bg-gray-100 w-64 h-64 mx-auto rounded-lg flex items-center justify-center">
-                  <Camera className="h-12 w-12 text-gray-400" />
-                </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  {selectedEmployee.faceEnrolled 
-                    ? "Update existing face enrollment" 
-                    : "Position your face in the frame"}
-                </p>
-              </div>
-              
-              <div className="flex justify-center gap-4">
-                <Button
-                  onClick={() => {
-                    // Update employee face enrollment status
-                    const updatedEmployees = employees.map(emp => 
-                      emp.id === selectedEmployee.id 
-                        ? {...emp, faceEnrolled: true} 
-                        : emp
-                    );
-                    setEmployees(updatedEmployees);
-                    setIsFaceEnrollmentOpen(false);
-                  }}
-                  className="bg-proscape hover:bg-proscape-dark"
-                >
-                  {selectedEmployee.faceEnrolled ? "Update Enrollment" : "Complete Enrollment"}
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => setIsFaceEnrollmentOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-      
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
