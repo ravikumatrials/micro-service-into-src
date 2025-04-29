@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Eye, Trash, User, Search, Filter, Check, X, Camera } from "lucide-react";
+import { Eye, Trash, User, Search, Filter, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
@@ -260,7 +260,6 @@ const Employees = () => {
   const [entityFilter, setEntityFilter] = useState("all");
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isFaceEnrollmentOpen, setIsFaceEnrollmentOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
   const [isTanseeqModalOpen, setIsTanseeqModalOpen] = useState(false);
@@ -288,11 +287,6 @@ const Employees = () => {
   const handleEmployeeView = (employee) => {
     setSelectedEmployee(employee);
     setIsViewModalOpen(true);
-  };
-
-  const handleFaceEnrollment = (employee) => {
-    setSelectedEmployee(employee);
-    setIsFaceEnrollmentOpen(true);
   };
 
   const handleDeleteConfirm = (employee) => {
@@ -452,7 +446,7 @@ const Employees = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
+                      <div className="flex justify-end space-x-3">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -464,23 +458,7 @@ const Employees = () => {
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>View Employee</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button 
-                                onClick={() => handleFaceEnrollment(employee)}
-                                className="text-proscape hover:text-proscape-dark p-1"
-                              >
-                                <Camera className="h-4 w-4" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Face Enrollment</p>
+                              <p>View Employee Details</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
