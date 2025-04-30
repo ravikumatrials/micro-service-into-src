@@ -1,69 +1,130 @@
 
 import { useState } from "react";
-import ManualAttendanceFilters from "@/components/attendance/ManualAttendanceFilters";
+import AttendanceFilters from "@/components/attendance/AttendanceFilters";
 import ManualAttendanceTable, { mockAttendanceRecords } from "@/components/attendance/ManualAttendanceTable";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
-// Mock project and location data
-const PROJECTS = ["Main Building Construction", "Bridge Expansion", "Warehouse Project", "Hospital Wing", "Commercial Complex"];
-const LOCATIONS = ["Downtown Site", "Bridge Zone A", "East Industrial", "North Medical District", "Central Business Area"];
+// Mock data for filters
+const MOCK_ENTITIES = [
+  "Tanseeq Landscaping LLC", 
+  "Tanseeq Construction LLC", 
+  "Tanseeq Investment LLC",
+  "Tanseeq Design LLC",
+  "Tanseeq Contracting LLC"
+];
+
+const MOCK_CATEGORIES = [
+  "Carpenter", 
+  "Mason", 
+  "Plumber", 
+  "Electrician", 
+  "Engineer",
+  "Supervisor",
+  "Architect"
+];
+
+const MOCK_PROJECTS = [
+  "Main Building Construction", 
+  "Bridge Expansion", 
+  "Warehouse Project", 
+  "Hospital Wing", 
+  "Commercial Complex"
+];
+
+const MOCK_LOCATIONS = [
+  "Downtown Site", 
+  "Bridge Zone A", 
+  "East Industrial", 
+  "North Medical District", 
+  "Central Business Area",
+  "Site A",
+  "Site B",
+  "Office"
+];
+
+// Define filter type
+interface FilterValues {
+  startDate: Date | null;
+  endDate: Date | null;
+  employeeId: string;
+  name: string;
+  entity: string;
+  category: string;
+  classification: string;
+  project: string;
+  location: string;
+}
 
 const ManualAttendanceRecords = () => {
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [filters, setFilters] = useState({
+  const [activeFilters, setActiveFilters] = useState<FilterValues>({
+    startDate: null,
+    endDate: null,
     employeeId: "",
     name: "",
-    category: "all-categories",
-    classification: "all-classifications",
-    project: "all-projects",
-    location: "all-locations"
+    entity: "",
+    category: "",
+    classification: "",
+    project: "",
+    location: ""
   });
   
-  // Filtered records based on filter criteria
-  const filteredRecords = mockAttendanceRecords.filter(record => {
-    if (filters.employeeId && !record.employeeId.includes(filters.employeeId)) {
-      return false;
-    }
-    if (filters.name && !record.employeeName.toLowerCase().includes(filters.name.toLowerCase())) {
-      return false;
-    }
-    if (filters.category !== "all-categories" && record.category !== filters.category) {
-      return false;
-    }
-    // For classification, project and location filters
-    // In a real app, we would have these fields in the records
-    // For now, we'll simulate filtering
-    return true;
-  });
+  // Function to filter records based on selected filters
+  const getFilteredRecords = () => {
+    return mockAttendanceRecords.filter(record => {
+      // Filter by Employee ID
+      if (activeFilters.employeeId && !record.employeeId.includes(activeFilters.employeeId)) {
+        return false;
+      }
+      
+      // Filter by Name
+      if (activeFilters.name && !record.employeeName.toLowerCase().includes(activeFilters.name.toLowerCase())) {
+        return false;
+      }
+      
+      // Example of additional filters (in real app, these would be properly implemented)
+      // Category and other filters would need proper implementation based on the data structure
+      if (activeFilters.category && record.category !== activeFilters.category) {
+        return false;
+      }
+      
+      // Date range check would go here if the records contained date objects
+      
+      return true;
+    });
+  };
   
-  // Apply filters with loading simulation
-  const handleApplyFilters = () => {
+  // Apply filters with simulated loading
+  const handleApplyFilters = (filters: FilterValues) => {
     setIsLoading(true);
     
     // Simulate API call delay
     setTimeout(() => {
+      setActiveFilters(filters);
       setIsLoading(false);
-      toast({
-        title: "Filters Applied",
-        description: `Found ${filteredRecords.length} matching records`,
+      
+      // Show success toast
+      toast.success("Filters Applied", {
+        description: `Found ${getFilteredRecords().length} matching records`,
       });
     }, 800);
   };
   
-  // Reset all filters
-  const handleResetFilters = () => {
-    setFilters({
+  // Clear all filters
+  const handleClearFilters = () => {
+    setActiveFilters({
+      startDate: null,
+      endDate: null,
       employeeId: "",
       name: "",
-      category: "all-categories",
-      classification: "all-classifications",
-      project: "all-projects",
-      location: "all-locations"
+      entity: "",
+      category: "",
+      classification: "",
+      project: "",
+      location: ""
     });
     
-    toast({
-      title: "Filters Cleared",
+    toast.info("Filters Cleared", {
       description: "All filters have been reset",
     });
   };
@@ -72,20 +133,20 @@ const ManualAttendanceRecords = () => {
     <div className="space-y-5 px-1 pt-5">
       <h1 className="text-2xl font-bold text-gray-800">Manual Attendance Records</h1>
       
-      {/* Enhanced Filters Section */}
-      <ManualAttendanceFilters 
-        filters={filters}
-        setFilters={setFilters}
-        onApplyFilters={handleApplyFilters}
-        onReset={handleResetFilters}
+      {/* New Enhanced Filters Section */}
+      <AttendanceFilters
+        entities={MOCK_ENTITIES}
+        categories={MOCK_CATEGORIES}
+        projects={MOCK_PROJECTS}
+        locations={MOCK_LOCATIONS}
+        onApply={handleApplyFilters}
+        onClear={handleClearFilters}
         isLoading={isLoading}
-        projectOptions={PROJECTS}
-        locationOptions={LOCATIONS}
       />
       
       {/* Table Section with Loading State */}
       <div className={`transition-opacity duration-300 ${isLoading ? "opacity-50" : "opacity-100"}`}>
-        <ManualAttendanceTable records={filteredRecords} />
+        <ManualAttendanceTable records={getFilteredRecords()} />
       </div>
     </div>
   );
