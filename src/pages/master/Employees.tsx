@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -630,6 +631,7 @@ const Employees = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Date</TableHead>
+                        <TableHead>Project</TableHead>
                         <TableHead>Check-In Time</TableHead>
                         <TableHead>Check-Out Time</TableHead>
                         <TableHead>Attendance Mode</TableHead>
@@ -641,6 +643,7 @@ const Employees = () => {
                       {getEmployeeAttendanceRecords(selectedEmployee.employeeId).map((record) => (
                         <TableRow key={record.id}>
                           <TableCell>{record.date}</TableCell>
+                          <TableCell className="font-medium">{record.project}</TableCell>
                           <TableCell>{record.checkInTime}</TableCell>
                           <TableCell>{record.checkOutTime}</TableCell>
                           <TableCell>

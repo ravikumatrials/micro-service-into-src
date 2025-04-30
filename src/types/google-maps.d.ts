@@ -17,6 +17,12 @@ declare namespace google {
       getPosition(): LatLng | null;
       setMap(map: Map | null): void;
     }
+
+    class Polygon {
+      constructor(opts?: PolygonOptions);
+      getPath(): MVCArray<LatLng>;
+      setMap(map: Map | null): void;
+    }
     
     interface MapOptions {
       center?: LatLng | LatLngLiteral;
@@ -31,6 +37,19 @@ declare namespace google {
       map?: Map | null;
       draggable?: boolean;
       title?: string;
+    }
+
+    interface PolygonOptions {
+      paths?: LatLng[] | LatLngLiteral[] | Array<LatLng[] | LatLngLiteral[]>;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWeight?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+      map?: Map | null;
+      editable?: boolean;
+      clickable?: boolean;
+      zIndex?: number;
     }
     
     interface LatLng {
@@ -68,8 +87,50 @@ declare namespace google {
       function trigger(instance: Object, eventName: string, ...args: any[]): void;
     }
     
+    class MVCArray<T> {
+      constructor(array?: Array<T>);
+      clear(): void;
+      getArray(): Array<T>;
+      getAt(i: number): T;
+      getLength(): number;
+      insertAt(i: number, elem: T): void;
+      removeAt(i: number): T;
+      setAt(i: number, elem: T): void;
+      forEach(callback: (elem: T, i: number) => void): void;
+    }
+    
     namespace MapTypeId {
       const ROADMAP: string;
+    }
+    
+    namespace drawing {
+      class DrawingManager {
+        constructor(options?: DrawingManagerOptions);
+        setMap(map: Map | null): void;
+        setDrawingMode(drawingMode: OverlayType | null): void;
+        getDrawingMode(): OverlayType | null;
+      }
+      
+      interface DrawingManagerOptions {
+        drawingMode?: OverlayType | null;
+        drawingControl?: boolean;
+        drawingControlOptions?: DrawingControlOptions;
+        markerOptions?: MarkerOptions;
+        polygonOptions?: PolygonOptions;
+      }
+      
+      interface DrawingControlOptions {
+        position?: number;
+        drawingModes?: OverlayType[];
+      }
+      
+      enum OverlayType {
+        MARKER,
+        POLYGON,
+        POLYLINE,
+        RECTANGLE,
+        CIRCLE,
+      }
     }
   }
 }
