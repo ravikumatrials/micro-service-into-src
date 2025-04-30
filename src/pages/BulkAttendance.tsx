@@ -265,7 +265,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Projects</SelectItem>
+                  <SelectItem value="all-projects">All Projects</SelectItem>
                   {PROJECTS.map((p) => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
@@ -281,7 +281,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Locations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Locations</SelectItem>
+                  <SelectItem value="all-locations">All Locations</SelectItem>
                   {LOCATIONS.map((l) => (
                     <SelectItem key={l} value={l}>{l}</SelectItem>
                   ))}
@@ -297,7 +297,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Classifications" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Classifications</SelectItem>
+                  <SelectItem value="all-classifications">All Classifications</SelectItem>
                   {CLASSIFICATIONS.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -313,7 +313,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all-categories">All Categories</SelectItem>
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -568,7 +568,7 @@ const BulkAttendance = () => {
                           <SelectValue placeholder="All Projects" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Projects</SelectItem>
+                          <SelectItem value="all-projects">All Projects</SelectItem>
                           {PROJECTS.map((p) => (
                             <SelectItem key={p} value={p}>{p}</SelectItem>
                           ))}
@@ -584,7 +584,7 @@ const BulkAttendance = () => {
                           <SelectValue placeholder="All Locations" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Locations</SelectItem>
+                          <SelectItem value="all-locations">All Locations</SelectItem>
                           {LOCATIONS.map((l) => (
                             <SelectItem key={l} value={l}>{l}</SelectItem>
                           ))}
@@ -600,7 +600,7 @@ const BulkAttendance = () => {
                           <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Categories</SelectItem>
+                          <SelectItem value="all-categories">All Categories</SelectItem>
                           {CATEGORIES.map((c) => (
                             <SelectItem key={c} value={c}>{c}</SelectItem>
                           ))}
@@ -616,7 +616,7 @@ const BulkAttendance = () => {
                           <SelectValue placeholder="All Classifications" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Classifications</SelectItem>
+                          <SelectItem value="all-classifications">All Classifications</SelectItem>
                           {CLASSIFICATIONS.map((c) => (
                             <SelectItem key={c} value={c}>{c}</SelectItem>
                           ))}
