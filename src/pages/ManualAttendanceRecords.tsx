@@ -83,7 +83,6 @@ const ManualAttendanceRecords = () => {
       }
       
       // Example of additional filters (in real app, these would be properly implemented)
-      // Category and other filters would need proper implementation based on the data structure
       if (activeFilters.category && record.category !== activeFilters.category) {
         return false;
       }
@@ -103,10 +102,18 @@ const ManualAttendanceRecords = () => {
       setActiveFilters(filters);
       setIsLoading(false);
       
+      const filteredCount = getFilteredRecords().length;
+      
       // Show success toast
-      toast.success("Filters Applied", {
-        description: `Found ${getFilteredRecords().length} matching records`,
-      });
+      if (filteredCount > 0) {
+        toast.success("Filters Applied", {
+          description: `Found ${filteredCount} matching records`,
+        });
+      } else {
+        toast.info("No Results Found", {
+          description: "Try adjusting your filter criteria",
+        });
+      }
     }, 800);
   };
   
@@ -146,7 +153,13 @@ const ManualAttendanceRecords = () => {
       
       {/* Table Section with Loading State */}
       <div className={`transition-opacity duration-300 ${isLoading ? "opacity-50" : "opacity-100"}`}>
-        <ManualAttendanceTable records={getFilteredRecords()} />
+        {getFilteredRecords().length > 0 ? (
+          <ManualAttendanceTable records={getFilteredRecords()} />
+        ) : (
+          <div className="bg-white rounded-md p-8 text-center shadow-sm border border-gray-200">
+            <p className="text-gray-500 text-lg">No results found. Try adjusting your filter criteria.</p>
+          </div>
+        )}
       </div>
     </div>
   );

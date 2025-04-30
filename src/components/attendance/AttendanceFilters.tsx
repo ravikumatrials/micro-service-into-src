@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { CalendarIcon, ChevronDown, Check, X, Search } from "lucide-react";
+import { CalendarIcon, Search, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -59,6 +59,14 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
     setFilters(prev => ({ ...prev, [field]: value }));
   };
 
+  // Handle employee ID input - allow only numeric values
+  const handleEmployeeIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^[0-9\b]+$/.test(value)) {
+      handleFilterChange("employeeId", value);
+    }
+  };
+
   // Apply filters
   const handleApply = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,70 +91,72 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
       className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mb-6"
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Row 1 */}
-        {/* From Date */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left font-normal"
-                disabled={isLoading}
-                type="button"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4 text-green-600" />
-                {filters.startDate ? (
-                  formatDate(filters.startDate)
-                ) : (
-                  <span className="text-gray-400">Start Date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={filters.startDate!}
-                onSelect={(date) => handleFilterChange("startDate", date)}
-                className="p-3 pointer-events-auto"
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+        {/* Row 1 - Date Range */}
+        <div className="flex space-x-4">
+          {/* From Date */}
+          <div className="w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  disabled={isLoading}
+                  type="button"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-green-600" />
+                  {filters.startDate ? (
+                    formatDate(filters.startDate)
+                  ) : (
+                    <span className="text-gray-400">Start Date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={filters.startDate!}
+                  onSelect={(date) => handleFilterChange("startDate", date)}
+                  className="p-3 pointer-events-auto"
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          {/* To Date */}
+          <div className="w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  disabled={isLoading}
+                  type="button"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-green-600" />
+                  {filters.endDate ? (
+                    formatDate(filters.endDate)
+                  ) : (
+                    <span className="text-gray-400">End Date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={filters.endDate!}
+                  onSelect={(date) => handleFilterChange("endDate", date)}
+                  className="p-3 pointer-events-auto"
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
         
-        {/* To Date */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left font-normal"
-                disabled={isLoading}
-                type="button"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4 text-green-600" />
-                {filters.endDate ? (
-                  formatDate(filters.endDate)
-                ) : (
-                  <span className="text-gray-400">End Date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={filters.endDate!}
-                onSelect={(date) => handleFilterChange("endDate", date)}
-                className="p-3 pointer-events-auto"
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-        
-        {/* Employee ID */}
+        {/* Employee ID - Numeric only */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
           <div className="relative">
@@ -154,7 +164,7 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
               type="text"
               placeholder="Enter Employee ID"
               value={filters.employeeId}
-              onChange={(e) => handleFilterChange("employeeId", e.target.value)}
+              onChange={handleEmployeeIdChange}
               disabled={isLoading}
               className="pl-8"
             />
@@ -162,7 +172,6 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
           </div>
         </div>
         
-        {/* Row 2 */}
         {/* Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -179,6 +188,7 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
           </div>
         </div>
         
+        {/* Row 2 */}
         {/* Entity */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Entity</label>
@@ -211,7 +221,6 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
           </select>
         </div>
         
-        {/* Row 3 */}
         {/* Classification */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Classification</label>
@@ -227,6 +236,7 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
           </select>
         </div>
         
+        {/* Row 3 */}
         {/* Project */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Project</label>
