@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp } from "lucide-react";
+import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,6 +31,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 // Mock data for employees
 const MOCK_EMPLOYEES = [
@@ -71,12 +81,21 @@ const BulkAttendance = () => {
   const [attendanceTime, setAttendanceTime] = useState(format(new Date(), "HH:mm"));
   const [reason, setReason] = useState("");
   
-  // Import modal state
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  // Import drawer state
+  const [isImportDrawerOpen, setIsImportDrawerOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreviewData, setImportPreviewData] = useState<typeof MOCK_EMPLOYEES>([]);
   const [importComment, setImportComment] = useState("");
   const [importAttendanceType, setImportAttendanceType] = useState<"check-in" | "check-out">("check-in");
+  
+  // Import filters state
+  const [importProjectFilter, setImportProjectFilter] = useState<string>("");
+  const [importLocationFilter, setImportLocationFilter] = useState<string>("");
+  const [importCategoryFilter, setImportCategoryFilter] = useState<string>("");
+  const [importClassificationFilter, setImportClassificationFilter] = useState<string>("");
+  const [importSearchQuery, setImportSearchQuery] = useState<string>("");
+  const [importSelectedEmployees, setImportSelectedEmployees] = useState<string[]>([]);
+  const [importSelectAll, setImportSelectAll] = useState(false);
 
   // Filter employees based on filters
   const filteredEmployees = MOCK_EMPLOYEES.filter((employee) => {
@@ -89,6 +108,18 @@ const BulkAttendance = () => {
         !employee.id.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
+  
+  // Filter imported employees based on import filters
+  const filteredImportEmployees = importPreviewData.filter((employee) => {
+    if (importProjectFilter && employee.project !== importProjectFilter) return false;
+    if (importLocationFilter && employee.location !== importLocationFilter) return false;
+    if (importCategoryFilter && employee.category !== importCategoryFilter) return false;
+    if (importClassificationFilter && employee.classification !== importClassificationFilter) return false;
+    if (importSearchQuery && 
+        !employee.name.toLowerCase().includes(importSearchQuery.toLowerCase()) && 
+        !employee.id.toLowerCase().includes(importSearchQuery.toLowerCase())) return false;
+    return true;
+  });
 
   // Handle select all
   const handleSelectAll = () => {
@@ -99,10 +130,29 @@ const BulkAttendance = () => {
     }
     setSelectAll(!selectAll);
   };
+  
+  // Handle import select all
+  const handleImportSelectAll = () => {
+    if (importSelectAll) {
+      setImportSelectedEmployees([]);
+    } else {
+      setImportSelectedEmployees(filteredImportEmployees.map(e => e.id));
+    }
+    setImportSelectAll(!importSelectAll);
+  };
 
   // Handle checkbox change
   const handleCheckboxChange = (employeeId: string) => {
     setSelectedEmployees(prev => 
+      prev.includes(employeeId) 
+        ? prev.filter(id => id !== employeeId)
+        : [...prev, employeeId]
+    );
+  };
+  
+  // Handle import checkbox change
+  const handleImportCheckboxChange = (employeeId: string) => {
+    setImportSelectedEmployees(prev => 
       prev.includes(employeeId) 
         ? prev.filter(id => id !== employeeId)
         : [...prev, employeeId]
@@ -127,7 +177,16 @@ const BulkAttendance = () => {
   
   // Handle import button click
   const handleImportClick = () => {
-    setIsImportModalOpen(true);
+    setIsImportDrawerOpen(true);
+  };
+  
+  // Clear import filters
+  const clearImportFilters = () => {
+    setImportProjectFilter("");
+    setImportLocationFilter("");
+    setImportCategoryFilter("");
+    setImportClassificationFilter("");
+    setImportSearchQuery("");
   };
   
   // Handle file selection
@@ -138,12 +197,12 @@ const BulkAttendance = () => {
       
       // In a real app, we would parse the file here
       // For this prototype, we'll just simulate it with mock data
-      setImportPreviewData(MOCK_EMPLOYEES.slice(0, 5));
+      setImportPreviewData(MOCK_EMPLOYEES);
     }
   };
   
-  // Handle import confirmation
-  const handleImportConfirm = () => {
+  // Handle import attendance marking
+  const handleImportAttendanceMark = () => {
     if (importComment.trim() === "") {
       toast({
         title: "Error",
@@ -155,12 +214,15 @@ const BulkAttendance = () => {
     
     toast({
       title: "Success!",
-      description: `Attendance ${importAttendanceType === "check-in" ? "check-in" : "check-out"} marked for ${importPreviewData.length} employees.`,
+      description: `Attendance ${importAttendanceType === "check-in" ? "check-in" : "check-out"} marked for ${importSelectedEmployees.length} employees on ${format(date || new Date(), "MMM dd, yyyy")}.`,
     });
-    setIsImportModalOpen(false);
+    setIsImportDrawerOpen(false);
     setImportFile(null);
     setImportPreviewData([]);
     setImportComment("");
+    setImportSelectedEmployees([]);
+    setImportSelectAll(false);
+    clearImportFilters();
   };
 
   return (
@@ -203,8 +265,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Fix: Using "all-projects" instead of empty string for the "All Projects" option */}
-                  <SelectItem value="all-projects">All Projects</SelectItem>
+                  <SelectItem value="">All Projects</SelectItem>
                   {PROJECTS.map((p) => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
@@ -220,8 +281,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Locations" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Fix: Using "all-locations" instead of empty string for the "All Locations" option */}
-                  <SelectItem value="all-locations">All Locations</SelectItem>
+                  <SelectItem value="">All Locations</SelectItem>
                   {LOCATIONS.map((l) => (
                     <SelectItem key={l} value={l}>{l}</SelectItem>
                   ))}
@@ -237,7 +297,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Classifications" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-classifications">All Classifications</SelectItem>
+                  <SelectItem value="">All Classifications</SelectItem>
                   {CLASSIFICATIONS.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -253,7 +313,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-categories">All Categories</SelectItem>
+                  <SelectItem value="">All Categories</SelectItem>
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -439,17 +499,17 @@ const BulkAttendance = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Import Modal */}
-      <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
-        <DialogContent className="sm:max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Import Attendance Data</DialogTitle>
-            <DialogDescription>
+      {/* Enhanced Import Drawer */}
+      <Drawer open={isImportDrawerOpen} onOpenChange={setIsImportDrawerOpen}>
+        <DrawerContent className="max-h-[90vh] p-0">
+          <DrawerHeader className="px-6 py-4 border-b">
+            <DrawerTitle className="text-xl">Import Attendance Data</DrawerTitle>
+            <DrawerDescription>
               Upload an Excel or Word file containing employee data for bulk attendance marking.
-            </DialogDescription>
-          </DialogHeader>
+            </DrawerDescription>
+          </DrawerHeader>
           
-          <div className="space-y-6 py-4">
+          <div className="p-6 overflow-y-auto">
             {!importFile ? (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <div className="mx-auto flex flex-col items-center">
@@ -475,7 +535,7 @@ const BulkAttendance = () => {
               </div>
             ) : (
               <>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="text-lg font-medium">Preview Data</h3>
                     <p className="text-sm text-gray-500">
@@ -488,54 +548,207 @@ const BulkAttendance = () => {
                     onClick={() => {
                       setImportFile(null);
                       setImportPreviewData([]);
+                      clearImportFilters();
+                      setImportSelectedEmployees([]);
+                      setImportSelectAll(false);
                     }}
                   >
                     Change File
                   </Button>
                 </div>
                 
-                <div className="max-h-64 overflow-y-auto border rounded">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left">Employee ID</th>
-                        <th className="px-4 py-2 text-left">Name</th>
-                        <th className="px-4 py-2 text-left">Category</th>
-                        <th className="px-4 py-2 text-left">Classification</th>
-                        <th className="px-4 py-2 text-left">Project</th>
-                        <th className="px-4 py-2 text-left">Location</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {importPreviewData.map((employee) => (
-                        <tr key={employee.id} className="border-t">
-                          <td className="px-4 py-2">{employee.id}</td>
-                          <td className="px-4 py-2">{employee.name}</td>
-                          <td className="px-4 py-2">{employee.category}</td>
-                          <td className="px-4 py-2">{employee.classification}</td>
-                          <td className="px-4 py-2">{employee.project}</td>
-                          <td className="px-4 py-2">{employee.location}</td>
+                {/* Filter Section */}
+                <Card className="p-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {/* Project Filter */}
+                    <div className="space-y-1">
+                      <Label htmlFor="import-project" className="text-sm">Project</Label>
+                      <Select value={importProjectFilter} onValueChange={setImportProjectFilter}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All Projects" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Projects</SelectItem>
+                          {PROJECTS.map((p) => (
+                            <SelectItem key={p} value={p}>{p}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Location Filter */}
+                    <div className="space-y-1">
+                      <Label htmlFor="import-location" className="text-sm">Location</Label>
+                      <Select value={importLocationFilter} onValueChange={setImportLocationFilter}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All Locations" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Locations</SelectItem>
+                          {LOCATIONS.map((l) => (
+                            <SelectItem key={l} value={l}>{l}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Category Filter */}
+                    <div className="space-y-1">
+                      <Label htmlFor="import-category" className="text-sm">Category</Label>
+                      <Select value={importCategoryFilter} onValueChange={setImportCategoryFilter}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All Categories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Categories</SelectItem>
+                          {CATEGORIES.map((c) => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Classification Filter */}
+                    <div className="space-y-1">
+                      <Label htmlFor="import-classification" className="text-sm">Classification</Label>
+                      <Select value={importClassificationFilter} onValueChange={setImportClassificationFilter}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All Classifications" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Classifications</SelectItem>
+                          {CLASSIFICATIONS.map((c) => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* Search by Name/ID */}
+                    <div className="space-y-1">
+                      <Label htmlFor="import-search" className="text-sm">Search by Name/ID</Label>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input
+                          id="import-search"
+                          placeholder="Search..."
+                          className="pl-8 h-9"
+                          value={importSearchQuery}
+                          onChange={(e) => setImportSearchQuery(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Reset Filters Button */}
+                  <div className="mt-3 flex justify-end">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={clearImportFilters} 
+                      className="text-xs"
+                    >
+                      <X className="h-3 w-3 mr-1" /> Clear Filters
+                    </Button>
+                  </div>
+                </Card>
+                
+                <Separator className="my-4" />
+                
+                {/* Preview Table */}
+                <div className="border rounded mb-4">
+                  <div className="max-h-64 overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-4 py-2 w-16">
+                            <Checkbox 
+                              checked={importSelectAll} 
+                              onCheckedChange={handleImportSelectAll}
+                              aria-label="Select all employees"
+                            />
+                          </th>
+                          <th className="px-4 py-2 text-left">Employee ID</th>
+                          <th className="px-4 py-2 text-left">Name</th>
+                          <th className="px-4 py-2 text-left">Category</th>
+                          <th className="px-4 py-2 text-left">Classification</th>
+                          <th className="px-4 py-2 text-left">Project</th>
+                          <th className="px-4 py-2 text-left">Location</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {filteredImportEmployees.length > 0 ? (
+                          filteredImportEmployees.map((employee) => (
+                            <tr key={employee.id} className="border-t hover:bg-gray-50">
+                              <td className="px-4 py-2">
+                                <Checkbox 
+                                  checked={importSelectedEmployees.includes(employee.id)}
+                                  onCheckedChange={() => handleImportCheckboxChange(employee.id)}
+                                  aria-label={`Select ${employee.name}`}
+                                />
+                              </td>
+                              <td className="px-4 py-2 font-medium">{employee.id}</td>
+                              <td className="px-4 py-2">{employee.name}</td>
+                              <td className="px-4 py-2">{employee.category}</td>
+                              <td className="px-4 py-2">
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  employee.classification === "Staff" 
+                                    ? "bg-blue-100 text-blue-700" 
+                                    : "bg-green-100 text-green-700"
+                                }`}>
+                                  {employee.classification}
+                                </span>
+                              </td>
+                              <td className="px-4 py-2">{employee.project}</td>
+                              <td className="px-4 py-2">{employee.location}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={7} className="text-center py-8 text-gray-400">
+                              No employees found matching the filters.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label>Attendance Type</Label>
-                    <Select 
-                      value={importAttendanceType} 
-                      onValueChange={(value) => setImportAttendanceType(value as "check-in" | "check-out")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="check-in">Check-In</SelectItem>
-                        <SelectItem value="check-out">Check-Out</SelectItem>
-                      </SelectContent>
-                    </Select>
+                {/* Summary */}
+                <div className="mb-4 text-sm text-gray-600">
+                  <p>Showing {filteredImportEmployees.length} of {importPreviewData.length} employees</p>
+                  <p>Selected: {importSelectedEmployees.length} employees</p>
+                </div>
+                
+                {/* Attendance Type and Comment */}
+                <div className="space-y-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Attendance Type</Label>
+                      <Select 
+                        value={importAttendanceType} 
+                        onValueChange={(value) => setImportAttendanceType(value as "check-in" | "check-out")}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="check-in">Check-In</SelectItem>
+                          <SelectItem value="check-out">Check-Out</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="time">Time</Label>
+                      <Input 
+                        id="import-time"
+                        type="time" 
+                        value={attendanceTime}
+                        onChange={(e) => setAttendanceTime(e.target.value)}
+                      />
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
@@ -554,23 +767,22 @@ const BulkAttendance = () => {
             )}
           </div>
 
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsImportModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="bg-proscape hover:bg-proscape-dark text-white"
-              onClick={handleImportConfirm}
-              disabled={!importFile || !importComment.trim()}
-            >
-              Mark Attendance
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <DrawerFooter className="border-t p-4">
+            <div className="flex justify-end gap-2">
+              <DrawerClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DrawerClose>
+              <Button 
+                className="bg-proscape hover:bg-proscape-dark text-white"
+                onClick={handleImportAttendanceMark}
+                disabled={!importFile || !importComment.trim() || importSelectedEmployees.length === 0}
+              >
+                <CheckCircle className="mr-2 h-4 w-4" /> Mark Attendance
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
