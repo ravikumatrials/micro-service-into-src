@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import AttendanceFilters from "@/components/attendance/AttendanceFilters";
+import { FilterSection } from "@/components/attendance/FilterSection";
 import ManualAttendanceTable, { mockAttendanceRecords } from "@/components/attendance/ManualAttendanceTable";
 import { toast } from "sonner";
 
@@ -46,8 +46,7 @@ const MOCK_LOCATIONS = [
 interface FilterValues {
   startDate: Date | null;
   endDate: Date | null;
-  employeeId: string;
-  name: string;
+  employee: string;
   entity: string;
   category: string;
   classification: string;
@@ -60,8 +59,7 @@ const ManualAttendanceRecords = () => {
   const [activeFilters, setActiveFilters] = useState<FilterValues>({
     startDate: null,
     endDate: null,
-    employeeId: "",
-    name: "",
+    employee: "",
     entity: "",
     category: "",
     classification: "",
@@ -72,22 +70,25 @@ const ManualAttendanceRecords = () => {
   // Function to filter records based on selected filters
   const getFilteredRecords = () => {
     return mockAttendanceRecords.filter(record => {
-      // Filter by Employee ID
-      if (activeFilters.employeeId && !record.employeeId.includes(activeFilters.employeeId)) {
+      // Filter by Employee ID or Name
+      if (activeFilters.employee && 
+          !(record.employeeId.includes(activeFilters.employee) || 
+            record.employeeName.toLowerCase().includes(activeFilters.employee.toLowerCase()))) {
         return false;
       }
       
-      // Filter by Name
-      if (activeFilters.name && !record.employeeName.toLowerCase().includes(activeFilters.name.toLowerCase())) {
-        return false;
-      }
-      
-      // Example of additional filters (in real app, these would be properly implemented)
+      // Category filter
       if (activeFilters.category && record.category !== activeFilters.category) {
         return false;
       }
       
-      // Date range check would go here if the records contained date objects
+      // Project filter
+      if (activeFilters.project && record.checkInProject !== activeFilters.project) {
+        return false;
+      }
+      
+      // Date range check
+      // In a real implementation, this would check if record date falls within selected range
       
       return true;
     });
@@ -122,8 +123,7 @@ const ManualAttendanceRecords = () => {
     setActiveFilters({
       startDate: null,
       endDate: null,
-      employeeId: "",
-      name: "",
+      employee: "",
       entity: "",
       category: "",
       classification: "",
@@ -140,15 +140,13 @@ const ManualAttendanceRecords = () => {
     <div className="space-y-5 px-1 pt-5">
       <h1 className="text-2xl font-bold text-gray-800">Manual Attendance Records</h1>
       
-      {/* New Enhanced Filters Section */}
-      <AttendanceFilters
-        entities={MOCK_ENTITIES}
-        categories={MOCK_CATEGORIES}
-        projects={MOCK_PROJECTS}
-        locations={MOCK_LOCATIONS}
+      {/* Filters Section */}
+      <FilterSection
+        availableProjects={MOCK_PROJECTS}
+        availableLocations={MOCK_LOCATIONS}
         onApply={handleApplyFilters}
         onClear={handleClearFilters}
-        isLoading={isLoading}
+        currentFilters={activeFilters}
       />
       
       {/* Table Section with Loading State */}
