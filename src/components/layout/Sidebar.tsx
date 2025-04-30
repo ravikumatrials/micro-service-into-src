@@ -51,11 +51,15 @@ const menuItems: MenuItem[] = [
       {
         name: "Projects",
         path: "/master/projects"
+      },
+      {
+        name: "Users",
+        path: "/master/users"
       }
     ]
   },
   {
-    name: "Attendance",
+    name: "Manual Attendance",
     path: "/attendance",
     icon: <Calendar className="h-5 w-5" />
   },

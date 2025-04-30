@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import Employees from "./pages/master/Employees";
 import Roles from "./pages/master/Roles";
 import Projects from "./pages/master/Projects";
+import Users from "./pages/master/Users";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/master/employees" element={<Layout><Employees /></Layout>} />
             <Route path="/master/roles" element={<Layout><Roles /></Layout>} />
             <Route path="/master/projects" element={<Layout><Projects /></Layout>} />
+            <Route path="/master/users" element={<Layout><Users /></Layout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
