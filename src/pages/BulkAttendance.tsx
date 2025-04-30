@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -100,14 +101,14 @@ const BulkAttendance = () => {
     
     toast({
       title: "Success!",
-      description: `Attendance ${importAttendanceType === "check-in" ? "check-in" : "check-out"} marked for ${importSelectedEmployees.length} employees on ${format(date || new Date(), "MMM dd, yyyy")}.`,
+      description: `Attendance ${importAttendanceType === "check-in" ? "check-in" : "check-out"} marked for ${selectedEmployees.length} employees on ${format(date || new Date(), "MMM dd, yyyy")}.`,
     });
     setIsImportDrawerOpen(false);
     setImportFile(null);
     setImportPreviewData([]);
     setImportComment("");
-    setImportSelectedEmployees([]);
-    setImportSelectAll(false);
+    setSelectedEmployees([]);
+    setSelectAll(false);
   };
 
   // When a file is selected, set the preview data
