@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
 import AttendanceHistory from "./pages/AttendanceHistory";
 import BulkAttendance from "./pages/BulkAttendance";
+import ManualAttendanceRecords from "./pages/ManualAttendanceRecords";
 import RoleMapping from "./pages/RoleMapping";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
             <Route path="/attendance" element={<Layout><Attendance /></Layout>} />
+            <Route path="/manual-attendance" element={<Layout><ManualAttendanceRecords /></Layout>} />
             <Route path="/bulk-attendance" element={<Layout><BulkAttendance /></Layout>} />
             <Route path="/attendance-history" element={<Layout><AttendanceHistory /></Layout>} />
             <Route path="/role-mapping" element={<Layout><RoleMapping /></Layout>} />
