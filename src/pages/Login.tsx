@@ -11,6 +11,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 const Login = () => {
@@ -87,15 +88,15 @@ const Login = () => {
       <div className="w-full max-w-md space-y-8 p-8 bg-white rounded-lg shadow-lg animate-fade-in">
         <div className="flex flex-col items-center space-y-4">
           <img
-            src="/lovable-uploads/a0d8ed56-0cf0-440c-8865-50cfc30ca8a0.png"
-            alt="Proscape Logo"
+            src="/lovable-uploads/05179fc8-d11b-4d37-bd27-20cd7447beaa.png"
+            alt="Tanseeq Investment Logo"
             className="h-12 w-12"
           />
           <h2 className="text-2xl font-bold text-gray-900">
-            Proscape Facial Attendance System
+            Tanseeq Investment Facial Attendance System
           </h2>
           <p className="text-sm text-gray-600">
-            Sign in to access your account
+            Welcome to Tanseeq Investment Facial Attendance System
           </p>
         </div>
 
@@ -169,7 +170,7 @@ const Login = () => {
 
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500">
-            &copy; 2025 Proscape Construction Company
+            &copy; 2025 Tanseeq Investment Company
           </p>
         </div>
       </div>

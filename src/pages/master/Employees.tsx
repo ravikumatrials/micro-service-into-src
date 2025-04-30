@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -44,8 +43,19 @@ const entities = [
   "Gulf Builders International"
 ];
 
-// Sample categories
-const categories = ["Laborer", "Engineer", "Supervisor", "Manager", "Driver", "Consultant"];
+// Sample categories with the new predefined values
+const categories = [
+  "Carpenter",
+  "Mason",
+  "Plumber",
+  "Electrician",
+  "Welder",
+  "Steel Fixer", 
+  "Painter",
+  "Helper",
+  "Driver",
+  "Supervisor"
+];
 
 // Sample classifications
 const classifications = ["Laborer", "Staff"];
@@ -344,9 +354,10 @@ const Employees = () => {
       contactNumber: "+971 5" + Math.floor(Math.random() * 10) + " " + 
                     Math.floor(Math.random() * 900 + 100) + " " + 
                     Math.floor(Math.random() * 9000 + 1000),
-      email: emp.name.toLowerCase().replace(" ", ".") + "@proscape.ae",
+      email: emp.name.toLowerCase().replace(" ", ".") + "@tanseeq.ae",
       faceEnrolled: false,
-      status: "Active"
+      status: "Active",
+      classification: classifications[Math.floor(Math.random() * classifications.length)]
     }));
     
     setEmployees([...employees, ...employeesToAdd]);
