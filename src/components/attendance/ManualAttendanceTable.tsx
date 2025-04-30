@@ -20,10 +20,6 @@ interface AttendanceRecord {
   checkOutTime: string | null;
   checkOutProject: string | null;
   role: string;
-  // Add missing properties referenced in filter logic
-  location: string;
-  entity: string;
-  classification: string;
 }
 
 interface ManualAttendanceTableProps {
@@ -99,10 +95,7 @@ export const mockAttendanceRecords: AttendanceRecord[] = [
     checkInProject: "Main Building Construction",
     checkOutTime: "05:30 PM (Apr 29, 2025)",
     checkOutProject: "Main Building Construction",
-    role: "Supervisor",
-    location: "Downtown Site",
-    entity: "Tanseeq Construction LLC",
-    classification: "Staff"
+    role: "Supervisor"
   },
   {
     id: "2",
@@ -113,10 +106,7 @@ export const mockAttendanceRecords: AttendanceRecord[] = [
     checkInProject: "Bridge Expansion",
     checkOutTime: "04:45 PM (Apr 29, 2025)",
     checkOutProject: "Bridge Expansion",
-    role: "Laborer",
-    location: "Bridge Zone A",
-    entity: "Tanseeq Construction LLC",
-    classification: "Laborer"
+    role: "Laborer"
   },
   {
     id: "3",
@@ -127,10 +117,7 @@ export const mockAttendanceRecords: AttendanceRecord[] = [
     checkInProject: "Warehouse Project",
     checkOutTime: null,
     checkOutProject: null,
-    role: "Specialist",
-    location: "East Industrial",
-    entity: "Tanseeq Contracting LLC",
-    classification: "Staff"
+    role: "Specialist"
   },
   {
     id: "4",
@@ -141,10 +128,7 @@ export const mockAttendanceRecords: AttendanceRecord[] = [
     checkInProject: "Hospital Wing",
     checkOutTime: "06:00 PM (Apr 29, 2025)",
     checkOutProject: "Hospital Wing",
-    role: "Senior Technician",
-    location: "North Medical District",
-    entity: "Tanseeq Investment LLC",
-    classification: "Staff"
+    role: "Senior Technician"
   }
 ];
 
