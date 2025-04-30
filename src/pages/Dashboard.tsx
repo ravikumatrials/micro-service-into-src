@@ -1,8 +1,24 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, CheckCircle, AlertTriangle, Clock, FileText, PenSquare } from "lucide-react";
+import { 
+  Users, 
+  Calendar, 
+  CheckCircle, 
+  AlertTriangle, 
+  Clock, 
+  Package, 
+  Upload,
+  Folder,
+  FileText,
+  RefreshCw
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   // Mock data for dashboard
   const stats = [
     { 
@@ -39,52 +55,68 @@ const Dashboard = () => {
     { id: 5, employee: "David Taylor", action: "Check-in (Face)", time: "08:30 AM", location: "South Tower" }
   ];
 
-  // Quick actions - Face Enrollment removed
+  // New quick actions
   const quickActions = [
     { 
-      label: "Mark Attendance", 
-      icon: <CheckCircle className="h-5 w-5" />,
-      onClick: () => console.log("Mark Attendance clicked")
+      label: "Bulk Attendance", 
+      icon: <Package className="h-5 w-5" />,
+      onClick: () => navigate("/bulk-attendance"),
+      description: "Mark attendance for multiple employees"
     },
     { 
-      label: "Manual Entry", 
-      icon: <PenSquare className="h-5 w-5" />,
-      onClick: () => console.log("Manual Entry clicked")
+      label: "Import Employees", 
+      icon: <Upload className="h-5 w-5" />,
+      onClick: () => navigate("/master/employees"),
+      description: "Import employee list via Tanseeq API or Excel"
     },
     { 
-      label: "Export Report", 
+      label: "View Projects", 
+      icon: <Folder className="h-5 w-5" />,
+      onClick: () => navigate("/master/projects"),
+      description: "Navigate directly to the Projects submenu"
+    },
+    { 
+      label: "Attendance Reports", 
       icon: <FileText className="h-5 w-5" />,
-      onClick: () => console.log("Export Report clicked")
+      onClick: () => navigate("/reports"),
+      description: "View and export attendance history and records"
+    },
+    { 
+      label: "Sync Data", 
+      icon: <RefreshCw className="h-5 w-5" />,
+      onClick: () => {
+        toast.info("Syncing data...", { duration: 2000 });
+        setTimeout(() => {
+          toast.success("Data synchronized successfully!");
+        }, 2000);
+      },
+      description: "Initiates data sync with central database"
     }
   ];
 
   return (
     <div className="space-y-6">
       <div className="bg-white p-4 rounded-lg shadow-sm">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          
-          <div className="flex items-center gap-3 px-4 min-w-0">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">Dashboard</h1>
+        
+        {/* New Quick Actions Section */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-4">
+          <h2 className="text-sm font-medium text-gray-500 mb-3">QUICK ACTIONS</h2>
+          <div className="grid grid-cols-5 gap-4">
             {quickActions.map((action, index) => (
               <Button
                 key={index}
                 variant="outline"
-                size="sm"
-                className="flex items-center gap-2 text-gray-700 hover:text-proscape hover:border-proscape transition-colors whitespace-nowrap"
+                className="flex flex-col items-center gap-2 p-4 h-auto border-gray-200 hover:bg-proscape/5 hover:border-proscape hover:shadow-sm transition-all"
                 onClick={action.onClick}
+                title={action.description}
               >
-                {action.icon}
-                <span className="hidden sm:inline">{action.label}</span>
+                <div className="w-10 h-10 rounded-full bg-proscape/10 flex items-center justify-center text-proscape">
+                  {action.icon}
+                </div>
+                <span className="font-medium text-sm">{action.label}</span>
               </Button>
             ))}
-          </div>
-
-          <div className="flex justify-end">
-            <Button 
-              className="bg-proscape hover:bg-proscape-dark text-white"
-            >
-              Sync Data
-            </Button>
           </div>
         </div>
       </div>
