@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { CalendarIcon, FileText, User, UserCog } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,28 +13,30 @@ import {
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
 // Mock data for users with role assignments
 const USERS = [
   { 
     employeeId: "EMP001", 
-    name: "John Smith", 
+    name: "John Smith",
+    entity: "Tanseeq Investment",
+    category: "Carpenter",
+    classification: "Laborer",
+    status: "Active",
     role: "Supervisor", 
     assignedBy: "Admin User", 
     assignmentDate: "2025-03-15" 
@@ -42,6 +44,10 @@ const USERS = [
   { 
     employeeId: "EMP003", 
     name: "Emily Davis", 
+    entity: "Tanseeq Investment LLC",
+    category: "Manager",
+    classification: "Staff",
+    status: "Active",
     role: "Manager", 
     assignedBy: "Admin User", 
     assignmentDate: "2025-02-20" 
@@ -49,6 +55,10 @@ const USERS = [
   { 
     employeeId: "EMP005", 
     name: "Michael Brown", 
+    entity: "Al Maha Projects",
+    category: "Plumber",
+    classification: "Laborer",
+    status: "Inactive",
     role: "Clerk", 
     assignedBy: "Jane Doe", 
     assignmentDate: "2025-01-10" 
@@ -56,49 +66,35 @@ const USERS = [
   { 
     employeeId: "EMP007", 
     name: "David Lee", 
+    entity: "Gulf Builders International",
+    category: "Electrician",
+    classification: "Laborer",
+    status: "Active",
     role: "Supervisor", 
     assignedBy: "Admin User", 
     assignmentDate: "2025-04-05" 
   },
 ];
 
-// Mock roles for dropdown
-const ROLES = ["Supervisor", "Manager", "Clerk", "Admin"];
-
 const Users = () => {
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isChangeRoleModalOpen, setIsChangeRoleModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<typeof USERS[0] | null>(null);
-  const [newRole, setNewRole] = useState("");
 
   // Filter users based on search query
   const filteredUsers = USERS.filter((user) => {
     return (
       user.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase())
+      user.entity.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
-  // Open change role modal
-  const handleOpenChangeRoleModal = (user: typeof USERS[0]) => {
+  // Open view modal
+  const handleOpenViewModal = (user: typeof USERS[0]) => {
     setSelectedUser(user);
-    setNewRole(user.role);
-    setIsChangeRoleModalOpen(true);
-  };
-
-  // Handle role change
-  const handleChangeRole = () => {
-    if (selectedUser && newRole) {
-      // In a real app, this would update the role in the database
-      toast({
-        title: "Role Updated",
-        description: `${selectedUser.name}'s role has been updated to ${newRole}.`,
-      });
-      setIsChangeRoleModalOpen(false);
-      setSelectedUser(null);
-    }
+    setIsViewModalOpen(true);
   };
 
   return (
@@ -111,12 +107,12 @@ const Users = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="relative w-full md:w-96">
               <Input
-                placeholder="Search by ID, name or role..."
+                placeholder="Search by ID, name, entity or category..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8"
               />
-              <FileText className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Eye className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
           </div>
         </Card>
@@ -126,12 +122,13 @@ const Users = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Employee ID</TableHead>
+                <TableHead className="w-[100px]">Employee ID</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Assigned By</TableHead>
-                <TableHead>Assignment Date</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Entity</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Classification</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -140,28 +137,48 @@ const Users = () => {
                   <TableRow key={user.employeeId}>
                     <TableCell className="font-medium">{user.employeeId}</TableCell>
                     <TableCell>{user.name}</TableCell>
-                    <TableCell>
-                      <span className="bg-proscape-lighter text-proscape px-2 py-1 rounded-full text-xs">
-                        {user.role}
-                      </span>
+                    <TableCell className="max-w-[200px] truncate" title={user.entity}>
+                      {user.entity}
                     </TableCell>
-                    <TableCell>{user.assignedBy}</TableCell>
-                    <TableCell>{format(new Date(user.assignmentDate), "MMM dd, yyyy")}</TableCell>
+                    <TableCell>{user.category}</TableCell>
+                    <TableCell>{user.classification}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenChangeRoleModal(user)}
-                        className="flex items-center gap-1"
+                      <Badge 
+                        className={
+                          user.status === "Active" 
+                            ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                            : "bg-red-100 text-red-800 hover:bg-red-200"
+                        }
                       >
-                        <UserCog className="h-4 w-4" /> Change Role
-                      </Button>
+                        {user.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                onClick={() => handleOpenViewModal(user)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View Details</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                  <TableCell colSpan={7} className="text-center py-6 text-gray-500">
                     No users found with the specified criteria.
                   </TableCell>
                 </TableRow>
@@ -170,57 +187,55 @@ const Users = () => {
           </Table>
         </Card>
 
-        {/* Change Role Modal */}
-        <Dialog open={isChangeRoleModalOpen} onOpenChange={setIsChangeRoleModalOpen}>
+        {/* View Modal */}
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Change User Role</DialogTitle>
+              <DialogTitle>Employee Details</DialogTitle>
               <DialogDescription>
-                Update the role for {selectedUser?.name}
+                View details for {selectedUser?.name}
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <p className="text-sm font-medium">Employee ID:</p>
-                <p className="col-span-3">{selectedUser?.employeeId}</p>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <p className="text-sm font-medium">Name:</p>
-                <p className="col-span-3">{selectedUser?.name}</p>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <p className="text-sm font-medium">Current Role:</p>
-                <p className="col-span-3">{selectedUser?.role}</p>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <p className="text-sm font-medium">New Role:</p>
-                <div className="col-span-3">
-                  <Select value={newRole} onValueChange={setNewRole}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ROLES.map((role) => (
-                        <SelectItem key={role} value={role}>
-                          {role}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <p className="text-sm font-medium">Employee ID:</p>
+              <p className="text-sm">{selectedUser?.employeeId}</p>
+              
+              <p className="text-sm font-medium">Name:</p>
+              <p className="text-sm">{selectedUser?.name}</p>
+              
+              <p className="text-sm font-medium">Role:</p>
+              <p className="text-sm">{selectedUser?.role}</p>
+              
+              <p className="text-sm font-medium">Entity:</p>
+              <p className="text-sm">{selectedUser?.entity}</p>
+              
+              <p className="text-sm font-medium">Category:</p>
+              <p className="text-sm">{selectedUser?.category}</p>
+              
+              <p className="text-sm font-medium">Classification:</p>
+              <p className="text-sm">{selectedUser?.classification}</p>
+              
+              <p className="text-sm font-medium">Status:</p>
+              <p className="text-sm">
+                <Badge 
+                  className={
+                    selectedUser?.status === "Active" 
+                      ? "bg-green-100 text-green-800" 
+                      : "bg-red-100 text-red-800"
+                  }
+                >
+                  {selectedUser?.status}
+                </Badge>
+              </p>
+              
+              <p className="text-sm font-medium">Assigned By:</p>
+              <p className="text-sm">{selectedUser?.assignedBy}</p>
+              
+              <p className="text-sm font-medium">Assignment Date:</p>
+              <p className="text-sm">
+                {selectedUser?.assignmentDate && format(new Date(selectedUser.assignmentDate), "MMM dd, yyyy")}
+              </p>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsChangeRoleModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button 
-                className="bg-proscape hover:bg-proscape-dark text-white"
-                onClick={handleChangeRole}
-              >
-                Update Role
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

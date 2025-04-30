@@ -110,17 +110,17 @@ export function Sidebar() {
           {!isCollapsed && (
             <div className="flex items-center">
               <img 
-                src="/lovable-uploads/a0d8ed56-0cf0-440c-8865-50cfc30ca8a0.png" 
-                alt="Proscape Logo" 
+                src="/lovable-uploads/05179fc8-d11b-4d37-bd27-20cd7447beaa.png" 
+                alt="Tanseeq Investment Logo" 
                 className="h-8 w-8 mr-2" 
               />
-              <h1 className="text-white text-lg font-bold">Proscape</h1>
+              <h1 className="text-white text-lg font-bold">Tanseeq</h1>
             </div>
           )}
           {isCollapsed && (
             <img 
-              src="/lovable-uploads/a0d8ed56-0cf0-440c-8865-50cfc30ca8a0.png" 
-              alt="Proscape Logo" 
+              src="/lovable-uploads/05179fc8-d11b-4d37-bd27-20cd7447beaa.png" 
+              alt="Tanseeq Investment Logo" 
               className="h-8 w-8 mx-auto" 
             />
           )}

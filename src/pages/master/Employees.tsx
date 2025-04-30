@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -36,7 +37,7 @@ import { Separator } from "@/components/ui/separator";
 
 // Sample entities for dummy data
 const entities = [
-  "Proscape Construction Pvt Ltd",
+  "Tanseeq Investment",
   "Tanseeq Landscaping LLC",
   "Al Maha Projects",
   "Zenith Infrastructure",
@@ -46,6 +47,9 @@ const entities = [
 // Sample categories
 const categories = ["Laborer", "Engineer", "Supervisor", "Manager", "Driver", "Consultant"];
 
+// Sample classifications
+const classifications = ["Laborer", "Staff"];
+
 const initialEmployees = [
   { 
     id: 1, 
@@ -53,9 +57,10 @@ const initialEmployees = [
     employeeId: "EMP001", 
     role: "Labour", 
     category: "Laborer",
-    entity: "Proscape Construction Pvt Ltd",
+    classification: "Laborer",
+    entity: "Tanseeq Investment",
     contactNumber: "+971 50 123 4567",
-    email: "john.smith@proscape.ae",
+    email: "john.smith@tanseeq.ae",
     faceEnrolled: true,
     status: "Active" 
   },
@@ -65,6 +70,7 @@ const initialEmployees = [
     employeeId: "EMP002", 
     role: "Supervisor", 
     category: "Supervisor",
+    classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 234 5678",
     email: "sarah.johnson@tanseeq.ae",
@@ -77,6 +83,7 @@ const initialEmployees = [
     employeeId: "EMP003", 
     role: "Labour", 
     category: "Laborer",
+    classification: "Laborer",
     entity: "Al Maha Projects",
     contactNumber: "+971 55 345 6789",
     email: "robert.williams@almaha.ae",
@@ -89,6 +96,7 @@ const initialEmployees = [
     employeeId: "EMP004", 
     role: "Labour", 
     category: "Driver",
+    classification: "Staff",
     entity: "Gulf Builders International",
     contactNumber: "+971 54 456 7890",
     email: "emily.davis@gulfbuilders.ae",
@@ -101,6 +109,7 @@ const initialEmployees = [
     employeeId: "EMP005", 
     role: "Report Admin", 
     category: "Engineer",
+    classification: "Staff",
     entity: "Zenith Infrastructure",
     contactNumber: "+971 56 567 8901",
     email: "james.miller@zenith.ae",
@@ -113,9 +122,10 @@ const initialEmployees = [
     employeeId: "EMP006", 
     role: "Labour", 
     category: "Consultant",
-    entity: "Proscape Construction Pvt Ltd",
+    classification: "Staff",
+    entity: "Tanseeq Investment",
     contactNumber: "+971 50 678 9012",
-    email: "jennifer.wilson@proscape.ae",
+    email: "jennifer.wilson@tanseeq.ae",
     faceEnrolled: false,
     status: "Inactive" 
   },
@@ -125,6 +135,7 @@ const initialEmployees = [
     employeeId: "EMP007", 
     role: "Super Admin", 
     category: "Manager",
+    classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 789 0123",
     email: "michael.brown@tanseeq.ae",
@@ -137,6 +148,7 @@ const initialEmployees = [
     employeeId: "EMP008", 
     role: "Labour", 
     category: "Laborer",
+    classification: "Laborer",
     entity: "Al Maha Projects",
     contactNumber: "+971 55 890 1234",
     email: "david.thompson@almaha.ae",
@@ -258,6 +270,7 @@ const Employees = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
+  const [classificationFilter, setClassificationFilter] = useState("all");
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -280,8 +293,11 @@ const Employees = () => {
     const entityMatch = 
       entityFilter === "all" || 
       employee.entity === entityFilter;
+    const classificationMatch = 
+      classificationFilter === "all" || 
+      employee.classification === classificationFilter;
 
-    return searchMatch && statusMatch && categoryMatch && entityMatch;
+    return searchMatch && statusMatch && categoryMatch && entityMatch && classificationMatch;
   });
 
   const handleEmployeeView = (employee) => {
@@ -398,6 +414,19 @@ const Employees = () => {
               </select>
             </div>
             <div className="flex items-center">
+              <span className="text-sm text-gray-600 mr-2">Classification:</span>
+              <select
+                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
+                value={classificationFilter}
+                onChange={(e) => setClassificationFilter(e.target.value)}
+              >
+                <option value="all">All Classifications</option>
+                {classifications.map((classification, index) => (
+                  <option key={index} value={classification}>{classification}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center">
               <span className="text-sm text-gray-600 mr-2">Entity:</span>
               <select
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
@@ -419,6 +448,7 @@ const Employees = () => {
                 <TableHead className="w-[100px]">Employee ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Entity</TableHead>
+                <TableHead>Classification</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -433,6 +463,7 @@ const Employees = () => {
                     <TableCell className="max-w-[200px] truncate" title={employee.entity}>
                       {employee.entity}
                     </TableCell>
+                    <TableCell>{employee.classification}</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>
                       <Badge 
@@ -486,7 +517,7 @@ const Employees = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                  <TableCell colSpan={7} className="text-center py-6 text-gray-500">
                     No employees found matching the search criteria
                   </TableCell>
                 </TableRow>
@@ -546,6 +577,9 @@ const Employees = () => {
                     <div className="grid grid-cols-[120px_1fr] gap-2">
                       <div className="text-sm text-gray-600 font-medium">Entity:</div>
                       <div className="text-sm">{selectedEmployee.entity}</div>
+                      
+                      <div className="text-sm text-gray-600 font-medium">Classification:</div>
+                      <div className="text-sm">{selectedEmployee.classification}</div>
                       
                       <div className="text-sm text-gray-600 font-medium">Category:</div>
                       <div className="text-sm">{selectedEmployee.category}</div>
