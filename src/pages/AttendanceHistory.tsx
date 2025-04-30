@@ -248,7 +248,8 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Projects</SelectItem>
+                  {/* Fix: Using "all-projects" instead of empty string */}
+                  <SelectItem value="all-projects">All Projects</SelectItem>
                   {PROJECTS.map((p) => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
@@ -264,7 +265,8 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  {/* Fix: Using "all-categories" instead of empty string */}
+                  <SelectItem value="all-categories">All Categories</SelectItem>
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -280,7 +282,8 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Classifications" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Classifications</SelectItem>
+                  {/* Fix: Using "all-classifications" instead of empty string */}
+                  <SelectItem value="all-classifications">All Classifications</SelectItem>
                   {CLASSIFICATIONS.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -296,7 +299,8 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Entities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Entities</SelectItem>
+                  {/* Fix: Using "all-entities" instead of empty string */}
+                  <SelectItem value="all-entities">All Entities</SelectItem>
                   {ENTITIES.map((e) => (
                     <SelectItem key={e} value={e}>{e}</SelectItem>
                   ))}
@@ -312,7 +316,8 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Modes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Modes</SelectItem>
+                  {/* Fix: Using "all-modes" instead of empty string */}
+                  <SelectItem value="all-modes">All Modes</SelectItem>
                   <SelectItem value="Face">Face</SelectItem>
                   <SelectItem value="Manual">Manual</SelectItem>
                 </SelectContent>

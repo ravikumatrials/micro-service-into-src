@@ -82,7 +82,7 @@ const ManualAttendanceFilters: React.FC<ManualAttendanceFiltersProps> = ({
             className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
           >
             {categoryOptions.map((option) => (
-              <option key={option} value={option === "All" ? "" : option}>
+              <option key={option} value={option === "All" ? "all-categories" : option}>
                 {option}
               </option>
             ))}
@@ -100,7 +100,7 @@ const ManualAttendanceFilters: React.FC<ManualAttendanceFiltersProps> = ({
             className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
           >
             {classificationOptions.map((option) => (
-              <option key={option} value={option === "All" ? "" : option}>
+              <option key={option} value={option === "All" ? "all-classifications" : option}>
                 {option}
               </option>
             ))}
