@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Filter } from 'lucide-react';
+import { Calendar as CalendarIcon, Filter, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -27,8 +27,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import AttendanceDetailModal from '@/components/attendance/AttendanceDetailModal';
 
-// Mock data for attendance history
+// Updated mock data to include classification and comments
 const MOCK_ATTENDANCE = [
   {
     id: 1,
@@ -36,11 +38,13 @@ const MOCK_ATTENDANCE = [
     name: 'John Smith',
     project: 'Main Building Construction',
     category: 'Carpenter',
+    classification: 'Laborer',
     entity: 'Acme Construction',
     date: '2025-04-25',
     checkInTime: '08:00',
     checkOutTime: '17:00',
     mode: 'Face',
+    comment: 'Regular attendance'
   },
   {
     id: 2,
@@ -48,11 +52,13 @@ const MOCK_ATTENDANCE = [
     name: 'Sarah Johnson',
     project: 'Main Building Construction',
     category: 'Mason',
+    classification: 'Staff',
     entity: 'Acme Construction',
     date: '2025-04-25',
     checkInTime: '07:55',
     checkOutTime: '17:10',
     mode: 'Face',
+    comment: null
   },
   {
     id: 3,
@@ -60,11 +66,13 @@ const MOCK_ATTENDANCE = [
     name: 'Emily Davis',
     project: 'Bridge Expansion',
     category: 'Plumber',
+    classification: 'Laborer',
     entity: 'Skyline Builders',
     date: '2025-04-25',
     checkInTime: '08:10',
     checkOutTime: '16:45',
     mode: 'Manual',
+    comment: 'System was down during check-in'
   },
   {
     id: 4,
@@ -72,11 +80,13 @@ const MOCK_ATTENDANCE = [
     name: 'Robert Williams',
     project: 'Bridge Expansion',
     category: 'Electrician',
+    classification: 'Staff',
     entity: 'Skyline Builders',
     date: '2025-04-24',
     checkInTime: '08:05',
     checkOutTime: '17:00',
     mode: 'Face',
+    comment: null
   },
   {
     id: 5,
@@ -84,11 +94,13 @@ const MOCK_ATTENDANCE = [
     name: 'Michael Brown',
     project: 'Warehouse Project',
     category: 'Supervisor',
+    classification: 'Staff',
     entity: 'Acme Construction',
     date: '2025-04-24',
     checkInTime: '07:45',
     checkOutTime: '18:15',
     mode: 'Manual',
+    comment: 'Stayed late to complete urgent task'
   },
 ];
 
@@ -96,6 +108,7 @@ const MOCK_ATTENDANCE = [
 const PROJECTS = ['Main Building Construction', 'Bridge Expansion', 'Warehouse Project'];
 const CATEGORIES = ['Carpenter', 'Mason', 'Electrician', 'Plumber', 'Supervisor'];
 const ENTITIES = ['Acme Construction', 'Skyline Builders', 'Metro Developers'];
+const CLASSIFICATIONS = ['Laborer', 'Staff'];
 
 const AttendanceHistory = () => {
   // Filter states
@@ -108,6 +121,11 @@ const AttendanceHistory = () => {
   const [category, setCategory] = useState('');
   const [entity, setEntity] = useState('');
   const [mode, setMode] = useState('');
+  const [classification, setClassification] = useState('');
+  
+  // Modal state for viewing attendance details
+  const [selectedRecord, setSelectedRecord] = useState<typeof MOCK_ATTENDANCE[0] | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Apply filters to attendance data
   const filteredAttendance = MOCK_ATTENDANCE.filter((record) => {
@@ -122,9 +140,28 @@ const AttendanceHistory = () => {
     if (category && record.category !== category) return false;
     if (entity && record.entity !== entity) return false;
     if (mode && record.mode !== mode) return false;
+    if (classification && record.classification !== classification) return false;
     
     return true;
   });
+  
+  // Handle opening the detail modal
+  const handleViewRecord = (record: typeof MOCK_ATTENDANCE[0]) => {
+    setSelectedRecord(record);
+    setIsDetailModalOpen(true);
+  };
+  
+  // Reset all filters
+  const handleResetFilters = () => {
+    setEmployeeId('');
+    setFromDate(new Date(new Date().setDate(new Date().getDate() - 7)));
+    setToDate(new Date());
+    setProject('');
+    setCategory('');
+    setEntity('');
+    setMode('');
+    setClassification('');
+  };
 
   return (
     <div className="space-y-6 px-1 pt-5">
@@ -141,7 +178,13 @@ const AttendanceHistory = () => {
                 id="employee-id"
                 placeholder="Search by ID or name..."
                 value={employeeId}
-                onChange={(e) => setEmployeeId(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Only allow numbers for employee ID
+                  if (value === '' || /^[0-9\b]+$/.test(value) || value.includes(' ')) {
+                    setEmployeeId(e.target.value);
+                  }
+                }}
               />
             </div>
 
@@ -205,7 +248,7 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-projects">All Projects</SelectItem>
+                  <SelectItem value="">All Projects</SelectItem>
                   {PROJECTS.map((p) => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
@@ -221,8 +264,24 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-categories">All Categories</SelectItem>
+                  <SelectItem value="">All Categories</SelectItem>
                   {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Classification Filter */}
+            <div className="space-y-2">
+              <Label htmlFor="classification">Classification</Label>
+              <Select value={classification} onValueChange={setClassification}>
+                <SelectTrigger id="classification">
+                  <SelectValue placeholder="All Classifications" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Classifications</SelectItem>
+                  {CLASSIFICATIONS.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
                 </SelectContent>
@@ -237,7 +296,7 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Entities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-entities">All Entities</SelectItem>
+                  <SelectItem value="">All Entities</SelectItem>
                   {ENTITIES.map((e) => (
                     <SelectItem key={e} value={e}>{e}</SelectItem>
                   ))}
@@ -253,18 +312,27 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Modes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-modes">All Modes</SelectItem>
+                  <SelectItem value="">All Modes</SelectItem>
                   <SelectItem value="Face">Face</SelectItem>
                   <SelectItem value="Manual">Manual</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Filter Button */}
+            {/* Filter Buttons */}
             <div className="space-y-2 flex items-end">
-              <Button className="bg-proscape hover:bg-proscape-dark text-white w-full">
-                <Filter className="mr-2 h-4 w-4" /> Apply Filters
-              </Button>
+              <div className="flex gap-2 w-full">
+                <Button className="bg-green-600 hover:bg-green-700 text-white flex-1">
+                  <Filter className="mr-2 h-4 w-4" /> Apply Filters
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="text-gray-600" 
+                  onClick={handleResetFilters}
+                >
+                  Clear
+                </Button>
+              </div>
             </div>
           </div>
         </Card>
@@ -273,30 +341,40 @@ const AttendanceHistory = () => {
         <Card className="overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
+              <TableRow className="bg-gray-50">
                 <TableHead>Employee ID</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Check-In</TableHead>
-                <TableHead>Check-Out</TableHead>
                 <TableHead>Project</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Entity</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Check-In Time</TableHead>
+                <TableHead>Check-Out Time</TableHead>
                 <TableHead>Mode</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredAttendance.length > 0 ? (
                 filteredAttendance.map((record) => (
-                  <TableRow key={record.id} className="hover:bg-gray-50">
-                    <TableCell>{format(new Date(record.date), 'MMM dd, yyyy')}</TableCell>
+                  <TableRow key={record.id} className="hover:bg-gray-50 odd:bg-white even:bg-gray-50">
                     <TableCell>{record.employeeId}</TableCell>
                     <TableCell>{record.name}</TableCell>
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-help">
+                            {record.project.length > 25 
+                              ? `${record.project.substring(0, 25)}...` 
+                              : record.project}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{record.project}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>{format(new Date(record.date), 'MMM dd, yyyy')}</TableCell>
                     <TableCell>{record.checkInTime}</TableCell>
-                    <TableCell>{record.checkOutTime}</TableCell>
-                    <TableCell>{record.project}</TableCell>
-                    <TableCell>{record.category}</TableCell>
-                    <TableCell>{record.entity}</TableCell>
+                    <TableCell>{record.checkOutTime || '-'}</TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
@@ -308,11 +386,22 @@ const AttendanceHistory = () => {
                         {record.mode}
                       </span>
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleViewRecord(record)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span className="sr-only">View details</span>
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-6 text-gray-500">
+                  <TableCell colSpan={8} className="text-center py-6 text-gray-500">
                     No attendance records found matching the filters.
                   </TableCell>
                 </TableRow>
@@ -325,6 +414,13 @@ const AttendanceHistory = () => {
           Showing {filteredAttendance.length} of {MOCK_ATTENDANCE.length} records
         </div>
       </div>
+      
+      {/* Detail Modal */}
+      <AttendanceDetailModal
+        record={selectedRecord}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+      />
     </div>
   );
 };
