@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { Upload, Eye, Trash, Search } from "lucide-react";
 import ProjectFilters from "./ProjectFilters";
@@ -178,15 +177,14 @@ export default function ProjectsPage() {
     setDeleteProject(null);
   };
 
-  const handleAssignLocation = (projectId: string, latitude: string, longitude: string) => {
+  const handleAssignLocation = (projectId: string, geofenceData: string) => {
     setProjects(prev => 
       prev.map(p => {
         if (p.id === projectId) {
           return {
             ...p,
             coordinates: {
-              latitude,
-              longitude
+              geofenceData
             }
           };
         }
