@@ -37,7 +37,7 @@ const ProjectField = ({
         <SelectValue placeholder="Select project" />
       </SelectTrigger>
       <SelectContent>
-        {/* Fix: Using "none" instead of empty string or "select-project" */}
+        {/* Using "none" instead of empty string */}
         <SelectItem value="none">Select project</SelectItem>
         {projects.map((project) => (
           <SelectItem key={project.id} value={project.id.toString()}>

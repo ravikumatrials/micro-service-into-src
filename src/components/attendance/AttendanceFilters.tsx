@@ -198,7 +198,7 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
             onChange={(e) => handleFilterChange("entity", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Entities</option>
+            <option value="all-entities">All Entities</option>
             {entities.map((entity, i) => (
               <option key={i} value={entity}>{entity}</option>
             ))}
@@ -214,7 +214,7 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
             onChange={(e) => handleFilterChange("category", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Categories</option>
+            <option value="all-categories">All Categories</option>
             {categories.map((category, i) => (
               <option key={i} value={category}>{category}</option>
             ))}
@@ -230,7 +230,7 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
             onChange={(e) => handleFilterChange("classification", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Classifications</option>
+            <option value="all-classifications">All Classifications</option>
             <option value="Laborer">Laborer</option>
             <option value="Staff">Staff</option>
           </select>
@@ -246,7 +246,7 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
             onChange={(e) => handleFilterChange("project", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Projects</option>
+            <option value="all-projects">All Projects</option>
             {projects.map((project, i) => (
               <option key={i} value={project}>{project}</option>
             ))}
@@ -262,7 +262,7 @@ const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
             onChange={(e) => handleFilterChange("location", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Locations</option>
+            <option value="all-locations">All Locations</option>
             {locations.map((location, i) => (
               <option key={i} value={location}>{location}</option>
             ))}

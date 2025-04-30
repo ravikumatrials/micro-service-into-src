@@ -78,12 +78,28 @@ const ManualAttendanceRecords = () => {
       }
       
       // Category filter
-      if (activeFilters.category && record.category !== activeFilters.category) {
+      if (activeFilters.category && activeFilters.category !== "all-categories" && record.category !== activeFilters.category) {
         return false;
       }
       
       // Project filter
-      if (activeFilters.project && record.checkInProject !== activeFilters.project) {
+      if (activeFilters.project && activeFilters.project !== "all-projects" && record.checkInProject !== activeFilters.project) {
+        return false;
+      }
+      
+      // Location filter
+      if (activeFilters.location && activeFilters.location !== "all-locations" && record.location !== activeFilters.location) {
+        return false;
+      }
+      
+      // Entity filter
+      if (activeFilters.entity && activeFilters.entity !== "all-entities" && record.entity !== activeFilters.entity) {
+        return false;
+      }
+      
+      // Classification filter
+      if (activeFilters.classification && activeFilters.classification !== "all-classifications" && 
+          record.classification !== activeFilters.classification) {
         return false;
       }
       

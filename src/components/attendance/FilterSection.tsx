@@ -189,7 +189,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             onChange={(e) => handleInput("entity", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Entities</option>
+            <option value="all-entities">All Entities</option>
             <option value="Tanseeq Landscaping LLC">Tanseeq Landscaping LLC</option>
             <option value="Tanseeq Construction LLC">Tanseeq Construction LLC</option>
             <option value="Tanseeq Investment LLC">Tanseeq Investment LLC</option>
@@ -207,7 +207,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             onChange={(e) => handleInput("category", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Categories</option>
+            <option value="all-categories">All Categories</option>
             <option value="Carpenter">Carpenter</option>
             <option value="Mason">Mason</option>
             <option value="Plumber">Plumber</option>
@@ -227,7 +227,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             onChange={(e) => handleInput("classification", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Classifications</option>
+            <option value="all-classifications">All Classifications</option>
             <option value="Laborer">Laborer</option>
             <option value="Staff">Staff</option>
           </select>
@@ -242,7 +242,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             onChange={(e) => handleInput("project", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Projects</option>
+            <option value="all-projects">All Projects</option>
             {availableProjects.map((project, i) => (
               <option key={i} value={project}>{project}</option>
             ))}
@@ -258,7 +258,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             onChange={(e) => handleInput("location", e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All Locations</option>
+            <option value="all-locations">All Locations</option>
             {availableLocations.map((location, i) => (
               <option key={i} value={location}>{location}</option>
             ))}
