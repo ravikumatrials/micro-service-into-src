@@ -28,6 +28,7 @@ const EmployeeActionsCell = ({ employee, onEnrollFace }: EmployeeActionsCellProp
               size="icon"
               className="h-8 w-8"
               onClick={() => onEnrollFace(employee)}
+              style={{ color: employee.hasFaceEnrolled ? '#F97316' : '#22c55e' }}
             >
               <Camera className="h-4 w-4" />
               <span className="sr-only">

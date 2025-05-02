@@ -37,7 +37,7 @@ const USERS = [
     category: "Carpenter",
     classification: "Laborer",
     status: "Active",
-    roles: ["Supervisor", "Report Admin"], 
+    role: "Supervisor", 
     assignedBy: "Admin User", 
     assignmentDate: "2025-03-15" 
   },
@@ -48,7 +48,7 @@ const USERS = [
     category: "Manager",
     classification: "Staff",
     status: "Active",
-    roles: ["Manager", "Admin"], 
+    role: "Admin", 
     assignedBy: "Admin User", 
     assignmentDate: "2025-02-20" 
   },
@@ -59,7 +59,7 @@ const USERS = [
     category: "Plumber",
     classification: "Laborer",
     status: "Inactive",
-    roles: ["Clerk"], 
+    role: "Clerk", 
     assignedBy: "Jane Doe", 
     assignmentDate: "2025-01-10" 
   },
@@ -70,7 +70,7 @@ const USERS = [
     category: "Electrician",
     classification: "Laborer",
     status: "Active",
-    roles: ["Supervisor"], 
+    role: "Supervisor", 
     assignedBy: "Admin User", 
     assignmentDate: "2025-04-05" 
   },
@@ -95,15 +95,6 @@ const Users = () => {
   const handleOpenViewModal = (user: typeof USERS[0]) => {
     setSelectedUser(user);
     setIsViewModalOpen(true);
-  };
-
-  // Format roles for display
-  const formatRoles = (roles: string[]) => {
-    if (!roles || roles.length === 0) return "-";
-    if (roles.length === 1) return roles[0];
-    
-    // For multiple roles, display first one + count
-    return `${roles[0]} +${roles.length - 1}`;
   };
 
   return (
@@ -137,7 +128,7 @@ const Users = () => {
                 <TableHead>Category</TableHead>
                 <TableHead>Classification</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Roles</TableHead>
+                <TableHead>Role</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -164,18 +155,9 @@ const Users = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="cursor-help">
-                            <span className="max-w-[150px] truncate inline-block">
-                              {formatRoles(user.roles)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{user.roles.join(", ")}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <Badge className="bg-blue-100 text-blue-800">
+                        {user.role}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end">
@@ -227,8 +209,12 @@ const Users = () => {
               <p className="text-sm font-medium">Name:</p>
               <p className="text-sm">{selectedUser?.name}</p>
               
-              <p className="text-sm font-medium">Roles:</p>
-              <p className="text-sm">{selectedUser?.roles?.join(", ") || "-"}</p>
+              <p className="text-sm font-medium">Role:</p>
+              <p className="text-sm">
+                <Badge className="bg-blue-100 text-blue-800">
+                  {selectedUser?.role}
+                </Badge>
+              </p>
               
               <p className="text-sm font-medium">Entity:</p>
               <p className="text-sm">{selectedUser?.entity}</p>

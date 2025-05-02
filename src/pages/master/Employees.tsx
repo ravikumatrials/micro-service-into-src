@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -34,6 +33,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import EmployeeActionsCell from "./EmployeeActionsCell";
+import FaceEnrollmentModal from "./FaceEnrollmentModal";
 
 // Sample entities for dummy data
 const entities = [
@@ -287,6 +288,8 @@ const Employees = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
   const [isTanseeqModalOpen, setIsTanseeqModalOpen] = useState(false);
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
+  const [selectedFaceEmployee, setSelectedFaceEmployee] = useState(null);
   
   // Current user role - in a real app, this would come from auth context
   const currentUserRole = "Super Admin";
@@ -367,6 +370,11 @@ const Employees = () => {
   // Get attendance records for selected employee
   const getEmployeeAttendanceRecords = (employeeId) => {
     return mockAttendanceRecords.filter(record => record.employeeId === employeeId).slice(0, 10);
+  };
+
+  const handleFaceEnrollment = (employee) => {
+    setSelectedFaceEmployee(employee);
+    setIsFaceModalOpen(true);
   };
 
   return (
@@ -490,6 +498,15 @@ const Employees = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-3">
+                        <EmployeeActionsCell
+                          employee={{
+                            id: employee.employeeId,
+                            name: employee.name,
+                            hasFaceEnrolled: employee.faceEnrolled
+                          }}
+                          onEnrollFace={handleFaceEnrollment}
+                        />
+                        
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -726,6 +743,17 @@ const Employees = () => {
           open={isTanseeqModalOpen}
           onOpenChange={() => setIsTanseeqModalOpen(false)}
           onImportComplete={handleTanseeqImport}
+        />
+      )}
+      
+      {/* Face Enrollment Modal */}
+      {selectedFaceEmployee && (
+        <FaceEnrollmentModal
+          isOpen={isFaceModalOpen}
+          onClose={() => setIsFaceModalOpen(false)}
+          employeeName={selectedFaceEmployee.name}
+          employeeId={selectedFaceEmployee.id}
+          isUpdate={selectedFaceEmployee.hasFaceEnrolled}
         />
       )}
     </div>
