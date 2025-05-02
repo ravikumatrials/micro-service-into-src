@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
+import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,6 +41,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Mock data for employees
 const MOCK_EMPLOYEES = [
@@ -56,15 +64,21 @@ const MOCK_EMPLOYEES = [
   { id: "EMP010", name: "Maria Garcia", category: "Site Engineer", classification: "Staff", entity: "Metro Developers", project: "Warehouse Project", location: "East Industrial" },
 ];
 
+// Dummy Excel data
+const DUMMY_EXCEL_DATA = [
+  { id: "101", name: "Ahmed Khan", category: "Mason", classification: "Laborer", project: "Project A", location: "Abu Dhabi" },
+  { id: "102", name: "Ramesh Iyer", category: "Electrician", classification: "Staff", project: "Project B", location: "Dubai" },
+  { id: "103", name: "Sara Al Marzooqi", category: "Engineer", classification: "Staff", project: "Project A", location: "Abu Dhabi" },
+  { id: "104", name: "John Peterson", category: "Carpenter", classification: "Laborer", project: "Project C", location: "Sharjah" },
+  { id: "105", name: "Ali Mohammed", category: "Supervisor", classification: "Staff", project: "Project B", location: "Dubai" },
+];
+
 // Mock data for filter options
 const PROJECTS = ["Main Building Construction", "Bridge Expansion", "Warehouse Project"];
 const LOCATIONS = ["Downtown Site", "Bridge Zone A", "East Industrial"];
 const ENTITIES = ["Acme Construction", "Skyline Builders", "Metro Developers"];
 const CATEGORIES = ["Carpenter", "Mason", "Electrician", "Plumber", "Supervisor", "Manager", "Site Engineer"];
 const CLASSIFICATIONS = ["Laborer", "Staff"];
-
-// Sample template URL
-const SAMPLE_URL = "https://docs.google.com/spreadsheets/d/1Yv8w9K9tQMVOuO7A4tuL0k5cF_fmY7Fsj6t4HZH7vmfM/export?format=xlsx";
 
 const BulkAttendance = () => {
   const { toast } = useToast();
@@ -87,7 +101,7 @@ const BulkAttendance = () => {
   // Import drawer state
   const [isImportDrawerOpen, setIsImportDrawerOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [importPreviewData, setImportPreviewData] = useState<typeof MOCK_EMPLOYEES>([]);
+  const [importPreviewData, setImportPreviewData] = useState<typeof DUMMY_EXCEL_DATA>([]);
   const [importComment, setImportComment] = useState("");
   const [importAttendanceType, setImportAttendanceType] = useState<"check-in" | "check-out">("check-in");
   
@@ -201,9 +215,9 @@ const BulkAttendance = () => {
     if (file) {
       setImportFile(file);
       
-      // In a real app, we would parse the file here
-      // For this prototype, we'll just simulate it with mock data
-      setImportPreviewData(MOCK_EMPLOYEES);
+      // In a real app, we would parse the Excel file here
+      // For this prototype, we'll use the dummy data
+      setImportPreviewData(DUMMY_EXCEL_DATA);
     }
   };
   
@@ -222,8 +236,8 @@ const BulkAttendance = () => {
     setIsDataImported(true);
     
     toast({
-      title: "Success!",
-      description: `File imported successfully. ${importSelectedEmployees.length} employees ready for attendance marking.`,
+      title: "Employees imported successfully.",
+      description: `${importSelectedEmployees.length} employees ready for attendance marking.`,
     });
     setIsImportDrawerOpen(false);
     setImportFile(null);
@@ -232,16 +246,6 @@ const BulkAttendance = () => {
     setImportSelectedEmployees([]);
     setImportSelectAll(false);
     clearImportFilters();
-  };
-  
-  // Handle download sample template
-  const handleDownloadSample = () => {
-    window.open(SAMPLE_URL, '_blank');
-    
-    toast({
-      title: "Download Started",
-      description: "The sample Excel template is being downloaded.",
-    });
   };
 
   return (
@@ -391,39 +395,39 @@ const BulkAttendance = () => {
         {/* Employees Table or Empty State */}
         {isDataImported ? (
           <Card className="p-0 overflow-x-auto shadow-sm">
-            <table className="w-full text-sm text-left text-gray-700">
-              <thead className="text-xs uppercase bg-gray-50 border-b">
-                <tr>
-                  <th className="px-4 py-3 w-16">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">
                     <Checkbox 
                       checked={selectAll} 
                       onCheckedChange={handleSelectAll} 
                       aria-label="Select all employees"
                     />
-                  </th>
-                  <th className="px-4 py-3">Employee ID</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Classification</th>
-                  <th className="px-4 py-3">Project</th>
-                  <th className="px-4 py-3">Location</th>
-                </tr>
-              </thead>
-              <tbody>
+                  </TableHead>
+                  <TableHead>Employee ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Classification</TableHead>
+                  <TableHead>Project</TableHead>
+                  <TableHead>Location</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredEmployees.length > 0 ? (
                   filteredEmployees.map((employee) => (
-                    <tr key={employee.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">
+                    <TableRow key={employee.id}>
+                      <TableCell>
                         <Checkbox 
                           checked={selectedEmployees.includes(employee.id)}
                           onCheckedChange={() => handleCheckboxChange(employee.id)}
                           aria-label={`Select ${employee.name}`}
                         />
-                      </td>
-                      <td className="px-4 py-3 font-medium">{employee.id}</td>
-                      <td className="px-4 py-3">{employee.name}</td>
-                      <td className="px-4 py-3">{employee.category}</td>
-                      <td className="px-4 py-3">
+                      </TableCell>
+                      <TableCell className="font-medium">{employee.id}</TableCell>
+                      <TableCell>{employee.name}</TableCell>
+                      <TableCell>{employee.category}</TableCell>
+                      <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           employee.classification === "Staff" 
                             ? "bg-blue-100 text-blue-700" 
@@ -431,20 +435,20 @@ const BulkAttendance = () => {
                         }`}>
                           {employee.classification}
                         </span>
-                      </td>
-                      <td className="px-4 py-3">{employee.project}</td>
-                      <td className="px-4 py-3">{employee.location}</td>
-                    </tr>
+                      </TableCell>
+                      <TableCell>{employee.project}</TableCell>
+                      <TableCell>{employee.location}</TableCell>
+                    </TableRow>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan={7} className="text-center py-8 text-gray-400">
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-gray-400">
                       No employees found matching the filters.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </Card>
         ) : (
           <Card className="p-8 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px]">
@@ -459,13 +463,6 @@ const BulkAttendance = () => {
                   onClick={handleImportClick}
                 >
                   <FileUp className="h-4 w-4" /> Import File
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={handleDownloadSample}
-                >
-                  <Download className="h-4 w-4" /> Download Sample Template
                 </Button>
               </div>
             </div>
@@ -554,7 +551,7 @@ const BulkAttendance = () => {
           <DrawerHeader className="px-6 py-4 border-b">
             <DrawerTitle className="text-xl">Import Attendance Data</DrawerTitle>
             <DrawerDescription>
-              Upload an Excel or Word file containing employee data for bulk attendance marking.
+              Upload an Excel file containing employee data for bulk attendance marking.
             </DrawerDescription>
           </DrawerHeader>
           
@@ -565,31 +562,22 @@ const BulkAttendance = () => {
                   <Upload className="h-12 w-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium mb-2">Upload Attendance Data</h3>
                   <p className="text-sm text-gray-500 mb-4">
-                    Supported formats: Excel (.xlsx) or Word (.doc/.docx)
+                    Supported formats: Excel (.xlsx)
                   </p>
                   <Input
                     type="file"
                     id="file-upload"
                     className="hidden"
-                    accept=".xlsx,.doc,.docx"
+                    accept=".xlsx"
                     onChange={handleFileChange}
                   />
-                  <div className="flex gap-3">
-                    <Label 
-                      htmlFor="file-upload" 
-                      className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded cursor-pointer flex items-center gap-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Select File
-                    </Label>
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-2"
-                      onClick={handleDownloadSample}
-                    >
-                      <Download className="h-4 w-4" /> Download Template
-                    </Button>
-                  </div>
+                  <Label 
+                    htmlFor="file-upload" 
+                    className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded cursor-pointer flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Select File
+                  </Label>
                 </div>
               </div>
             ) : (
@@ -717,39 +705,39 @@ const BulkAttendance = () => {
                 {/* Preview Table */}
                 <div className="border rounded mb-4">
                   <div className="max-h-64 overflow-y-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50 sticky top-0">
-                        <tr>
-                          <th className="px-4 py-2 w-16">
+                    <Table>
+                      <TableHeader className="sticky top-0 bg-gray-50">
+                        <TableRow>
+                          <TableHead className="w-16">
                             <Checkbox 
                               checked={importSelectAll} 
                               onCheckedChange={handleImportSelectAll}
                               aria-label="Select all employees"
                             />
-                          </th>
-                          <th className="px-4 py-2 text-left">Employee ID</th>
-                          <th className="px-4 py-2 text-left">Name</th>
-                          <th className="px-4 py-2 text-left">Category</th>
-                          <th className="px-4 py-2 text-left">Classification</th>
-                          <th className="px-4 py-2 text-left">Project</th>
-                          <th className="px-4 py-2 text-left">Location</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                          </TableHead>
+                          <TableHead>Employee ID</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Classification</TableHead>
+                          <TableHead>Project</TableHead>
+                          <TableHead>Location</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {filteredImportEmployees.length > 0 ? (
                           filteredImportEmployees.map((employee) => (
-                            <tr key={employee.id} className="border-t hover:bg-gray-50">
-                              <td className="px-4 py-2">
+                            <TableRow key={employee.id}>
+                              <TableCell>
                                 <Checkbox 
                                   checked={importSelectedEmployees.includes(employee.id)}
                                   onCheckedChange={() => handleImportCheckboxChange(employee.id)}
                                   aria-label={`Select ${employee.name}`}
                                 />
-                              </td>
-                              <td className="px-4 py-2 font-medium">{employee.id}</td>
-                              <td className="px-4 py-2">{employee.name}</td>
-                              <td className="px-4 py-2">{employee.category}</td>
-                              <td className="px-4 py-2">
+                              </TableCell>
+                              <TableCell className="font-medium">{employee.id}</TableCell>
+                              <TableCell>{employee.name}</TableCell>
+                              <TableCell>{employee.category}</TableCell>
+                              <TableCell>
                                 <span className={`px-2 py-1 rounded-full text-xs ${
                                   employee.classification === "Staff" 
                                     ? "bg-blue-100 text-blue-700" 
@@ -757,20 +745,20 @@ const BulkAttendance = () => {
                                 }`}>
                                   {employee.classification}
                                 </span>
-                              </td>
-                              <td className="px-4 py-2">{employee.project}</td>
-                              <td className="px-4 py-2">{employee.location}</td>
-                            </tr>
+                              </TableCell>
+                              <TableCell>{employee.project}</TableCell>
+                              <TableCell>{employee.location}</TableCell>
+                            </TableRow>
                           ))
                         ) : (
-                          <tr>
-                            <td colSpan={7} className="text-center py-8 text-gray-400">
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8 text-gray-400">
                               No employees found matching the filters.
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         )}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
                 
