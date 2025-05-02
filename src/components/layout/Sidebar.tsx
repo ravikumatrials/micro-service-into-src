@@ -45,16 +45,24 @@ const menuItems: MenuItem[] = [
         path: "/master/employees"
       },
       {
-        name: "Roles",
-        path: "/master/roles"
-      },
-      {
         name: "Projects",
         path: "/master/projects"
       },
       {
+        name: "Location",
+        path: "/master/location"
+      },
+      {
+        name: "Roles",
+        path: "/master/roles"
+      },
+      {
         name: "Users",
         path: "/master/users"
+      },
+      {
+        name: "Role Mapping",
+        path: "/role-mapping"
       }
     ]
   },
@@ -72,11 +80,6 @@ const menuItems: MenuItem[] = [
     name: "Attendance History",
     path: "/attendance-history",
     icon: <Clock className="h-5 w-5" />
-  },
-  {
-    name: "Role Mapping",
-    path: "/role-mapping",
-    icon: <Users className="h-5 w-5" />
   },
   {
     name: "Reports",

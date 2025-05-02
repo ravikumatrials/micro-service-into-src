@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Filter, Eye } from 'lucide-react';
@@ -30,49 +29,49 @@ import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AttendanceDetailModal from '@/components/attendance/AttendanceDetailModal';
 
-// Updated mock data to include classification and comments
+// Updated mock data with realistic examples
 const MOCK_ATTENDANCE = [
   {
     id: 1,
-    employeeId: 'EMP001',
-    name: 'John Smith',
-    project: 'Main Building Construction',
+    employeeId: '1001',
+    name: 'Ahmed Khan',
+    project: 'Project A',
     category: 'Carpenter',
     classification: 'Laborer',
-    entity: 'Acme Construction',
-    date: '2025-04-25',
-    checkInTime: '08:00',
-    checkOutTime: '17:00',
-    mode: 'Face',
-    comment: 'Regular attendance'
-  },
-  {
-    id: 2,
-    employeeId: 'EMP002',
-    name: 'Sarah Johnson',
-    project: 'Main Building Construction',
-    category: 'Mason',
-    classification: 'Staff',
-    entity: 'Acme Construction',
-    date: '2025-04-25',
-    checkInTime: '07:55',
-    checkOutTime: '17:10',
+    entity: 'Tanseeq Investment',
+    date: '2024-04-01',
+    checkInTime: '08:30',
+    checkOutTime: '17:15',
     mode: 'Face',
     comment: null
   },
   {
+    id: 2,
+    employeeId: '1002',
+    name: 'R. Iyer',
+    project: 'Project B',
+    category: 'Mason',
+    classification: 'Staff',
+    entity: 'Tanseeq Investment',
+    date: '2024-04-01',
+    checkInTime: '09:00',
+    checkOutTime: '18:00',
+    mode: 'Manual',
+    comment: 'Late'
+  },
+  {
     id: 3,
-    employeeId: 'EMP003',
-    name: 'Emily Davis',
-    project: 'Bridge Expansion',
+    employeeId: '1003',
+    name: 'L. Kumar',
+    project: 'Project A',
     category: 'Plumber',
     classification: 'Laborer',
     entity: 'Skyline Builders',
-    date: '2025-04-25',
-    checkInTime: '08:10',
-    checkOutTime: '16:45',
-    mode: 'Manual',
-    comment: 'System was down during check-in'
+    date: '2024-04-02',
+    checkInTime: '08:45',
+    checkOutTime: '17:30',
+    mode: 'Face',
+    comment: null
   },
   {
     id: 4,
@@ -105,9 +104,9 @@ const MOCK_ATTENDANCE = [
 ];
 
 // Mock filter options
-const PROJECTS = ['Main Building Construction', 'Bridge Expansion', 'Warehouse Project'];
+const PROJECTS = ['Project A', 'Project B', 'Bridge Expansion', 'Warehouse Project'];
 const CATEGORIES = ['Carpenter', 'Mason', 'Electrician', 'Plumber', 'Supervisor'];
-const ENTITIES = ['Acme Construction', 'Skyline Builders', 'Metro Developers'];
+const ENTITIES = ['Tanseeq Investment', 'Skyline Builders', 'Acme Construction'];
 const CLASSIFICATIONS = ['Laborer', 'Staff'];
 
 const AttendanceHistory = () => {
@@ -179,11 +178,7 @@ const AttendanceHistory = () => {
                 placeholder="Search by ID or name..."
                 value={employeeId}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  // Only allow numbers for employee ID
-                  if (value === '' || /^[0-9\b]+$/.test(value) || value.includes(' ')) {
-                    setEmployeeId(e.target.value);
-                  }
+                  setEmployeeId(e.target.value);
                 }}
               />
             </div>
@@ -248,7 +243,6 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Fix: Using "all-projects" instead of empty string */}
                   <SelectItem value="all-projects">All Projects</SelectItem>
                   {PROJECTS.map((p) => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
@@ -265,7 +259,6 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Fix: Using "all-categories" instead of empty string */}
                   <SelectItem value="all-categories">All Categories</SelectItem>
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
@@ -282,7 +275,6 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Classifications" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Fix: Using "all-classifications" instead of empty string */}
                   <SelectItem value="all-classifications">All Classifications</SelectItem>
                   {CLASSIFICATIONS.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
@@ -299,7 +291,6 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Entities" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Fix: Using "all-entities" instead of empty string */}
                   <SelectItem value="all-entities">All Entities</SelectItem>
                   {ENTITIES.map((e) => (
                     <SelectItem key={e} value={e}>{e}</SelectItem>
@@ -316,7 +307,6 @@ const AttendanceHistory = () => {
                   <SelectValue placeholder="All Modes" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Fix: Using "all-modes" instead of empty string */}
                   <SelectItem value="all-modes">All Modes</SelectItem>
                   <SelectItem value="Face">Face</SelectItem>
                   <SelectItem value="Manual">Manual</SelectItem>
