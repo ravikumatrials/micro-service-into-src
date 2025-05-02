@@ -572,19 +572,6 @@ const Employees = () => {
                       
                       <div className="text-sm text-gray-600 font-medium">Category:</div>
                       <div className="text-sm">{selectedEmployee.category}</div>
-                      
-                      <div className="text-sm text-gray-600 font-medium">Status:</div>
-                      <div>
-                        <Badge 
-                          className={
-                            selectedEmployee.status === "Active" 
-                              ? "bg-green-100 text-green-800" 
-                              : "bg-red-100 text-red-800"
-                          }
-                        >
-                          {selectedEmployee.status}
-                        </Badge>
-                      </div>
                     </div>
                   </div>
                   
