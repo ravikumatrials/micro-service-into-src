@@ -34,7 +34,7 @@ const Login = () => {
     setError("");
 
     if (
-      credentials.email === "admin@proscape.com" &&
+      credentials.email === "admin@tanseeq.com" &&
       credentials.password === "123456"
     ) {
       toast.success("Login successful!");
