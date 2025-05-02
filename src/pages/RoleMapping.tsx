@@ -104,10 +104,6 @@ const RoleMapping = () => {
                     </Badge>
                   )}
                 </div>
-                <div className="text-sm text-gray-600">
-                  <p>Location: {employee.location}</p>
-                  <p>Project: {employee.project}</p>
-                </div>
                 <Button 
                   variant="outline" 
                   className="w-full mt-2"
@@ -124,8 +120,6 @@ const RoleMapping = () => {
               <TableRow>
                 <TableHead>Employee Name</TableHead>
                 <TableHead>Employee ID</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Project</TableHead>
                 <TableHead>Current Role</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -135,8 +129,6 @@ const RoleMapping = () => {
                 <TableRow key={employee.id}>
                   <TableCell className="font-medium">{employee.name}</TableCell>
                   <TableCell>{employee.employeeId}</TableCell>
-                  <TableCell>{employee.location}</TableCell>
-                  <TableCell>{employee.project}</TableCell>
                   <TableCell>
                     {employee.currentRole && (
                       <Badge className="bg-green-100 text-green-800 border-green-200">
