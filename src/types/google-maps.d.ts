@@ -137,4 +137,5 @@ declare namespace google {
 
 interface Window {
   google: typeof google;
+  initMap: () => void;
 }

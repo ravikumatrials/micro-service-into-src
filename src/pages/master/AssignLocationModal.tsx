@@ -1,10 +1,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { MapPin, Hexagon } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader } from "@googlemaps/js-api-loader";
 
 interface AssignLocationProps {
   project: any;
@@ -27,25 +26,53 @@ export default function AssignLocationModal({
   const [polygonComplete, setPolygonComplete] = useState(false);
   const [polygonCoordinates, setPolygonCoordinates] = useState<Array<{lat: number, lng: number}>>([]);
   const { toast } = useToast();
+  const [mapLoading, setMapLoading] = useState(false);
 
   // Initialize map when modal opens
   useEffect(() => {
-    if (!open || !mapRef.current || mapLoaded) return;
+    if (!open || !mapRef.current) return;
+    
+    if (mapLoaded) {
+      // If map was already loaded but modal was closed and reopened
+      setTimeout(() => {
+        if (googleMapRef.current) {
+          google.maps.event.trigger(googleMapRef.current, 'resize');
+          
+          // If project has coordinates, fit bounds to the polygon
+          if (project?.coordinates?.geofenceData && polygonRef.current) {
+            try {
+              const geofenceData = JSON.parse(project.coordinates.geofenceData);
+              const bounds = new google.maps.LatLngBounds();
+              geofenceData.forEach((point: {lat: number, lng: number}) => {
+                bounds.extend(new google.maps.LatLng(point.lat, point.lng));
+              });
+              googleMapRef.current.fitBounds(bounds);
+            } catch (e) {
+              console.error("Error fitting bounds to polygon", e);
+            }
+          }
+        }
+      }, 300);
+      return;
+    }
+    
+    setMapLoading(true);
 
-    // In a real app, you would use your Google Maps API key
-    const loader = new Loader({
-      apiKey: "DEMO_API_KEY_REPLACE_IN_PRODUCTION",
-      version: "weekly",
-      libraries: ["drawing"]
-    });
-
-    loader
-      .load()
-      .then((google: any) => {
+    // Google Maps API script loading
+    const loadGoogleMapsApi = () => {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=DEMO_API_KEY_REPLACE_IN_PRODUCTION&libraries=drawing&callback=initMap`;
+      script.defer = true;
+      script.async = true;
+      
+      // Define the callback function that will be called when the script loads
+      window.initMap = () => {
+        if (!mapRef.current) return;
+        
         const defaultPosition = { lat: 25.276987, lng: 55.296249 }; // Default to Dubai
         
         // Create map
-        const map = new google.maps.Map(mapRef.current!, {
+        const map = new google.maps.Map(mapRef.current, {
           center: defaultPosition,
           zoom: 14,
           mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -103,6 +130,15 @@ export default function AssignLocationModal({
             
             // Switch drawing manager to edit mode since we already have a polygon
             drawingManager.setDrawingMode(null);
+            
+            // Add listener for path changes (when user edits the polygon)
+            google.maps.event.addListener(polygon.getPath(), 'set_at', function() {
+              updatePolygonCoordinates(polygon);
+            });
+            
+            google.maps.event.addListener(polygon.getPath(), 'insert_at', function() {
+              updatePolygonCoordinates(polygon);
+            });
           } catch (e) {
             console.error("Error parsing geofence data", e);
             toast({
@@ -144,21 +180,24 @@ export default function AssignLocationModal({
         googleMapRef.current = map;
         drawingManagerRef.current = drawingManager;
         setMapLoaded(true);
-      })
-      .catch(error => {
-        console.error("Error loading Google Maps", error);
-        toast({
-          title: "Error",
-          description: "Failed to load Google Maps. Please try again.",
-          variant: "destructive"
-        });
-      });
-
+        setMapLoading(false);
+      };
+      
+      document.head.appendChild(script);
+      
+      return () => {
+        // Clean up the global callback when the component is unmounted
+        delete window.initMap;
+        // Remove the script tag
+        document.head.removeChild(script);
+      };
+    };
+    
+    // Load the Google Maps API
+    loadGoogleMapsApi();
+    
     return () => {
-      // Cleanup
-      googleMapRef.current = null;
-      drawingManagerRef.current = null;
-      polygonRef.current = null;
+      // Additional cleanup if needed
     };
   }, [open, project, mapLoaded, toast]);
 
@@ -177,18 +216,6 @@ export default function AssignLocationModal({
     
     setPolygonCoordinates(coordinates);
   };
-
-  // Resize map when modal content is visible
-  useEffect(() => {
-    if (open && googleMapRef.current && mapLoaded) {
-      setTimeout(() => {
-        const google = window.google;
-        if (google && googleMapRef.current) {
-          google.maps.event.trigger(googleMapRef.current, 'resize');
-        }
-      }, 100);
-    }
-  }, [open, mapLoaded]);
 
   const handleSave = () => {
     if (!polygonComplete || polygonCoordinates.length < 3) {
@@ -237,6 +264,9 @@ export default function AssignLocationModal({
             <Hexagon className="h-5 w-5 text-proscape" />
             Assign Location Perimeter
           </DialogTitle>
+          <DialogDescription>
+            Define the geographical boundary for this project
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-3">
@@ -255,7 +285,7 @@ export default function AssignLocationModal({
               style={{ height: '100%', width: '100%' }}
             />
 
-            {!mapLoaded && (
+            {(!mapLoaded || mapLoading) && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-md">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-proscape mx-auto"></div>
