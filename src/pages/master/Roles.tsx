@@ -2,15 +2,18 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash, X } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// Mock data
+// Updated mock data with separate web and mobile permissions
 const initialRoles = [
   { 
     id: 1, 
     code: "LAB", 
     name: "Labour", 
     description: "Regular construction worker with basic permissions", 
-    permissions: ["Self Attendance"], 
+    webPermissions: [], 
+    mobilePermissions: ["Self Attendance"],
     createdAt: "01/01/2023"
   },
   { 
@@ -18,7 +21,8 @@ const initialRoles = [
     code: "SUP", 
     name: "Supervisor", 
     description: "Manages workers and can mark their attendance", 
-    permissions: ["Self Attendance", "Mark Attendance", "View Reports"], 
+    webPermissions: ["Attendance History", "View Reports"], 
+    mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History"],
     createdAt: "01/01/2023"
   },
   { 
@@ -26,7 +30,8 @@ const initialRoles = [
     code: "SADM", 
     name: "Super Admin", 
     description: "Has full access to all system functionalities", 
-    permissions: ["Self Attendance", "Mark Attendance", "View Reports", "Manage Employees", "Manage Roles", "Manage Projects", "Manage Locations", "Export Data", "System Settings"], 
+    webPermissions: ["Manual Attendance", "Attendance History", "View Reports", "Manage Employees", "Manage Projects", "Manage Roles", "Manage Locations", "Export Reports"], 
+    mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History", "Manage Employees"],
     createdAt: "01/01/2023"
   },
   { 
@@ -34,22 +39,29 @@ const initialRoles = [
     code: "RADM", 
     name: "Report Admin", 
     description: "Can view and export all reports", 
-    permissions: ["Self Attendance", "View Reports", "Export Data"], 
+    webPermissions: ["Attendance History", "View Reports", "Export Reports"], 
+    mobilePermissions: ["Attendance History"],
     createdAt: "01/01/2023"
   },
 ];
 
-// List of all possible permissions
-const allPermissions = [
-  "Self Attendance",
-  "Mark Attendance",
+// Lists of all possible permissions separated by platform
+const webPermissions = [
+  "Manual Attendance",
+  "Attendance History",
   "View Reports",
   "Manage Employees",
-  "Manage Roles",
   "Manage Projects",
+  "Manage Roles",
   "Manage Locations",
-  "Export Data",
-  "System Settings"
+  "Export Reports"
+];
+
+const mobilePermissions = [
+  "Self Attendance",
+  "Mark Attendance",
+  "Attendance History",
+  "Manage Employees"
 ];
 
 const Roles = () => {
@@ -62,8 +74,10 @@ const Roles = () => {
     code: "",
     name: "",
     description: "",
-    permissions: []
+    webPermissions: [],
+    mobilePermissions: []
   });
+  const [activeTab, setActiveTab] = useState("web");
 
   // Filter roles based on search term
   const filteredRoles = roles.filter((role) => 
@@ -72,23 +86,45 @@ const Roles = () => {
     role.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handlePermissionChange = (permission) => {
+  const handleWebPermissionChange = (permission) => {
     if (isEditModalOpen) {
       // For editing
       const updatedRole = {...selectedRole};
-      if (updatedRole.permissions.includes(permission)) {
-        updatedRole.permissions = updatedRole.permissions.filter(p => p !== permission);
+      if (updatedRole.webPermissions.includes(permission)) {
+        updatedRole.webPermissions = updatedRole.webPermissions.filter(p => p !== permission);
       } else {
-        updatedRole.permissions = [...updatedRole.permissions, permission];
+        updatedRole.webPermissions = [...updatedRole.webPermissions, permission];
       }
       setSelectedRole(updatedRole);
     } else {
       // For creating
       const updatedNewRole = {...newRole};
-      if (updatedNewRole.permissions.includes(permission)) {
-        updatedNewRole.permissions = updatedNewRole.permissions.filter(p => p !== permission);
+      if (updatedNewRole.webPermissions.includes(permission)) {
+        updatedNewRole.webPermissions = updatedNewRole.webPermissions.filter(p => p !== permission);
       } else {
-        updatedNewRole.permissions = [...updatedNewRole.permissions, permission];
+        updatedNewRole.webPermissions = [...updatedNewRole.webPermissions, permission];
+      }
+      setNewRole(updatedNewRole);
+    }
+  };
+
+  const handleMobilePermissionChange = (permission) => {
+    if (isEditModalOpen) {
+      // For editing
+      const updatedRole = {...selectedRole};
+      if (updatedRole.mobilePermissions.includes(permission)) {
+        updatedRole.mobilePermissions = updatedRole.mobilePermissions.filter(p => p !== permission);
+      } else {
+        updatedRole.mobilePermissions = [...updatedRole.mobilePermissions, permission];
+      }
+      setSelectedRole(updatedRole);
+    } else {
+      // For creating
+      const updatedNewRole = {...newRole};
+      if (updatedNewRole.mobilePermissions.includes(permission)) {
+        updatedNewRole.mobilePermissions = updatedNewRole.mobilePermissions.filter(p => p !== permission);
+      } else {
+        updatedNewRole.mobilePermissions = [...updatedNewRole.mobilePermissions, permission];
       }
       setNewRole(updatedNewRole);
     }
@@ -104,7 +140,8 @@ const Roles = () => {
       code: newRole.code,
       name: newRole.name,
       description: newRole.description,
-      permissions: newRole.permissions,
+      webPermissions: newRole.webPermissions,
+      mobilePermissions: newRole.mobilePermissions,
       createdAt: new Date().toLocaleDateString("en-US")
     };
     
@@ -116,7 +153,8 @@ const Roles = () => {
       code: "",
       name: "",
       description: "",
-      permissions: []
+      webPermissions: [],
+      mobilePermissions: []
     });
   };
 
@@ -140,6 +178,21 @@ const Roles = () => {
       const updatedRoles = roles.filter(role => role.id !== roleId);
       setRoles(updatedRoles);
     }
+  };
+
+  // Helper function to get combined permissions display for table
+  const getCombinedPermissionsDisplay = (role) => {
+    const combinedPermissions = [...role.webPermissions, ...role.mobilePermissions];
+    const uniquePermissions = Array.from(new Set(combinedPermissions));
+    
+    return uniquePermissions.slice(0, 2).map((permission, index) => (
+      <span 
+        key={index} 
+        className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded mr-1 mb-1"
+      >
+        {permission}
+      </span>
+    ));
   };
 
   return (
@@ -192,17 +245,10 @@ const Roles = () => {
                     <td className="px-4 py-3">{role.description}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
-                        {role.permissions.slice(0, 2).map((permission, index) => (
-                          <span 
-                            key={index} 
-                            className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
-                          >
-                            {permission}
-                          </span>
-                        ))}
-                        {role.permissions.length > 2 && (
+                        {getCombinedPermissionsDisplay(role)}
+                        {(role.webPermissions.length + role.mobilePermissions.length) > 2 && (
                           <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
-                            +{role.permissions.length - 2} more
+                            +{(role.webPermissions.length + role.mobilePermissions.length) - 2} more
                           </span>
                         )}
                       </div>
@@ -303,22 +349,46 @@ const Roles = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Permissions
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {allPermissions.map((permission, index) => (
-                    <div key={index} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`permission-${index}`}
-                        className="h-4 w-4 text-proscape focus:ring-proscape border-gray-300 rounded"
-                        checked={newRole.permissions.includes(permission)}
-                        onChange={() => handlePermissionChange(permission)}
-                      />
-                      <label htmlFor={`permission-${index}`} className="ml-2 block text-sm text-gray-900">
-                        {permission}
-                      </label>
+                <Tabs defaultValue="web" className="w-full" onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="web">Web Permissions</TabsTrigger>
+                    <TabsTrigger value="mobile">Mobile Permissions</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="web" className="mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {webPermissions.map((permission, index) => (
+                        <div key={index} className="flex items-center">
+                          <Checkbox
+                            id={`web-permission-${index}`}
+                            checked={newRole.webPermissions.includes(permission)}
+                            onCheckedChange={() => handleWebPermissionChange(permission)}
+                          />
+                          <label htmlFor={`web-permission-${index}`} className="ml-2 block text-sm text-gray-900">
+                            {permission}
+                          </label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="mobile" className="mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {mobilePermissions.map((permission, index) => (
+                        <div key={index} className="flex items-center">
+                          <Checkbox
+                            id={`mobile-permission-${index}`}
+                            checked={newRole.mobilePermissions.includes(permission)}
+                            onCheckedChange={() => handleMobilePermissionChange(permission)}
+                          />
+                          <label htmlFor={`mobile-permission-${index}`} className="ml-2 block text-sm text-gray-900">
+                            {permission}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
             
@@ -400,23 +470,49 @@ const Roles = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Permissions
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {allPermissions.map((permission, index) => (
-                    <div key={index} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`edit-permission-${index}`}
-                        className="h-4 w-4 text-proscape focus:ring-proscape border-gray-300 rounded"
-                        checked={selectedRole.permissions.includes(permission)}
-                        onChange={() => handlePermissionChange(permission)}
-                        disabled={selectedRole.code === "SADM" && permission === "System Settings"} // Prevent removing system settings from Super Admin
-                      />
-                      <label htmlFor={`edit-permission-${index}`} className="ml-2 block text-sm text-gray-900">
-                        {permission}
-                      </label>
+                <Tabs defaultValue="web" className="w-full" onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="web">Web Permissions</TabsTrigger>
+                    <TabsTrigger value="mobile">Mobile Permissions</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="web" className="mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {webPermissions.map((permission, index) => (
+                        <div key={index} className="flex items-center">
+                          <Checkbox
+                            id={`edit-web-permission-${index}`}
+                            checked={selectedRole.webPermissions.includes(permission)}
+                            onCheckedChange={() => handleWebPermissionChange(permission)}
+                            disabled={selectedRole.code === "SADM" && ["Manage Roles", "System Settings"].includes(permission)}
+                          />
+                          <label htmlFor={`edit-web-permission-${index}`} className="ml-2 block text-sm text-gray-900">
+                            {permission}
+                          </label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="mobile" className="mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {mobilePermissions.map((permission, index) => (
+                        <div key={index} className="flex items-center">
+                          <Checkbox
+                            id={`edit-mobile-permission-${index}`}
+                            checked={selectedRole.mobilePermissions.includes(permission)}
+                            onCheckedChange={() => handleMobilePermissionChange(permission)}
+                            disabled={selectedRole.code === "SADM" && permission === "Self Attendance"}
+                          />
+                          <label htmlFor={`edit-mobile-permission-${index}`} className="ml-2 block text-sm text-gray-900">
+                            {permission}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+                
                 {selectedRole.code === "SADM" && (
                   <p className="mt-2 text-xs text-amber-500">
                     Note: Some permissions cannot be removed from the Super Admin role
