@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -47,10 +46,6 @@ const menuItems: MenuItem[] = [
       {
         name: "Projects",
         path: "/master/projects"
-      },
-      {
-        name: "Location",
-        path: "/master/location"
       },
       {
         name: "Roles",
