@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 
 // Mock data type for attendance records
 export interface AttendanceRecord {
@@ -43,7 +42,6 @@ const ManualAttendanceTable: React.FC<ManualAttendanceTableProps> = ({
             <TableHead className="font-semibold">Employee Name</TableHead>
             <TableHead className="font-semibold">Classification</TableHead>
             <TableHead className="font-semibold">Category</TableHead>
-            <TableHead className="font-semibold">Status</TableHead>
             <TableHead className="font-semibold">Check-In (Project)</TableHead>
             <TableHead className="font-semibold">Check-Out (Project)</TableHead>
           </TableRow>
@@ -56,14 +54,6 @@ const ManualAttendanceTable: React.FC<ManualAttendanceTableProps> = ({
                 <TableCell>{record.employeeName}</TableCell>
                 <TableCell>{record.classification}</TableCell>
                 <TableCell>{record.category}</TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={record.status === "Active" ? "default" : "destructive"}
-                    className={record.status === "Active" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
-                  >
-                    {record.status}
-                  </Badge>
-                </TableCell>
                 <TableCell>
                   <div>
                     <div className="font-medium">{record.checkInTime}</div>
@@ -84,7 +74,7 @@ const ManualAttendanceTable: React.FC<ManualAttendanceTableProps> = ({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                 No attendance records found
               </TableCell>
             </TableRow>

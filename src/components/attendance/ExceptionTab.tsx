@@ -4,7 +4,6 @@ import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
 
@@ -126,7 +125,6 @@ const ExceptionTab = ({
               <TableHead className="w-[170px]">Employee Name</TableHead>
               <TableHead>Classification</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Check-in Time</TableHead>
               <TableHead>Project</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -135,7 +133,7 @@ const ExceptionTab = ({
           <TableBody>
             {filteredPendingCheckouts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
                   No pending checkouts found matching your filters
                 </TableCell>
               </TableRow>
@@ -153,14 +151,6 @@ const ExceptionTab = ({
                   </TableCell>
                   <TableCell>{employee.classification}</TableCell>
                   <TableCell>{employee.category}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={employee.status === "Active" ? "default" : "destructive"}
-                      className={employee.status === "Active" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
-                    >
-                      {employee.status}
-                    </Badge>
-                  </TableCell>
                   <TableCell>{employee.checkInTime}</TableCell>
                   <TableCell>{employee.project}</TableCell>
                   <TableCell className="text-right">

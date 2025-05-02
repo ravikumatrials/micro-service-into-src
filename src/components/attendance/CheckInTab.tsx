@@ -4,7 +4,6 @@ import { Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import ManualCheckInDialog from "./dialogs/ManualCheckInDialog";
 import { toast } from "sonner";
 
@@ -176,7 +175,6 @@ const CheckInTab = ({
               <TableHead className="w-[170px]">Employee Name</TableHead>
               <TableHead>Classification</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Check-In Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -196,14 +194,6 @@ const CheckInTab = ({
                   </TableCell>
                   <TableCell>{employee.classification}</TableCell>
                   <TableCell>{employee.category}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={employee.activeStatus === "Active" ? "default" : "destructive"}
-                      className={employee.activeStatus === "Active" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
-                    >
-                      {employee.activeStatus}
-                    </Badge>
-                  </TableCell>
                   <TableCell>
                     {employee.status === "checkedin" ? (
                       <div className="flex items-center text-green-600">
@@ -235,7 +225,7 @@ const CheckInTab = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={6} className="text-center py-10 text-gray-500">
                   No employees found matching your filters
                 </TableCell>
               </TableRow>

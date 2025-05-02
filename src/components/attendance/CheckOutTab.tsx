@@ -4,7 +4,6 @@ import { Edit, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
 
@@ -139,7 +138,6 @@ const CheckOutTab = ({
               <TableHead className="w-[170px]">Employee Name</TableHead>
               <TableHead>Classification</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Check-in Time</TableHead>
               <TableHead>Project</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -148,7 +146,7 @@ const CheckOutTab = ({
           <TableBody>
             {filteredEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
                   No checked-in employees found matching your filters
                 </TableCell>
               </TableRow>
@@ -166,14 +164,6 @@ const CheckOutTab = ({
                   </TableCell>
                   <TableCell>{employee.classification}</TableCell>
                   <TableCell>{employee.category}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={employee.status === "Active" ? "default" : "destructive"}
-                      className={employee.status === "Active" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
-                    >
-                      {employee.status}
-                    </Badge>
-                  </TableCell>
                   <TableCell>
                     <div className="flex items-center text-gray-600">
                       <UserCheck className="h-4 w-4 mr-1 text-green-600" />
