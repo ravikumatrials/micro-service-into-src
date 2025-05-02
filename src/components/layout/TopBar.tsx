@@ -27,7 +27,7 @@ export function TopBar() {
             <div className="flex items-center justify-between">
               <div className="flex-shrink-0">
                 <h1 className="text-lg sm:text-xl font-bold text-proscape dark:text-proscape-light">
-                  Tanseeq Investment Facial Attendance System
+                  Tanseeq Investment
                 </h1>
               </div>
             </div>

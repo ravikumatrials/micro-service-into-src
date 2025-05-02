@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
@@ -93,10 +94,10 @@ const Login = () => {
             className="h-12 w-12"
           />
           <h2 className="text-2xl font-bold text-gray-900">
-            Tanseeq Investment Facial Attendance System
+            Tanseeq Investment
           </h2>
           <p className="text-sm text-gray-600">
-            Welcome to Tanseeq Investment Facial Attendance System
+            Welcome to Tanseeq Investment
           </p>
         </div>
 
@@ -170,7 +171,7 @@ const Login = () => {
 
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500">
-            &copy; 2025 Tanseeq Investment Company
+            &copy; 2025 Tanseeq Investment
           </p>
         </div>
       </div>
