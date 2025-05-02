@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Eye, Trash, User, Search, Filter, Check, X } from "lucide-react";
+import { Eye, User, Search, Filter, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
@@ -13,23 +13,13 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -284,7 +274,6 @@ const Employees = () => {
   const [entityFilter, setEntityFilter] = useState("all");
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
   const [isTanseeqModalOpen, setIsTanseeqModalOpen] = useState(false);
@@ -317,17 +306,6 @@ const Employees = () => {
   const handleEmployeeView = (employee) => {
     setSelectedEmployee(employee);
     setIsViewModalOpen(true);
-  };
-
-  const handleDeleteConfirm = (employee) => {
-    setSelectedEmployee(employee);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDelete = () => {
-    const updatedEmployees = employees.filter(emp => emp.id !== selectedEmployee.id);
-    setEmployees(updatedEmployees);
-    setIsDeleteDialogOpen(false);
   };
 
   const toggleEmployeeStatus = (employeeId) => {
@@ -522,24 +500,6 @@ const Employees = () => {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                        
-                        {currentUserRole === "Super Admin" && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button 
-                                  onClick={() => handleDeleteConfirm(employee)}
-                                  className="text-red-500 hover:text-red-700 p-1"
-                                >
-                                  <Trash className="h-4 w-4" />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Delete Employee</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -716,27 +676,6 @@ const Employees = () => {
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Employee</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {selectedEmployee?.name}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {isTanseeqModalOpen && (
         <TanseeqImportModal 
