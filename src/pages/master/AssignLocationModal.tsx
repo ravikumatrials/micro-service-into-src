@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useRef } from "react";
-import { MapPin, Hexagon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MapPin, Hexagon, Square } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -18,242 +18,55 @@ export default function AssignLocationModal({
   onOpenChange,
   onSave
 }: AssignLocationProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const googleMapRef = useRef<google.maps.Map | null>(null);
-  const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null);
-  const polygonRef = useRef<google.maps.Polygon | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [polygonComplete, setPolygonComplete] = useState(false);
   const [polygonCoordinates, setPolygonCoordinates] = useState<Array<{lat: number, lng: number}>>([]);
   const { toast } = useToast();
-  const [mapLoading, setMapLoading] = useState(false);
-
-  // Initialize map when modal opens
+  const [simulated, setSimulated] = useState(true);
+  
+  // Generate random polygon coordinates for simulation
   useEffect(() => {
-    if (!open || !mapRef.current) return;
+    if (!open) return;
     
-    if (mapLoaded) {
-      // If map was already loaded but modal was closed and reopened
-      setTimeout(() => {
-        if (googleMapRef.current) {
-          google.maps.event.trigger(googleMapRef.current, 'resize');
-          
-          // If project has coordinates, fit bounds to the polygon
-          if (project?.coordinates?.geofenceData && polygonRef.current) {
-            try {
-              const geofenceData = JSON.parse(project.coordinates.geofenceData);
-              const bounds = new google.maps.LatLngBounds();
-              geofenceData.forEach((point: {lat: number, lng: number}) => {
-                bounds.extend(new google.maps.LatLng(point.lat, point.lng));
-              });
-              googleMapRef.current.fitBounds(bounds);
-            } catch (e) {
-              console.error("Error fitting bounds to polygon", e);
-            }
-          }
-        }
-      }, 300);
-      return;
+    // Check if project already has coordinates
+    if (project?.coordinates?.geofenceData) {
+      try {
+        const parsedCoordinates = JSON.parse(project.coordinates.geofenceData);
+        setPolygonCoordinates(parsedCoordinates);
+        return;
+      } catch (e) {
+        console.error("Error parsing geofence data", e);
+      }
     }
     
-    setMapLoading(true);
-
-    // Google Maps API script loading
-    const loadGoogleMapsApi = () => {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=DEMO_API_KEY_REPLACE_IN_PRODUCTION&libraries=drawing&callback=initMap`;
-      script.defer = true;
-      script.async = true;
-      
-      // Define the callback function that will be called when the script loads
-      window.initMap = () => {
-        if (!mapRef.current) return;
-        
-        const defaultPosition = { lat: 25.276987, lng: 55.296249 }; // Default to Dubai
-        
-        // Create map
-        const map = new google.maps.Map(mapRef.current, {
-          center: defaultPosition,
-          zoom: 14,
-          mapTypeId: google.maps.MapTypeId.ROADMAP,
-          streetViewControl: false,
-          mapTypeControl: false,
-        });
-
-        // Initialize drawing manager for polygon creation
-        const drawingManager = new google.maps.drawing.DrawingManager({
-          drawingMode: google.maps.drawing.OverlayType.POLYGON,
-          drawingControl: true,
-          drawingControlOptions: {
-            position: google.maps.ControlPosition.TOP_CENTER,
-            drawingModes: [google.maps.drawing.OverlayType.POLYGON]
-          },
-          polygonOptions: {
-            fillColor: "#42a5f5",
-            fillOpacity: 0.3,
-            strokeWeight: 2,
-            strokeColor: "#1976d2",
-            clickable: true,
-            editable: true,
-            zIndex: 1
-          }
-        });
-
-        drawingManager.setMap(map);
-        
-        // If project already has geofence data, display it
-        if (project?.coordinates?.geofenceData) {
-          try {
-            const geofenceData = JSON.parse(project.coordinates.geofenceData);
-            
-            // Create a polygon with the saved coordinates
-            const polygon = new google.maps.Polygon({
-              paths: geofenceData,
-              fillColor: "#42a5f5",
-              fillOpacity: 0.3,
-              strokeWeight: 2,
-              strokeColor: "#1976d2",
-              editable: true
-            });
-            
-            polygon.setMap(map);
-            polygonRef.current = polygon;
-            setPolygonCoordinates(geofenceData);
-            setPolygonComplete(true);
-            
-            // Fit the map to the polygon bounds
-            const bounds = new google.maps.LatLngBounds();
-            geofenceData.forEach((point: {lat: number, lng: number}) => {
-              bounds.extend(new google.maps.LatLng(point.lat, point.lng));
-            });
-            map.fitBounds(bounds);
-            
-            // Switch drawing manager to edit mode since we already have a polygon
-            drawingManager.setDrawingMode(null);
-            
-            // Add listener for path changes (when user edits the polygon)
-            google.maps.event.addListener(polygon.getPath(), 'set_at', function() {
-              updatePolygonCoordinates(polygon);
-            });
-            
-            google.maps.event.addListener(polygon.getPath(), 'insert_at', function() {
-              updatePolygonCoordinates(polygon);
-            });
-          } catch (e) {
-            console.error("Error parsing geofence data", e);
-            toast({
-              title: "Error",
-              description: "Could not load existing location perimeter data.",
-              variant: "destructive"
-            });
-          }
-        }
-        
-        // Handle polygon complete event
-        google.maps.event.addListener(drawingManager, 'polygoncomplete', function(polygon) {
-          // Store reference to the polygon
-          polygonRef.current = polygon;
-          
-          // Get polygon coordinates
-          const coordinates = polygon.getPath().getArray().map(coord => ({
-            lat: coord.lat(),
-            lng: coord.lng()
-          }));
-          
-          setPolygonCoordinates(coordinates);
-          setPolygonComplete(true);
-          
-          // Switch to selection mode after drawing is complete
-          drawingManager.setDrawingMode(null);
-          
-          // Add listener for path changes (when user edits the polygon)
-          google.maps.event.addListener(polygon.getPath(), 'set_at', function() {
-            updatePolygonCoordinates(polygon);
-          });
-          
-          google.maps.event.addListener(polygon.getPath(), 'insert_at', function() {
-            updatePolygonCoordinates(polygon);
-          });
-        });
-        
-        // Store references
-        googleMapRef.current = map;
-        drawingManagerRef.current = drawingManager;
-        setMapLoaded(true);
-        setMapLoading(false);
-      };
-      
-      document.head.appendChild(script);
-      
-      return () => {
-        // Clean up the global callback when the component is unmounted
-        delete window.initMap;
-        // Remove the script tag
-        document.head.removeChild(script);
-      };
-    };
+    // Generate random coordinates for simulated polygon
+    const center = { lat: 25.276987, lng: 55.296249 }; // Default point (Dubai)
+    const points = 6; // Hexagon
+    const radius = 0.01; // Small radius for the polygon
     
-    // Load the Google Maps API
-    loadGoogleMapsApi();
-    
-    return () => {
-      // Additional cleanup if needed
-    };
-  }, [open, project, mapLoaded, toast]);
-
-  // Function to update coordinates when polygon is edited
-  const updatePolygonCoordinates = (polygon: google.maps.Polygon) => {
-    const path = polygon.getPath();
     const coordinates = [];
-    
-    for (let i = 0; i < path.getLength(); i++) {
-      const point = path.getAt(i);
+    for (let i = 0; i < points; i++) {
+      const angle = (i / points) * Math.PI * 2;
       coordinates.push({
-        lat: point.lat(),
-        lng: point.lng()
+        lat: center.lat + Math.sin(angle) * radius,
+        lng: center.lng + Math.cos(angle) * radius
       });
     }
     
     setPolygonCoordinates(coordinates);
-  };
+  }, [open, project]);
 
   const handleSave = () => {
-    if (!polygonComplete || polygonCoordinates.length < 3) {
-      toast({
-        title: "Error",
-        description: "Please draw a complete perimeter on the map",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Save the geofence data
+    // Prepare simulated polygon data
     const geofenceData = JSON.stringify(polygonCoordinates);
     onSave(project.id, geofenceData);
     
     // Show success toast
     toast({
       title: "Success",
-      description: "Location perimeter assigned successfully",
+      description: "Dummy location perimeter saved successfully.",
     });
     
     // Close the dialog
     onOpenChange(false);
-  };
-
-  const handleClearPolygon = () => {
-    if (polygonRef.current) {
-      polygonRef.current.setMap(null);
-      polygonRef.current = null;
-    }
-    
-    setPolygonCoordinates([]);
-    setPolygonComplete(false);
-    
-    // Set drawing mode back to polygon
-    if (drawingManagerRef.current) {
-      drawingManagerRef.current.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
-    }
   };
 
   return (
@@ -275,52 +88,73 @@ export default function AssignLocationModal({
           </div>
           
           <div className="text-xs text-gray-500 mb-2">
-            Draw a polygon to define the perimeter of the project area. Employees within this area will be recognized as present at this location.
+            The polygon below represents the simulated perimeter of the project area.
           </div>
 
-          <div className="relative h-[400px] w-full rounded-md border">
-            <div 
-              ref={mapRef} 
-              className="absolute inset-0 rounded-md"
-              style={{ height: '100%', width: '100%' }}
-            />
-
-            {(!mapLoaded || mapLoading) && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-md">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-proscape mx-auto"></div>
-                  <p className="mt-2 text-sm text-gray-600">Loading map...</p>
+          <div className="relative h-[400px] w-full rounded-md border border-gray-200 bg-gray-100 overflow-hidden">
+            {/* Static Map Placeholder */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 bg-[#F1F1F1] z-0"></div>
+              
+              {/* Map Label */}
+              <div className="absolute top-4 left-4 bg-white/80 px-3 py-1 rounded-md text-sm font-medium text-gray-500 shadow-sm z-10">
+                Map Preview (Simulated)
+              </div>
+              
+              {/* Grid lines to simulate map */}
+              <div className="absolute inset-0 grid grid-cols-8 grid-rows-6 z-0">
+                {Array.from({ length: 48 }).map((_, i) => (
+                  <div key={i} className="border border-gray-200/40"></div>
+                ))}
+              </div>
+              
+              {/* Simulated Polygon */}
+              <div className="relative w-3/4 h-3/4 max-w-md max-h-md z-10">
+                <svg width="100%" height="100%" viewBox="0 0 200 200" className="drop-shadow-sm">
+                  <polygon 
+                    points="100,20 160,50 160,150 100,180 40,150 40,50" 
+                    fill="#42a5f5" 
+                    fillOpacity="0.3" 
+                    stroke="#1976d2" 
+                    strokeWidth="2" 
+                  />
+                </svg>
+                
+                {/* Polygon Label */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 px-2 py-1 rounded text-xs font-medium text-gray-700 shadow-sm whitespace-nowrap">
+                  Simulated Project Perimeter
                 </div>
               </div>
-            )}
-          </div>
-
-          {polygonComplete && (
-            <div className="text-sm">
-              <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
-                <div className="flex items-center font-medium text-blue-800 mb-1">
-                  <Hexagon className="h-4 w-4 mr-1" /> 
-                  Location Perimeter Configured
+              
+              {/* Compass rose */}
+              <div className="absolute right-4 bottom-4 w-12 h-12 bg-white/80 rounded-full flex items-center justify-center shadow-sm z-10">
+                <div className="relative w-8 h-8">
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-600">N</div>
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-600">S</div>
+                  <div className="absolute top-1/2 left-0 transform -translate-y-1/2 text-xs font-bold text-gray-600">W</div>
+                  <div className="absolute top-1/2 right-0 transform -translate-y-1/2 text-xs font-bold text-gray-600">E</div>
                 </div>
-                <p className="text-xs text-blue-600">
-                  A perimeter with {polygonCoordinates.length} points has been defined for this project.
-                </p>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* Helper text */}
+          <div className="text-sm">
+            <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
+              <div className="flex items-center font-medium text-blue-800 mb-1">
+                <Square className="h-4 w-4 mr-1" /> 
+                Simulation Notice
+              </div>
+              <p className="text-xs text-blue-600">
+                This is a simulated project perimeter. Actual geofence will apply once integrated with Google Maps.
+              </p>
+            </div>
+          </div>
         </div>
 
         <DialogFooter className="flex gap-2 sm:justify-between">
           <div>
-            {polygonComplete && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClearPolygon}
-              >
-                Clear & Redraw
-              </Button>
-            )}
+            {/* You could add an option here to adjust the simulated polygon if needed */}
           </div>
           <div className="flex gap-2">
             <Button
@@ -332,7 +166,6 @@ export default function AssignLocationModal({
             <Button
               className="bg-proscape hover:bg-proscape-dark text-white"
               onClick={handleSave}
-              disabled={!polygonComplete}
             >
               Save Location
             </Button>
