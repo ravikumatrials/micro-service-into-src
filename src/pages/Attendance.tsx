@@ -17,6 +17,11 @@ const Attendance = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
+  
+  // Add new state variables for the additional filter properties
+  const [selectedClassification, setSelectedClassification] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   // Mock projects
   const projects = [
@@ -139,6 +144,9 @@ const Attendance = () => {
               selectedStatus="all"
               projects={projects}
               locations={locations}
+              selectedClassification={selectedClassification}
+              selectedCategory={selectedCategory}
+              selectedActiveStatus={selectedStatus}
             />
           </TabsContent>
 
@@ -149,6 +157,9 @@ const Attendance = () => {
               selectedLocation={selectedLocation}
               projects={projects}
               locations={locations}
+              selectedClassification={selectedClassification}
+              selectedCategory={selectedCategory}
+              selectedStatus={selectedStatus}
             />
           </TabsContent>
 
@@ -159,6 +170,9 @@ const Attendance = () => {
               selectedLocation={selectedLocation}
               projects={projects}
               locations={locations}
+              selectedClassification={selectedClassification}
+              selectedCategory={selectedCategory}
+              selectedStatus={selectedStatus}
             />
           </TabsContent>
         </Tabs>
@@ -168,4 +182,3 @@ const Attendance = () => {
 };
 
 export default Attendance;
-
