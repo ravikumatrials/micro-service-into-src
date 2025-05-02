@@ -16,10 +16,10 @@ import {
 } from "@/components/ui/table";
 
 const mockEmployees = [
-  { id: 1, name: "John Smith", employeeId: "EMP001", location: "Site A", project: "Project X", currentRole: "Labour" },
-  { id: 2, name: "Sarah Johnson", employeeId: "EMP002", location: "Site B", project: "Project Y", currentRole: "Supervisor" },
-  { id: 3, name: "Robert Williams", employeeId: "EMP003", location: "Site A", project: "Project X", currentRole: undefined },
-  { id: 4, name: "Emily Davis", employeeId: "EMP004", location: "Site C", project: "Project Z", currentRole: "Labour" },
+  { id: 1, name: "John Smith", employeeId: "EMP001", location: "Site A", project: "Project X", entity: "Tanseeq Investment", category: "Carpenter", classification: "Laborer", currentRole: "Labour" },
+  { id: 2, name: "Sarah Johnson", employeeId: "EMP002", location: "Site B", project: "Project Y", entity: "Tanseeq Landscaping LLC", category: "Manager", classification: "Staff", currentRole: "Supervisor" },
+  { id: 3, name: "Robert Williams", employeeId: "EMP003", location: "Site A", project: "Project X", entity: "Gulf Builders International", category: "Electrician", classification: "Laborer", currentRole: undefined },
+  { id: 4, name: "Emily Davis", employeeId: "EMP004", location: "Site C", project: "Project Z", entity: "Al Maha Projects", category: "Plumber", classification: "Laborer", currentRole: "Labour" },
 ];
 
 const mockRoles = [
@@ -33,16 +33,27 @@ const RoleMapping = () => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [entityFilter, setEntityFilter] = useState("all");
+  const [classificationFilter, setClassificationFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // Extract unique values for filters
+  const entities = Array.from(new Set(mockEmployees.map(emp => emp.entity)));
+  const classifications = Array.from(new Set(mockEmployees.map(emp => emp.classification)));
+  const categories = Array.from(new Set(mockEmployees.map(emp => emp.category)));
 
   const filteredEmployees = mockEmployees.filter(employee => {
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === "all" || employee.currentRole === roleFilter;
+    const matchesEntity = entityFilter === "all" || employee.entity === entityFilter;
+    const matchesClassification = classificationFilter === "all" || employee.classification === classificationFilter;
+    const matchesCategory = categoryFilter === "all" || employee.category === categoryFilter;
     
-    return matchesSearch && matchesRole;
+    return matchesSearch && matchesRole && matchesEntity && matchesClassification && matchesCategory;
   });
 
   const handleAssignRole = (employee) => {
@@ -59,6 +70,14 @@ const RoleMapping = () => {
     });
   };
 
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setRoleFilter("all");
+    setEntityFilter("all");
+    setClassificationFilter("all");
+    setCategoryFilter("all");
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -70,7 +89,17 @@ const RoleMapping = () => {
             setSearchTerm={setSearchTerm}
             roleFilter={roleFilter}
             setRoleFilter={setRoleFilter}
+            entityFilter={entityFilter}
+            setEntityFilter={setEntityFilter}
+            classificationFilter={classificationFilter}
+            setClassificationFilter={setClassificationFilter}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
             roles={mockRoles}
+            entities={entities}
+            classifications={classifications}
+            categories={categories}
+            onClearFilters={handleClearFilters}
           />
         </Card>
       </div>
@@ -84,6 +113,17 @@ const RoleMapping = () => {
                   <div>
                     <h3 className="font-medium">{employee.name}</h3>
                     <p className="text-sm text-gray-500">{employee.employeeId}</p>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm">
+                        <span className="font-medium">Entity:</span> {employee.entity}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Classification:</span> {employee.classification}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Category:</span> {employee.category}
+                      </p>
+                    </div>
                   </div>
                   {employee.currentRole && (
                     <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -105,8 +145,11 @@ const RoleMapping = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Employee Name</TableHead>
                 <TableHead>Employee ID</TableHead>
+                <TableHead>Employee Name</TableHead>
+                <TableHead>Entity</TableHead>
+                <TableHead>Classification</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Current Role</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -114,8 +157,11 @@ const RoleMapping = () => {
             <TableBody>
               {filteredEmployees.map((employee) => (
                 <TableRow key={employee.id}>
-                  <TableCell className="font-medium">{employee.name}</TableCell>
                   <TableCell>{employee.employeeId}</TableCell>
+                  <TableCell className="font-medium">{employee.name}</TableCell>
+                  <TableCell>{employee.entity}</TableCell>
+                  <TableCell>{employee.classification}</TableCell>
+                  <TableCell>{employee.category}</TableCell>
                   <TableCell>
                     {employee.currentRole && (
                       <Badge className="bg-green-100 text-green-800 border-green-200">
