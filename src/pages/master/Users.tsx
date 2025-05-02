@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { Eye } from "lucide-react";
+import { useState, useMemo } from 'react';
+import { Eye, Search, Building, User, Briefcase, ActivitySquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -27,6 +27,13 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Updated mock data to include roles
 const USERS = [
@@ -76,20 +83,73 @@ const USERS = [
   },
 ];
 
+// Extract unique values for filter dropdowns
+const getUniqueValues = (field: string) => {
+  const values = USERS.map((user) => user[field as keyof typeof user]);
+  return [...new Set(values)];
+};
+
+const ENTITIES = getUniqueValues('entity');
+const CATEGORIES = getUniqueValues('category');
+const CLASSIFICATIONS = getUniqueValues('classification');
+const STATUSES = getUniqueValues('status');
+const ROLES = getUniqueValues('role');
+
 const Users = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<typeof USERS[0] | null>(null);
+  
+  // Filter state
+  const [employeeIdFilter, setEmployeeIdFilter] = useState("");
+  const [nameFilter, setNameFilter] = useState("");
+  const [entityFilter, setEntityFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [classificationFilter, setClassificationFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  
+  // Filtered users
+  const filteredUsers = useMemo(() => {
+    return USERS.filter((user) => {
+      // Apply all filters
+      const matchesEmployeeId = user.employeeId.toLowerCase().includes(employeeIdFilter.toLowerCase());
+      const matchesName = user.name.toLowerCase().includes(nameFilter.toLowerCase());
+      const matchesEntity = entityFilter === "all" || user.entity === entityFilter;
+      const matchesCategory = categoryFilter === "all" || user.category === categoryFilter;
+      const matchesClassification = classificationFilter === "all" || user.classification === classificationFilter;
+      const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
+      
+      return (
+        matchesEmployeeId &&
+        matchesName &&
+        matchesEntity &&
+        matchesCategory &&
+        matchesClassification &&
+        matchesStatus &&
+        matchesRole
+      );
+    });
+  }, [
+    employeeIdFilter,
+    nameFilter,
+    entityFilter,
+    categoryFilter,
+    classificationFilter,
+    statusFilter,
+    roleFilter,
+  ]);
 
-  // Filter users based on search query
-  const filteredUsers = USERS.filter((user) => {
-    return (
-      user.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.entity.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  // Clear all filters
+  const handleClearFilters = () => {
+    setEmployeeIdFilter("");
+    setNameFilter("");
+    setEntityFilter("all");
+    setCategoryFilter("all");
+    setClassificationFilter("all");
+    setStatusFilter("all");
+    setRoleFilter("all");
+  };
 
   // Open view modal
   const handleOpenViewModal = (user: typeof USERS[0]) => {
@@ -104,15 +164,183 @@ const Users = () => {
         
         {/* Search and Filter Section */}
         <Card className="p-5 mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="relative w-full md:w-96">
-              <Input
-                placeholder="Search by ID, name, entity or category..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
-              />
-              <Eye className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Employee ID Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Employee ID
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="Search by Employee ID"
+                    value={employeeIdFilter}
+                    onChange={(e) => setEmployeeIdFilter(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              {/* Name Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="Search by Name"
+                    value={nameFilter}
+                    onChange={(e) => setNameFilter(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              {/* Entity Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Entity
+                </label>
+                <div className="relative">
+                  <Select value={entityFilter} onValueChange={setEntityFilter}>
+                    <SelectTrigger className="w-full">
+                      <div className="flex items-center">
+                        <Building className="h-4 w-4 text-gray-400 mr-2" />
+                        <SelectValue placeholder="All Entities" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Entities</SelectItem>
+                      {ENTITIES.map((entity) => (
+                        <SelectItem key={entity} value={entity}>
+                          {entity}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {/* Category Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <div className="relative">
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="w-full">
+                      <div className="flex items-center">
+                        <Briefcase className="h-4 w-4 text-gray-400 mr-2" />
+                        <SelectValue placeholder="All Categories" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {CATEGORIES.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {/* Classification Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Classification
+                </label>
+                <div className="relative">
+                  <Select value={classificationFilter} onValueChange={setClassificationFilter}>
+                    <SelectTrigger className="w-full">
+                      <div className="flex items-center">
+                        <User className="h-4 w-4 text-gray-400 mr-2" />
+                        <SelectValue placeholder="All Classifications" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Classifications</SelectItem>
+                      {CLASSIFICATIONS.map((classification) => (
+                        <SelectItem key={classification} value={classification}>
+                          {classification}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {/* Status Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <div className="relative">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full">
+                      <div className="flex items-center">
+                        <ActivitySquare className="h-4 w-4 text-gray-400 mr-2" />
+                        <SelectValue placeholder="All Statuses" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      {STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {/* Role Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <div className="relative">
+                  <Select value={roleFilter} onValueChange={setRoleFilter}>
+                    <SelectTrigger className="w-full">
+                      <div className="flex items-center">
+                        <User className="h-4 w-4 text-gray-400 mr-2" />
+                        <SelectValue placeholder="All Roles" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Roles</SelectItem>
+                      {ROLES.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3">
+              <Button 
+                variant="outline" 
+                onClick={handleClearFilters}
+              >
+                Clear All
+              </Button>
+              <Button className="bg-green-600 hover:bg-green-700">
+                Apply Filters
+              </Button>
             </div>
           </div>
         </Card>
