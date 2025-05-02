@@ -4,11 +4,13 @@ import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
 
 interface Employee {
   id: number;
+  employeeId: string;
   name: string;
   role: string;
   project: string;
@@ -17,12 +19,18 @@ interface Employee {
   locationId: number;
   checkInTime: string;
   imageUrl: string;
+  classification: string;
+  category: string;
+  status: "Active" | "Inactive";
 }
 
 interface ExceptionTabProps {
   searchQuery: string;
   selectedProject: string;
   selectedLocation: string;
+  selectedClassification: string;
+  selectedCategory: string;
+  selectedStatus: string;
   projects: { id: number; name: string }[];
   locations: { id: number; name: string }[];
 }
@@ -31,6 +39,9 @@ const ExceptionTab = ({
   searchQuery,
   selectedProject,
   selectedLocation,
+  selectedClassification,
+  selectedCategory,
+  selectedStatus,
   projects,
   locations
 }: ExceptionTabProps) => {
@@ -41,6 +52,7 @@ const ExceptionTab = ({
   const mockPendingCheckouts: Employee[] = [
     {
       id: 8,
+      employeeId: "10008",
       name: "Thomas Harris",
       role: "Construction Worker",
       project: "Main Building Construction",
@@ -48,10 +60,14 @@ const ExceptionTab = ({
       location: "Site A",
       locationId: 1,
       checkInTime: "08:15 AM",
-      imageUrl: "https://randomuser.me/api/portraits/men/4.jpg"
+      imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
+      classification: "Laborer",
+      category: "Carpenter",
+      status: "Active"
     },
     {
       id: 9,
+      employeeId: "10009",
       name: "Jennifer White",
       role: "Electrician",
       project: "Bridge Expansion Project",
@@ -59,18 +75,25 @@ const ExceptionTab = ({
       location: "Site B",
       locationId: 2,
       checkInTime: "09:00 AM",
-      imageUrl: "https://randomuser.me/api/portraits/women/5.jpg"
+      imageUrl: "https://randomuser.me/api/portraits/women/5.jpg",
+      classification: "Staff",
+      category: "Electrician",
+      status: "Inactive"
     }
   ];
 
   // Filter employees based on search query and filters
   const filteredPendingCheckouts = mockPendingCheckouts.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         employee.id.toString().includes(searchQuery);
+                         employee.employeeId.includes(searchQuery);
     const matchesProject = selectedProject === "all" || employee.projectId.toString() === selectedProject;
     const matchesLocation = selectedLocation === "all" || employee.locationId.toString() === selectedLocation;
+    const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
+    const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
+    const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
     
-    return matchesSearch && matchesProject && matchesLocation;
+    return matchesSearch && matchesProject && matchesLocation && 
+           matchesClassification && matchesCategory && matchesStatus;
   });
 
   const handleManualCheckOut = (employee: Employee) => {
@@ -99,41 +122,47 @@ const ExceptionTab = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[250px]">Employee</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Project</TableHead>
+              <TableHead className="w-[80px]">Employee ID</TableHead>
+              <TableHead className="w-[170px]">Employee Name</TableHead>
+              <TableHead>Classification</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Check-in Time</TableHead>
+              <TableHead>Project</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredPendingCheckouts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={8} className="text-center py-10 text-gray-500">
                   No pending checkouts found matching your filters
                 </TableCell>
               </TableRow>
             ) : (
               filteredPendingCheckouts.map((employee) => (
                 <TableRow key={employee.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium">{employee.employeeId}</TableCell>
+                  <TableCell>
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-10 w-10">
                         <img src={employee.imageUrl} alt={employee.name} />
                       </Avatar>
-                      <div>
-                        <div className="font-medium">{employee.name}</div>
-                        <div className="text-sm text-gray-500">ID: {employee.id}</div>
-                      </div>
+                      <div>{employee.name}</div>
                     </div>
                   </TableCell>
-                  <TableCell>{employee.role}</TableCell>
-                  <TableCell>{employee.project}</TableCell>
+                  <TableCell>{employee.classification}</TableCell>
+                  <TableCell>{employee.category}</TableCell>
                   <TableCell>
-                    <div className="flex items-center text-gray-600">
-                      {employee.checkInTime}
-                    </div>
+                    <Badge 
+                      variant={employee.status === "Active" ? "default" : "destructive"}
+                      className={employee.status === "Active" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
+                    >
+                      {employee.status}
+                    </Badge>
                   </TableCell>
+                  <TableCell>{employee.checkInTime}</TableCell>
+                  <TableCell>{employee.project}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button 

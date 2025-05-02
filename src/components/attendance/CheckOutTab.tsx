@@ -1,13 +1,16 @@
+
 import React, { useState } from "react";
 import { Edit, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
 
 interface Employee {
   id: number;
+  employeeId: string;
   name: string;
   role: string;
   project: string;
@@ -16,12 +19,18 @@ interface Employee {
   locationId: number;
   checkInTime: string;
   imageUrl: string;
+  classification: string;
+  category: string;
+  status: "Active" | "Inactive";
 }
 
 interface CheckOutTabProps {
   searchQuery: string;
   selectedProject: string;
   selectedLocation: string;
+  selectedClassification: string;
+  selectedCategory: string;
+  selectedStatus: string;
   projects: { id: number; name: string }[];
   locations: { id: number; name: string }[];
 }
@@ -30,6 +39,9 @@ const CheckOutTab = ({
   searchQuery,
   selectedProject,
   selectedLocation,
+  selectedClassification,
+  selectedCategory,
+  selectedStatus,
   projects,
   locations
 }: CheckOutTabProps) => {
@@ -39,8 +51,12 @@ const CheckOutTab = ({
   const mockCheckedInEmployees: Employee[] = [
     {
       id: 3,
+      employeeId: "10003",
       name: "Michael Brown",
       role: "Engineer",
+      classification: "Staff",
+      category: "Plumber",
+      status: "Inactive",
       project: "Highway Renovation",
       projectId: 3,
       location: "Office",
@@ -50,8 +66,12 @@ const CheckOutTab = ({
     },
     {
       id: 5,
+      employeeId: "10005",
       name: "David Wilson",
       role: "Construction Worker",
+      classification: "Laborer",
+      category: "Painter",
+      status: "Active",
       project: "Bridge Expansion Project",
       projectId: 2,
       location: "Site B",
@@ -61,8 +81,12 @@ const CheckOutTab = ({
     },
     {
       id: 7,
+      employeeId: "10007",
       name: "Jane Cooper",
       role: "Project Manager",
+      classification: "Staff",
+      category: "Mason",
+      status: "Active",
       project: "Main Building Construction",
       projectId: 1,
       location: "Site A",
@@ -74,11 +98,15 @@ const CheckOutTab = ({
 
   const filteredEmployees = mockCheckedInEmployees.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         employee.id.toString().includes(searchQuery);
+                         employee.employeeId.includes(searchQuery);
     const matchesProject = selectedProject === "all" || employee.projectId.toString() === selectedProject;
     const matchesLocation = selectedLocation === "all" || employee.locationId.toString() === selectedLocation;
+    const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
+    const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
+    const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
     
-    return matchesSearch && matchesProject && matchesLocation;
+    return matchesSearch && matchesProject && matchesLocation && 
+           matchesClassification && matchesCategory && matchesStatus;
   });
 
   const handleManualCheckOut = (employee: Employee) => {
@@ -107,42 +135,52 @@ const CheckOutTab = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[250px]">Employee</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Project</TableHead>
+              <TableHead className="w-[80px]">Employee ID</TableHead>
+              <TableHead className="w-[170px]">Employee Name</TableHead>
+              <TableHead>Classification</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Check-in Time</TableHead>
+              <TableHead>Project</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={8} className="text-center py-10 text-gray-500">
                   No checked-in employees found matching your filters
                 </TableCell>
               </TableRow>
             ) : (
               filteredEmployees.map((employee) => (
                 <TableRow key={employee.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium">{employee.employeeId}</TableCell>
+                  <TableCell>
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-10 w-10">
                         <img src={employee.imageUrl} alt={employee.name} />
                       </Avatar>
-                      <div>
-                        <div className="font-medium">{employee.name}</div>
-                        <div className="text-sm text-gray-500">ID: {employee.id}</div>
-                      </div>
+                      <div>{employee.name}</div>
                     </div>
                   </TableCell>
-                  <TableCell>{employee.role}</TableCell>
-                  <TableCell>{employee.project}</TableCell>
+                  <TableCell>{employee.classification}</TableCell>
+                  <TableCell>{employee.category}</TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={employee.status === "Active" ? "default" : "destructive"}
+                      className={employee.status === "Active" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
+                    >
+                      {employee.status}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center text-gray-600">
                       <UserCheck className="h-4 w-4 mr-1 text-green-600" />
                       <span>{employee.checkInTime}</span>
                     </div>
                   </TableCell>
+                  <TableCell>{employee.project}</TableCell>
                   <TableCell className="text-right">
                     <Button 
                       onClick={() => handleManualCheckOut(employee)} 

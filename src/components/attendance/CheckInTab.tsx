@@ -1,14 +1,17 @@
+
 import React, { useState } from "react";
 import { Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import ManualCheckInDialog from "./dialogs/ManualCheckInDialog";
 import { toast } from "sonner";
 
 interface Employee {
   id: number;
   name: string;
+  employeeId: string;
   role: string;
   project?: string;
   projectId?: number;
@@ -17,6 +20,9 @@ interface Employee {
   status: "checkedin" | "notcheckedin";
   imageUrl: string;
   checkedInProject?: string;
+  classification: string;
+  category: string;
+  activeStatus: "Active" | "Inactive";
 }
 
 interface CheckInTabProps {
@@ -24,6 +30,9 @@ interface CheckInTabProps {
   selectedProject: string;
   selectedLocation: string;
   selectedStatus: string;
+  selectedClassification: string;
+  selectedCategory: string;
+  selectedActiveStatus: string;
   projects: { id: number; name: string }[];
   locations: { id: number; name: string }[];
 }
@@ -33,18 +42,25 @@ const CheckInTab = ({
   selectedProject,
   selectedLocation,
   selectedStatus,
+  selectedClassification,
+  selectedCategory,
+  selectedActiveStatus,
   projects,
   locations
 }: CheckInTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   
-  // Mock employees data - note that employees don't have pre-assigned projects
+  // Mock employees data with additional fields
   const mockEmployees: Employee[] = [
     {
       id: 1,
+      employeeId: "10001",
       name: "John Smith",
       role: "Construction Worker",
+      category: "Carpenter",
+      classification: "Laborer",
+      activeStatus: "Active",
       location: "Site A",
       locationId: 1,
       status: "notcheckedin",
@@ -52,8 +68,12 @@ const CheckInTab = ({
     },
     {
       id: 2,
+      employeeId: "10002",
       name: "Sarah Johnson",
       role: "Supervisor",
+      category: "Mason",
+      classification: "Staff",
+      activeStatus: "Active",
       location: "Site B",
       locationId: 2,
       status: "notcheckedin",
@@ -61,8 +81,12 @@ const CheckInTab = ({
     },
     {
       id: 3,
+      employeeId: "10003",
       name: "Michael Brown",
       role: "Engineer",
+      category: "Plumber",
+      classification: "Staff",
+      activeStatus: "Inactive",
       status: "checkedin",
       checkedInProject: "Highway Renovation",
       location: "Office",
@@ -71,8 +95,12 @@ const CheckInTab = ({
     },
     {
       id: 4,
+      employeeId: "10004",
       name: "Emily Davis",
       role: "Architect",
+      category: "Electrician",
+      classification: "Staff",
+      activeStatus: "Active",
       location: "Site A",
       locationId: 1,
       status: "notcheckedin",
@@ -80,8 +108,12 @@ const CheckInTab = ({
     },
     {
       id: 5,
+      employeeId: "10005",
       name: "David Wilson",
       role: "Construction Worker",
+      category: "Laborer",
+      classification: "Laborer",
+      activeStatus: "Active",
       checkedInProject: "Bridge Expansion Project",
       location: "Site B",
       locationId: 2,
@@ -93,12 +125,16 @@ const CheckInTab = ({
   // Filter employees based on search query and filters
   const filteredEmployees = mockEmployees.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         employee.id.toString().includes(searchQuery);
+                         employee.employeeId.includes(searchQuery);
     const matchesProject = selectedProject === "all" || (employee.projectId?.toString() === selectedProject);
     const matchesLocation = selectedLocation === "all" || (employee.locationId?.toString() === selectedLocation);
     const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
+    const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
+    const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
+    const matchesActiveStatus = selectedActiveStatus === "all" || employee.activeStatus === selectedActiveStatus;
     
-    return matchesSearch && (matchesProject || !employee.projectId) && matchesLocation && matchesStatus;
+    return matchesSearch && (matchesProject || !employee.projectId) && matchesLocation && 
+           matchesStatus && matchesClassification && matchesCategory && matchesActiveStatus;
   });
 
   const handleManualCheckIn = (employee: Employee) => {
@@ -136,34 +172,38 @@ const CheckInTab = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[250px]">Employee</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead className="w-[80px]">Employee ID</TableHead>
+              <TableHead className="w-[170px]">Employee Name</TableHead>
+              <TableHead>Classification</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Check-In Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredEmployees.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-10 text-gray-500">
-                  No employees found matching your filters
-                </TableCell>
-              </TableRow>
-            ) : (
+            {filteredEmployees.length > 0 ? (
               filteredEmployees.map((employee) => (
                 <TableRow key={employee.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium">{employee.employeeId}</TableCell>
+                  <TableCell>
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-10 w-10">
                         <img src={employee.imageUrl} alt={employee.name} />
                       </Avatar>
-                      <div>
-                        <div className="font-medium">{employee.name}</div>
-                        <div className="text-sm text-gray-500">ID: {employee.id}</div>
-                      </div>
+                      <div>{employee.name}</div>
                     </div>
                   </TableCell>
-                  <TableCell>{employee.role}</TableCell>
+                  <TableCell>{employee.classification}</TableCell>
+                  <TableCell>{employee.category}</TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={employee.activeStatus === "Active" ? "default" : "destructive"}
+                      className={employee.activeStatus === "Active" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
+                    >
+                      {employee.activeStatus}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     {employee.status === "checkedin" ? (
                       <div className="flex items-center text-green-600">
@@ -193,6 +233,12 @@ const CheckInTab = ({
                   </TableCell>
                 </TableRow>
               ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                  No employees found matching your filters
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
