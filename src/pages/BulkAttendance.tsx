@@ -49,6 +49,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Mock data for employees
 const MOCK_EMPLOYEES = [
@@ -107,6 +108,8 @@ const BulkAttendance = () => {
   
   // New state for tracking if data has been imported
   const [isDataImported, setIsDataImported] = useState(false);
+  // New state for showing success message
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   
   // Import filters state
   const [importProjectFilter, setImportProjectFilter] = useState<string>("");
@@ -234,11 +237,13 @@ const BulkAttendance = () => {
     
     // Set imported data flag to true
     setIsDataImported(true);
+    setShowSuccessMessage(true);
     
-    toast({
-      title: "Employees imported successfully.",
-      description: `${importSelectedEmployees.length} employees ready for attendance marking.`,
-    });
+    // Hide success message after 5 seconds
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 5000);
+    
     setIsImportDrawerOpen(false);
     setImportFile(null);
     setImportPreviewData([]);
@@ -371,7 +376,7 @@ const BulkAttendance = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex gap-2">
+            <div>
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2"
@@ -379,18 +384,19 @@ const BulkAttendance = () => {
               >
                 <FileUp className="h-4 w-4" /> Import
               </Button>
-              {isDataImported && (
-                <Button 
-                  className="bg-proscape hover:bg-proscape-dark text-white"
-                  onClick={handleMarkAttendance}
-                  disabled={selectedEmployees.length === 0}
-                >
-                  <CheckCircle className="mr-2 h-4 w-4" /> Mark Attendance
-                </Button>
-              )}
             </div>
           </div>
         </Card>
+
+        {/* Success Message */}
+        {showSuccessMessage && isDataImported && (
+          <Alert className="mb-4 bg-green-50 border-green-200 text-green-800">
+            <AlertDescription className="flex items-center">
+              <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+              Employees imported successfully.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Employees Table or Empty State */}
         {isDataImported ? (
@@ -456,7 +462,7 @@ const BulkAttendance = () => {
               <Upload className="h-16 w-16 text-gray-400 mb-4 mx-auto" />
               <h3 className="text-xl font-medium text-gray-700 mb-2">Please import an Excel file to mark attendance</h3>
               <p className="text-gray-500 mb-6">You can upload up to 500 employees at once.</p>
-              <div className="flex gap-3 justify-center">
+              <div className="flex justify-center">
                 <Button 
                   variant="outline" 
                   className="flex items-center gap-2"
@@ -467,6 +473,19 @@ const BulkAttendance = () => {
               </div>
             </div>
           </Card>
+        )}
+
+        {/* Show Mark Attendance button only if data has been imported */}
+        {isDataImported && filteredEmployees.length > 0 && (
+          <div className="flex justify-end mt-6">
+            <Button 
+              className="bg-proscape hover:bg-proscape-dark text-white"
+              onClick={handleMarkAttendance}
+              disabled={selectedEmployees.length === 0}
+            >
+              <CheckCircle className="mr-2 h-4 w-4" /> Mark Attendance
+            </Button>
+          </div>
         )}
 
         {/* Summary Footer - Only show if data is imported */}
@@ -545,7 +564,7 @@ const BulkAttendance = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Enhanced Import Drawer */}
+      {/* Import Drawer */}
       <Drawer open={isImportDrawerOpen} onOpenChange={setIsImportDrawerOpen}>
         <DrawerContent className="max-h-[90vh] p-0">
           <DrawerHeader className="px-6 py-4 border-b">
