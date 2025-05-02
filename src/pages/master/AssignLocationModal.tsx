@@ -20,7 +20,6 @@ export default function AssignLocationModal({
 }: AssignLocationProps) {
   const [polygonCoordinates, setPolygonCoordinates] = useState<Array<{lat: number, lng: number}>>([]);
   const { toast } = useToast();
-  const [simulated, setSimulated] = useState(true);
   
   // Generate random polygon coordinates for simulation
   useEffect(() => {
