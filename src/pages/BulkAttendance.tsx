@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X } from "lucide-react";
+import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -63,6 +63,9 @@ const ENTITIES = ["Acme Construction", "Skyline Builders", "Metro Developers"];
 const CATEGORIES = ["Carpenter", "Mason", "Electrician", "Plumber", "Supervisor", "Manager", "Site Engineer"];
 const CLASSIFICATIONS = ["Laborer", "Staff"];
 
+// Sample template URL
+const SAMPLE_URL = "https://docs.google.com/spreadsheets/d/1Yv8w9K9tQMVOuO7A4tuL0k5cF_fmY7Fsj6t4HZH7vmfM/export?format=xlsx";
+
 const BulkAttendance = () => {
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -88,6 +91,9 @@ const BulkAttendance = () => {
   const [importComment, setImportComment] = useState("");
   const [importAttendanceType, setImportAttendanceType] = useState<"check-in" | "check-out">("check-in");
   
+  // New state for tracking if data has been imported
+  const [isDataImported, setIsDataImported] = useState(false);
+  
   // Import filters state
   const [importProjectFilter, setImportProjectFilter] = useState<string>("");
   const [importLocationFilter, setImportLocationFilter] = useState<string>("");
@@ -98,7 +104,7 @@ const BulkAttendance = () => {
   const [importSelectAll, setImportSelectAll] = useState(false);
 
   // Filter employees based on filters
-  const filteredEmployees = MOCK_EMPLOYEES.filter((employee) => {
+  const filteredEmployees = isDataImported ? MOCK_EMPLOYEES.filter((employee) => {
     if (project && employee.project !== project) return false;
     if (location && employee.location !== location) return false;
     if (category && employee.category !== category) return false;
@@ -107,7 +113,7 @@ const BulkAttendance = () => {
         !employee.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
         !employee.id.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
-  });
+  }) : [];
   
   // Filter imported employees based on import filters
   const filteredImportEmployees = importPreviewData.filter((employee) => {
@@ -212,9 +218,12 @@ const BulkAttendance = () => {
       return;
     }
     
+    // Set imported data flag to true
+    setIsDataImported(true);
+    
     toast({
       title: "Success!",
-      description: `Attendance ${importAttendanceType === "check-in" ? "check-in" : "check-out"} marked for ${importSelectedEmployees.length} employees on ${format(date || new Date(), "MMM dd, yyyy")}.`,
+      description: `File imported successfully. ${importSelectedEmployees.length} employees ready for attendance marking.`,
     });
     setIsImportDrawerOpen(false);
     setImportFile(null);
@@ -223,6 +232,16 @@ const BulkAttendance = () => {
     setImportSelectedEmployees([]);
     setImportSelectAll(false);
     clearImportFilters();
+  };
+  
+  // Handle download sample template
+  const handleDownloadSample = () => {
+    window.open(SAMPLE_URL, '_blank');
+    
+    toast({
+      title: "Download Started",
+      description: "The sample Excel template is being downloaded.",
+    });
   };
 
   return (
@@ -356,80 +375,110 @@ const BulkAttendance = () => {
               >
                 <FileUp className="h-4 w-4" /> Import
               </Button>
-              <Button 
-                className="bg-proscape hover:bg-proscape-dark text-white"
-                onClick={handleMarkAttendance}
-                disabled={selectedEmployees.length === 0}
-              >
-                <CheckCircle className="mr-2 h-4 w-4" /> Mark Attendance
-              </Button>
+              {isDataImported && (
+                <Button 
+                  className="bg-proscape hover:bg-proscape-dark text-white"
+                  onClick={handleMarkAttendance}
+                  disabled={selectedEmployees.length === 0}
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" /> Mark Attendance
+                </Button>
+              )}
             </div>
           </div>
         </Card>
 
-        {/* Employees Table */}
-        <Card className="p-0 overflow-x-auto shadow-sm">
-          <table className="w-full text-sm text-left text-gray-700">
-            <thead className="text-xs uppercase bg-gray-50 border-b">
-              <tr>
-                <th className="px-4 py-3 w-16">
-                  <Checkbox 
-                    checked={selectAll} 
-                    onCheckedChange={handleSelectAll} 
-                    aria-label="Select all employees"
-                  />
-                </th>
-                <th className="px-4 py-3">Employee ID</th>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Classification</th>
-                <th className="px-4 py-3">Project</th>
-                <th className="px-4 py-3">Location</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEmployees.length > 0 ? (
-                filteredEmployees.map((employee) => (
-                  <tr key={employee.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <Checkbox 
-                        checked={selectedEmployees.includes(employee.id)}
-                        onCheckedChange={() => handleCheckboxChange(employee.id)}
-                        aria-label={`Select ${employee.name}`}
-                      />
-                    </td>
-                    <td className="px-4 py-3 font-medium">{employee.id}</td>
-                    <td className="px-4 py-3">{employee.name}</td>
-                    <td className="px-4 py-3">{employee.category}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        employee.classification === "Staff" 
-                          ? "bg-blue-100 text-blue-700" 
-                          : "bg-green-100 text-green-700"
-                      }`}>
-                        {employee.classification}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">{employee.project}</td>
-                    <td className="px-4 py-3">{employee.location}</td>
-                  </tr>
-                ))
-              ) : (
+        {/* Employees Table or Empty State */}
+        {isDataImported ? (
+          <Card className="p-0 overflow-x-auto shadow-sm">
+            <table className="w-full text-sm text-left text-gray-700">
+              <thead className="text-xs uppercase bg-gray-50 border-b">
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-gray-400">
-                    No employees found matching the filters.
-                  </td>
+                  <th className="px-4 py-3 w-16">
+                    <Checkbox 
+                      checked={selectAll} 
+                      onCheckedChange={handleSelectAll} 
+                      aria-label="Select all employees"
+                    />
+                  </th>
+                  <th className="px-4 py-3">Employee ID</th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Category</th>
+                  <th className="px-4 py-3">Classification</th>
+                  <th className="px-4 py-3">Project</th>
+                  <th className="px-4 py-3">Location</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </Card>
+              </thead>
+              <tbody>
+                {filteredEmployees.length > 0 ? (
+                  filteredEmployees.map((employee) => (
+                    <tr key={employee.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <Checkbox 
+                          checked={selectedEmployees.includes(employee.id)}
+                          onCheckedChange={() => handleCheckboxChange(employee.id)}
+                          aria-label={`Select ${employee.name}`}
+                        />
+                      </td>
+                      <td className="px-4 py-3 font-medium">{employee.id}</td>
+                      <td className="px-4 py-3">{employee.name}</td>
+                      <td className="px-4 py-3">{employee.category}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          employee.classification === "Staff" 
+                            ? "bg-blue-100 text-blue-700" 
+                            : "bg-green-100 text-green-700"
+                        }`}>
+                          {employee.classification}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">{employee.project}</td>
+                      <td className="px-4 py-3">{employee.location}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="text-center py-8 text-gray-400">
+                      No employees found matching the filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </Card>
+        ) : (
+          <Card className="p-8 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px]">
+            <div className="max-w-lg">
+              <Upload className="h-16 w-16 text-gray-400 mb-4 mx-auto" />
+              <h3 className="text-xl font-medium text-gray-700 mb-2">Please import an Excel file to mark attendance</h3>
+              <p className="text-gray-500 mb-6">You can upload up to 500 employees at once.</p>
+              <div className="flex gap-3 justify-center">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={handleImportClick}
+                >
+                  <FileUp className="h-4 w-4" /> Import File
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={handleDownloadSample}
+                >
+                  <Download className="h-4 w-4" /> Download Sample Template
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
 
-        {/* Summary Footer */}
-        <div className="mt-4 flex justify-between items-center text-sm text-gray-600 px-2">
-          <p>Total: {filteredEmployees.length} employees</p>
-          <p>Selected: {selectedEmployees.length} employees</p>
-        </div>
+        {/* Summary Footer - Only show if data is imported */}
+        {isDataImported && filteredEmployees.length > 0 && (
+          <div className="mt-4 flex justify-between items-center text-sm text-gray-600 px-2">
+            <p>Total: {filteredEmployees.length} employees</p>
+            <p>Selected: {selectedEmployees.length} employees</p>
+          </div>
+        )}
       </div>
 
       {/* Mark Attendance Modal */}
@@ -525,12 +574,22 @@ const BulkAttendance = () => {
                     accept=".xlsx,.doc,.docx"
                     onChange={handleFileChange}
                   />
-                  <Label 
-                    htmlFor="file-upload" 
-                    className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded cursor-pointer"
-                  >
-                    Select File
-                  </Label>
+                  <div className="flex gap-3">
+                    <Label 
+                      htmlFor="file-upload" 
+                      className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded cursor-pointer flex items-center gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Select File
+                    </Label>
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                      onClick={handleDownloadSample}
+                    >
+                      <Download className="h-4 w-4" /> Download Template
+                    </Button>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -772,13 +831,15 @@ const BulkAttendance = () => {
               <DrawerClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DrawerClose>
-              <Button 
-                className="bg-proscape hover:bg-proscape-dark text-white"
-                onClick={handleImportAttendanceMark}
-                disabled={!importFile || !importComment.trim() || importSelectedEmployees.length === 0}
-              >
-                <CheckCircle className="mr-2 h-4 w-4" /> Mark Attendance
-              </Button>
+              {importFile && (
+                <Button 
+                  className="bg-proscape hover:bg-proscape-dark text-white"
+                  onClick={handleImportAttendanceMark}
+                  disabled={!importFile || !importComment.trim() || importSelectedEmployees.length === 0}
+                >
+                  <FileUp className="mr-2 h-4 w-4" /> Import
+                </Button>
+              )}
             </div>
           </DrawerFooter>
         </DrawerContent>
