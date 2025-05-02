@@ -1,5 +1,5 @@
 
-import { Eye, Trash, MapPin } from "lucide-react";
+import { Eye, MapPin } from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -32,7 +32,6 @@ export default function ProjectTable({
           <tr>
             <th className="px-4 py-3">Project Name</th>
             <th className="px-4 py-3">Location</th>
-            <th className="px-4 py-3">Assigned Employees</th>
             <th className="px-4 py-3">Start Date</th>
             <th className="px-4 py-3">End Date</th>
             <th className="px-4 py-3">Status</th>
@@ -55,30 +54,6 @@ export default function ProjectTable({
                     <span className="inline-block px-2 py-0.5 rounded-full font-medium text-xs bg-gray-200 text-gray-500">
                       Not Configured
                     </span>
-                  )}
-                </td>
-                {/* Employees */}
-                <td className="px-4 py-3 max-w-[180px]">
-                  {project.assignedEmployees && project.assignedEmployees.length ? (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="truncate" title={project.assignedEmployees.map(e=>e.name).join(", ")}>
-                            {project.assignedEmployees.length > 2
-                              ? `${project.assignedEmployees.slice(0,2).map(e=>e.name).join(", ")} +${project.assignedEmployees.length - 2}`
-                              : project.assignedEmployees.map(e=>e.name).join(", ")
-                            }
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" align="center">
-                          {project.assignedEmployees.map((e, i) => (
-                            <div key={e.id} className="text-xs">{e.name}</div>
-                          ))}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ) : (
-                    <span className="italic text-xs text-gray-400">None</span>
                   )}
                 </td>
                 {/* Start Date */}
@@ -136,33 +111,13 @@ export default function ProjectTable({
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Delete Project"
-                            onClick={() => onDelete(project)}
-                            className="hover:bg-red-100 text-red-600"
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Delete Project</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
                   </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={7} className="text-center py-8 text-gray-400">No projects found</td>
+              <td colSpan={6} className="text-center py-8 text-gray-400">No projects found</td>
             </tr>
           )}
         </tbody>
