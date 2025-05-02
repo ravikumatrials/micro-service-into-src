@@ -32,24 +32,17 @@ const mockRoles = [
 const RoleMapping = () => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [projectFilter, setProjectFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-
-  const locations = Array.from(new Set(mockEmployees.map(emp => emp.location)));
-  const projects = Array.from(new Set(mockEmployees.map(emp => emp.project)));
 
   const filteredEmployees = mockEmployees.filter(employee => {
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation = locationFilter === "all" || employee.location === locationFilter;
-    const matchesProject = projectFilter === "all" || employee.project === projectFilter;
     const matchesRole = roleFilter === "all" || employee.currentRole === roleFilter;
     
-    return matchesSearch && matchesLocation && matchesProject && matchesRole;
+    return matchesSearch && matchesRole;
   });
 
   const handleAssignRole = (employee) => {
@@ -75,14 +68,8 @@ const RoleMapping = () => {
           <RoleMappingFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
-            locationFilter={locationFilter}
-            setLocationFilter={setLocationFilter}
-            projectFilter={projectFilter}
-            setProjectFilter={setProjectFilter}
             roleFilter={roleFilter}
             setRoleFilter={setRoleFilter}
-            locations={locations}
-            projects={projects}
             roles={mockRoles}
           />
         </Card>
