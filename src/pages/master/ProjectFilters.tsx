@@ -19,7 +19,7 @@ export default function ProjectFilters({
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
 
   return (
-    <div className="bg-card/80 rounded-md p-4 mb-2 flex flex-col gap-3 md:grid md:grid-cols-5 md:gap-4 md:items-end">
+    <div className="bg-card/80 rounded-md p-4 mb-2 flex flex-col gap-3 md:grid md:grid-cols-4 md:gap-4 md:items-end">
       {/* Project Name */}
       <div>
         <label className="block text-xs font-semibold text-gray-700 mb-1">Project Name</label>
@@ -98,16 +98,6 @@ export default function ProjectFilters({
             </div>
           </PopoverContent>
         </Popover>
-      </div>
-      {/* Assigned Employee */}
-      <div>
-        <label className="block text-xs font-semibold text-gray-700 mb-1">Assigned Employee</label>
-        <Input
-          placeholder="Search employee..."
-          value={filters.employee}
-          onChange={e => setFilters(f => ({ ...f, employee: e.target.value }))}
-          className="text-base"
-        />
       </div>
     </div>
   );

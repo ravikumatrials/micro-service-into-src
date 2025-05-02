@@ -100,8 +100,7 @@ export default function ProjectsPage() {
     name: "",
     location: "",
     status: "All",
-    dateRange: undefined,
-    employee: ""
+    dateRange: undefined
   });
   const [importOpen, setImportOpen] = useState(false);
   const [tanseeqImportOpen, setTanseeqImportOpen] = useState(false);
@@ -120,13 +119,6 @@ export default function ProjectsPage() {
       
       if (filters.status && filters.status !== "All" && p.status !== filters.status) 
         return false;
-      
-      if (filters.employee) {
-        const found = p.assignedEmployees.some(e =>
-          e.name.toLowerCase().includes(filters.employee.trim().toLowerCase())
-        );
-        if (!found) return false;
-      }
       
       if (filters.dateRange?.start || filters.dateRange?.end) {
         const projectStartDate = new Date(p.startDate);
