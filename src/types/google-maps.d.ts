@@ -30,6 +30,8 @@ declare namespace google {
       mapTypeId?: string;
       streetViewControl?: boolean;
       mapTypeControl?: boolean;
+      fullscreenControl?: boolean;
+      zoomControl?: boolean;
     }
     
     interface MarkerOptions {
@@ -131,6 +133,21 @@ declare namespace google {
         RECTANGLE,
         CIRCLE,
       }
+    }
+    
+    class ControlPosition {
+      static TOP_CENTER: number;
+      static TOP_LEFT: number;
+      static TOP_RIGHT: number;
+      static BOTTOM_CENTER: number;
+      static BOTTOM_LEFT: number;
+      static BOTTOM_RIGHT: number;
+      static LEFT_TOP: number;
+      static LEFT_CENTER: number;
+      static LEFT_BOTTOM: number;
+      static RIGHT_TOP: number;
+      static RIGHT_CENTER: number;
+      static RIGHT_BOTTOM: number;
     }
   }
 }

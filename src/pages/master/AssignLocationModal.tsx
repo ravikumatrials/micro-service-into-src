@@ -24,12 +24,17 @@ export default function AssignLocationModal({
 }: AssignLocationProps) {
   const [polygonCoordinates, setPolygonCoordinates] = useState<Array<{lat: number, lng: number}>>([]);
   const [isMapLoading, setIsMapLoading] = useState(true);
+  const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
   const { toast } = useToast();
   
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const polygonRef = useRef<google.maps.Polygon | null>(null);
+  const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null);
   const mapLoaderRef = useRef<Loader | null>(null);
+  
+  // Default center (Abu Dhabi)
+  const defaultCenter = { lat: 24.4539, lng: 54.3773 };
   
   // Initialize Google Maps loader
   useEffect(() => {
@@ -72,21 +77,33 @@ export default function AssignLocationModal({
       mapLoaderRef.current.load()
         .then((google) => {
           // Create a map instance
-          const mapCenter = calculateCenter(coordinates);
+          const mapCenter = coordinates.length > 0 ? calculateCenter(coordinates) : defaultCenter;
           const mapOptions: google.maps.MapOptions = {
             center: mapCenter,
             zoom: 15,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
-            mapTypeControl: false,
+            mapTypeControl: true,
             streetViewControl: false,
+            fullscreenControl: true,
+            zoomControl: true,
           };
           
           // Initialize the map
           const map = new google.maps.Map(mapRef.current!, mapOptions);
           googleMapRef.current = map;
           
-          // Add polygon to the map
-          drawPolygon(map, coordinates, google);
+          // Fix for map rendering in modal
+          setTimeout(() => {
+            google.maps.event.trigger(map, 'resize');
+          }, 100);
+          
+          // Add polygon to the map if coordinates exist
+          if (coordinates.length > 0) {
+            drawPolygon(map, coordinates, google);
+          }
+          
+          // Initialize Drawing Manager
+          initDrawingManager(map, google);
           
           // Map is now loaded
           setIsMapLoading(false);
@@ -97,22 +114,129 @@ export default function AssignLocationModal({
           toast({
             title: "Error",
             description: "Failed to load Google Maps. Please try again later.",
+            variant: "destructive"
           });
         });
     }
     
     return () => {
-      // Clean up polygon when modal closes
+      // Clean up polygon and drawing manager when modal closes
       if (polygonRef.current) {
         polygonRef.current.setMap(null);
         polygonRef.current = null;
       }
+      
+      if (drawingManagerRef.current) {
+        drawingManagerRef.current.setMap(null);
+        drawingManagerRef.current = null;
+      }
+      
+      setIsDrawingEnabled(false);
     };
   }, [open, project, toast]);
   
+  // Initialize drawing manager
+  const initDrawingManager = (map: google.maps.Map, googleMaps: typeof google) => {
+    if (drawingManagerRef.current) {
+      drawingManagerRef.current.setMap(null);
+    }
+    
+    // Create drawing manager
+    const drawingManager = new googleMaps.maps.drawing.DrawingManager({
+      drawingMode: null, // Start with drawing disabled
+      drawingControl: true,
+      drawingControlOptions: {
+        position: googleMaps.maps.ControlPosition.TOP_CENTER,
+        drawingModes: [googleMaps.maps.drawing.OverlayType.POLYGON]
+      },
+      polygonOptions: {
+        strokeColor: "#1976d2",
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: "#42a5f5",
+        fillOpacity: 0.35,
+        editable: true
+      }
+    });
+    
+    drawingManager.setMap(map);
+    drawingManagerRef.current = drawingManager;
+    
+    // Add event listener for when drawing is complete
+    googleMaps.maps.event.addListener(drawingManager, 'overlaycomplete', (event: any) => {
+      // Remove any existing polygon
+      if (polygonRef.current) {
+        polygonRef.current.setMap(null);
+        polygonRef.current = null;
+      }
+      
+      // Add the polygon to the map
+      const polygon = event.overlay;
+      polygonRef.current = polygon;
+      
+      // Turn off drawing mode after shape is created
+      drawingManager.setDrawingMode(null);
+      setIsDrawingEnabled(false);
+      
+      // Store polygon coordinates
+      updatePolygonCoordinates(polygon);
+      
+      // Add event listeners to the polygon for editing
+      const path = polygon.getPath();
+      googleMaps.maps.event.addListener(path, 'set_at', () => {
+        updatePolygonCoordinates(polygon);
+      });
+      
+      googleMaps.maps.event.addListener(path, 'insert_at', () => {
+        updatePolygonCoordinates(polygon);
+      });
+    });
+  };
+  
+  // Update polygon coordinates from polygon object
+  const updatePolygonCoordinates = (polygon: google.maps.Polygon) => {
+    const path = polygon.getPath();
+    const newCoordinates: Array<{lat: number, lng: number}> = [];
+    
+    for (let i = 0; i < path.getLength(); i++) {
+      const point = path.getAt(i);
+      newCoordinates.push({ lat: point.lat(), lng: point.lng() });
+    }
+    
+    setPolygonCoordinates(newCoordinates);
+  };
+  
+  // Toggle drawing mode
+  const toggleDrawingMode = () => {
+    if (!drawingManagerRef.current || !googleMapRef.current) return;
+    
+    if (!isDrawingEnabled) {
+      // Clear existing polygon when starting to draw a new one
+      if (polygonRef.current) {
+        polygonRef.current.setMap(null);
+        polygonRef.current = null;
+        setPolygonCoordinates([]);
+      }
+      
+      // Enable polygon drawing mode
+      drawingManagerRef.current.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+      setIsDrawingEnabled(true);
+      
+      toast({
+        title: "Drawing Mode Active",
+        description: "Click on the map to start drawing a polygon.",
+      });
+    } else {
+      // Disable drawing mode
+      drawingManagerRef.current.setDrawingMode(null);
+      setIsDrawingEnabled(false);
+    }
+  };
+  
   // Function to generate default polygon coordinates
   const generateDefaultCoordinates = () => {
-    const center = { lat: 25.276987, lng: 55.296249 }; // Default point (Dubai)
+    // Default to Abu Dhabi coordinates
+    const center = defaultCenter;
     const points = 6; // Hexagon
     const radius = 0.01; // Small radius for the polygon
     
@@ -131,7 +255,7 @@ export default function AssignLocationModal({
   // Calculate center of polygon for map focus
   const calculateCenter = (coordinates: Array<{lat: number, lng: number}>) => {
     if (coordinates.length === 0) {
-      return { lat: 25.276987, lng: 55.296249 }; // Default to Dubai
+      return defaultCenter; // Default to Abu Dhabi
     }
     
     const sumLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0);
@@ -202,6 +326,15 @@ export default function AssignLocationModal({
   };
 
   const handleSave = () => {
+    if (polygonCoordinates.length < 3) {
+      toast({
+        title: "Error",
+        description: "Please draw a valid polygon with at least 3 points.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Prepare polygon data
     const geofenceData = JSON.stringify(polygonCoordinates);
     onSave(project.id, geofenceData);
@@ -209,7 +342,7 @@ export default function AssignLocationModal({
     // Show success toast
     toast({
       title: "Success",
-      description: "Location perimeter saved successfully.",
+      description: "Project perimeter assigned successfully.",
     });
     
     // Close the dialog
@@ -255,6 +388,22 @@ export default function AssignLocationModal({
             ></div>
           </div>
 
+          {/* Drawing controls */}
+          <div className="flex justify-between items-center">
+            <Button
+              type="button"
+              variant={isDrawingEnabled ? "default" : "outline"}
+              onClick={toggleDrawingMode}
+              className={isDrawingEnabled ? "bg-blue-500 hover:bg-blue-600" : ""}
+            >
+              {isDrawingEnabled ? "Cancel Drawing" : "Draw New Polygon"}
+            </Button>
+            
+            <div className="text-sm text-gray-500">
+              {polygonCoordinates.length > 0 ? `Polygon with ${polygonCoordinates.length} points created` : "No polygon drawn yet"}
+            </div>
+          </div>
+
           {/* Helper text */}
           <div className="text-sm">
             <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
@@ -263,8 +412,9 @@ export default function AssignLocationModal({
                 Location Instructions
               </div>
               <p className="text-xs text-blue-600">
-                Drag the edges of the polygon to adjust the project perimeter. 
-                The geographic boundary defined here will be used for location-based check-ins.
+                Draw a polygon on the map to define the project's perimeter.
+                Click on the map to add points. Complete the polygon by clicking on the first point.
+                You can edit the polygon by dragging its vertices after it's created.
               </p>
             </div>
           </div>
@@ -284,6 +434,7 @@ export default function AssignLocationModal({
             <Button
               className="bg-proscape hover:bg-proscape-dark text-white"
               onClick={handleSave}
+              disabled={polygonCoordinates.length < 3}
             >
               Save Location
             </Button>
