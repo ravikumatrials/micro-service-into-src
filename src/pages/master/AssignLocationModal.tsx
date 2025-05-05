@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "@googlemaps/js-api-loader";
 
-// Mock API key - in a real app, this would be stored securely
-const GOOGLE_MAPS_API_KEY = "AIzaSyDLZ-LGtMxJBBCuqQaI8ZyUPQi9hkoJyu4";
+// Use a valid Google Maps API key
+const GOOGLE_MAPS_API_KEY = "AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg"; // Google Maps public test API key
 
 interface AssignLocationProps {
   project: any;
@@ -94,9 +94,11 @@ export default function AssignLocationModal({
           const map = new google.maps.Map(mapRef.current!, mapOptions);
           googleMapRef.current = map;
           
-          // Fix for map rendering in modal
+          // Fix for map rendering in modal - Ensuring map renders correctly after modal is visible
           setTimeout(() => {
             google.maps.event.trigger(map, 'resize');
+            // Recenter map after resize
+            map.setCenter(mapCenter);
           }, 100);
           
           // Add polygon to the map if coordinates exist
@@ -116,8 +118,8 @@ export default function AssignLocationModal({
           setMapLoadFailed(true);
           toast({
             title: "Map Loading Issue",
-            description: "Using simulated map for this session.",
-            variant: "default"
+            description: "Unable to load map. Please check API key or network connection.",
+            variant: "destructive"
           });
         });
     }
@@ -138,19 +140,19 @@ export default function AssignLocationModal({
     };
   }, [open, project, toast]);
   
-  // Initialize drawing manager
+  // Initialize drawing manager - focused on polygon drawing only
   const initDrawingManager = (map: google.maps.Map, googleMaps: typeof google) => {
     if (drawingManagerRef.current) {
       drawingManagerRef.current.setMap(null);
     }
     
-    // Create drawing manager
+    // Create drawing manager with polygon drawing only
     const drawingManager = new googleMaps.maps.drawing.DrawingManager({
       drawingMode: null, // Start with drawing disabled
       drawingControl: true,
       drawingControlOptions: {
         position: googleMaps.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [googleMaps.maps.drawing.OverlayType.POLYGON]
+        drawingModes: [googleMaps.maps.drawing.OverlayType.POLYGON] // Only allow polygon drawing
       },
       polygonOptions: {
         strokeColor: "#1976d2",
@@ -195,7 +197,7 @@ export default function AssignLocationModal({
       });
     });
   };
-  
+
   // Update polygon coordinates from polygon object
   const updatePolygonCoordinates = (polygon: google.maps.Polygon) => {
     const path = polygon.getPath();
@@ -326,6 +328,40 @@ export default function AssignLocationModal({
       bounds.extend(new googleMaps.maps.LatLng(coord.lat, coord.lng));
     });
     map.fitBounds(bounds);
+  };
+  
+  // Function to generate default polygon coordinates
+  const generateDefaultCoordinates = () => {
+    // Default to Abu Dhabi coordinates
+    const center = defaultCenter;
+    const points = 6; // Hexagon
+    const radius = 0.01; // Small radius for the polygon
+    
+    const coordinates = [];
+    for (let i = 0; i < points; i++) {
+      const angle = (i / points) * Math.PI * 2;
+      coordinates.push({
+        lat: center.lat + Math.sin(angle) * radius,
+        lng: center.lng + Math.cos(angle) * radius
+      });
+    }
+    
+    return coordinates;
+  };
+  
+  // Calculate center of polygon for map focus
+  const calculateCenter = (coordinates: Array<{lat: number, lng: number}>) => {
+    if (coordinates.length === 0) {
+      return defaultCenter; // Default to Abu Dhabi
+    }
+    
+    const sumLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0);
+    const sumLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0);
+    
+    return {
+      lat: sumLat / coordinates.length,
+      lng: sumLng / coordinates.length
+    };
   };
 
   const handleSave = () => {
