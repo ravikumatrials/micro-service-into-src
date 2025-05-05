@@ -1,5 +1,3 @@
-
-// Just update the interface to include the missing properties
 import React, { useState } from "react";
 import { Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,23 +26,21 @@ interface Employee {
 interface CheckInTabProps {
   searchQuery: string;
   selectedProject: string;
-  selectedLocation: string; // Add this to match expected props
-  selectedStatus: string;
+  selectedLocation: string;
+  selectedStatus: string;  // Changed from selectedActiveStatus to selectedStatus
   selectedClassification: string;
   selectedCategory: string;
-  selectedActiveStatus: string;
   projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];
-  locations: { id: number; name: string }[]; // Add this to match expected props
+  locations: { id: number; name: string }[];
 }
 
 const CheckInTab = ({ 
   searchQuery,
   selectedProject,
   selectedLocation,
-  selectedStatus,
+  selectedStatus,  // Changed from selectedActiveStatus to selectedStatus
   selectedClassification,
   selectedCategory,
-  selectedActiveStatus,
   projects,
   locations
 }: CheckInTabProps) => {
@@ -131,10 +127,10 @@ const CheckInTab = ({
     const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
     const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
     const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
-    const matchesActiveStatus = selectedActiveStatus === "all" || employee.activeStatus === selectedActiveStatus;
     
+    // Remove reference to selectedActiveStatus since we're using selectedStatus now
     return matchesSearch && (matchesProject || !employee.projectId) && matchesLocation && 
-           matchesStatus && matchesClassification && matchesCategory && matchesActiveStatus;
+           matchesStatus && matchesClassification && matchesCategory;
   });
 
   const handleManualCheckIn = (employee: Employee) => {
