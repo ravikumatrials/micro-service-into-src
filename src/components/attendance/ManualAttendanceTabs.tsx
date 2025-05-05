@@ -41,12 +41,12 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
         <CheckInTab 
           searchQuery={filters.name || filters.employeeId}
           selectedProject={filters.project}
-          selectedLocation="all" // Pass a default value to fix the type error
+          selectedLocation="all"
           selectedClassification={filters.classification}
           selectedCategory={filters.category}
-          selectedActiveStatus={filters.status}
+          selectedStatus={filters.status}  // Changed from selectedActiveStatus to selectedStatus
           projects={projects}
-          locations={emptyLocations} // Pass empty array to fix the type error
+          locations={emptyLocations}
         />
       </TabsContent>
       
@@ -54,7 +54,7 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
         <CheckOutTab 
           searchQuery={filters.name || filters.employeeId}
           selectedProject={filters.project}
-          selectedLocation="all" // Kept for backward compatibility
+          selectedLocation="all"
           selectedClassification={filters.classification}
           selectedCategory={filters.category}
           selectedStatus={filters.status}
@@ -67,7 +67,7 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
         <ExceptionTab 
           searchQuery={filters.name || filters.employeeId}
           selectedProject={filters.project}
-          selectedLocation="all" // Kept for backward compatibility
+          selectedLocation="all"
           selectedClassification={filters.classification}
           selectedCategory={filters.category}
           selectedStatus={filters.status}
