@@ -37,6 +37,40 @@ export default function AssignLocationModal({
   // Default center (Abu Dhabi)
   const defaultCenter = { lat: 24.4539, lng: 54.3773 };
   
+  // Function to generate default polygon coordinates
+  const generateDefaultCoordinates = () => {
+    // Default to Abu Dhabi coordinates
+    const center = defaultCenter;
+    const points = 6; // Hexagon
+    const radius = 0.01; // Small radius for the polygon
+    
+    const coordinates = [];
+    for (let i = 0; i < points; i++) {
+      const angle = (i / points) * Math.PI * 2;
+      coordinates.push({
+        lat: center.lat + Math.sin(angle) * radius,
+        lng: center.lng + Math.cos(angle) * radius
+      });
+    }
+    
+    return coordinates;
+  };
+  
+  // Calculate center of polygon for map focus
+  const calculateCenter = (coordinates: Array<{lat: number, lng: number}>) => {
+    if (coordinates.length === 0) {
+      return defaultCenter; // Default to Abu Dhabi
+    }
+    
+    const sumLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0);
+    const sumLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0);
+    
+    return {
+      lat: sumLat / coordinates.length,
+      lng: sumLng / coordinates.length
+    };
+  };
+  
   // Initialize Google Maps loader
   useEffect(() => {
     if (!mapLoaderRef.current) {
@@ -238,40 +272,6 @@ export default function AssignLocationModal({
     }
   };
   
-  // Function to generate default polygon coordinates
-  const generateDefaultCoordinates = () => {
-    // Default to Abu Dhabi coordinates
-    const center = defaultCenter;
-    const points = 6; // Hexagon
-    const radius = 0.01; // Small radius for the polygon
-    
-    const coordinates = [];
-    for (let i = 0; i < points; i++) {
-      const angle = (i / points) * Math.PI * 2;
-      coordinates.push({
-        lat: center.lat + Math.sin(angle) * radius,
-        lng: center.lng + Math.cos(angle) * radius
-      });
-    }
-    
-    return coordinates;
-  };
-  
-  // Calculate center of polygon for map focus
-  const calculateCenter = (coordinates: Array<{lat: number, lng: number}>) => {
-    if (coordinates.length === 0) {
-      return defaultCenter; // Default to Abu Dhabi
-    }
-    
-    const sumLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0);
-    const sumLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0);
-    
-    return {
-      lat: sumLat / coordinates.length,
-      lng: sumLng / coordinates.length
-    };
-  };
-  
   // Draw polygon on the map
   const drawPolygon = (
     map: google.maps.Map, 
@@ -328,40 +328,6 @@ export default function AssignLocationModal({
       bounds.extend(new googleMaps.maps.LatLng(coord.lat, coord.lng));
     });
     map.fitBounds(bounds);
-  };
-  
-  // Function to generate default polygon coordinates
-  const generateDefaultCoordinates = () => {
-    // Default to Abu Dhabi coordinates
-    const center = defaultCenter;
-    const points = 6; // Hexagon
-    const radius = 0.01; // Small radius for the polygon
-    
-    const coordinates = [];
-    for (let i = 0; i < points; i++) {
-      const angle = (i / points) * Math.PI * 2;
-      coordinates.push({
-        lat: center.lat + Math.sin(angle) * radius,
-        lng: center.lng + Math.cos(angle) * radius
-      });
-    }
-    
-    return coordinates;
-  };
-  
-  // Calculate center of polygon for map focus
-  const calculateCenter = (coordinates: Array<{lat: number, lng: number}>) => {
-    if (coordinates.length === 0) {
-      return defaultCenter; // Default to Abu Dhabi
-    }
-    
-    const sumLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0);
-    const sumLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0);
-    
-    return {
-      lat: sumLat / coordinates.length,
-      lng: sumLng / coordinates.length
-    };
   };
 
   const handleSave = () => {
