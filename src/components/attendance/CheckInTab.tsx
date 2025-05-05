@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,33 +22,34 @@ interface Employee {
   classification: string;
   category: string;
   activeStatus: "Active" | "Inactive";
+  entity?: string;
 }
 
 interface CheckInTabProps {
   searchQuery: string;
   selectedProject: string;
-  selectedLocation: string;
-  selectedStatus: string;  // Changed from selectedActiveStatus to selectedStatus
+  selectedStatus: string;
   selectedClassification: string;
   selectedCategory: string;
-  projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];
+  selectedEntity: string;
+  projects: { id: number; name: string; location?: string }[];
   locations: { id: number; name: string }[];
 }
 
 const CheckInTab = ({ 
   searchQuery,
   selectedProject,
-  selectedLocation,
-  selectedStatus,  // Changed from selectedActiveStatus to selectedStatus
+  selectedStatus,
   selectedClassification,
   selectedCategory,
+  selectedEntity,
   projects,
   locations
 }: CheckInTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   
-  // Mock employees data with additional fields
+  // Mock employees data with additional fields including entity
   const mockEmployees: Employee[] = [
     {
       id: 1,
@@ -60,7 +62,8 @@ const CheckInTab = ({
       location: "Site A",
       locationId: 1,
       status: "notcheckedin",
-      imageUrl: "https://randomuser.me/api/portraits/men/1.jpg"
+      imageUrl: "https://randomuser.me/api/portraits/men/1.jpg",
+      entity: "Tanseeq Landscaping LLC"
     },
     {
       id: 2,
@@ -73,7 +76,8 @@ const CheckInTab = ({
       location: "Site B",
       locationId: 2,
       status: "notcheckedin",
-      imageUrl: "https://randomuser.me/api/portraits/women/1.jpg"
+      imageUrl: "https://randomuser.me/api/portraits/women/1.jpg",
+      entity: "Tanseeq Construction Ltd"
     },
     {
       id: 3,
@@ -87,7 +91,8 @@ const CheckInTab = ({
       checkedInProject: "Highway Renovation",
       location: "Office",
       locationId: 3,
-      imageUrl: "https://randomuser.me/api/portraits/men/2.jpg"
+      imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
+      entity: "Tanseeq Engineering Co"
     },
     {
       id: 4,
@@ -100,7 +105,8 @@ const CheckInTab = ({
       location: "Site A",
       locationId: 1,
       status: "notcheckedin",
-      imageUrl: "https://randomuser.me/api/portraits/women/2.jpg"
+      imageUrl: "https://randomuser.me/api/portraits/women/2.jpg",
+      entity: "Tanseeq Landscaping LLC"
     },
     {
       id: 5,
@@ -114,7 +120,8 @@ const CheckInTab = ({
       location: "Site B",
       locationId: 2,
       status: "checkedin",
-      imageUrl: "https://randomuser.me/api/portraits/men/3.jpg"
+      imageUrl: "https://randomuser.me/api/portraits/men/3.jpg",
+      entity: "Tanseeq Construction Ltd"
     }
   ];
 
@@ -123,15 +130,28 @@ const CheckInTab = ({
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.employeeId.includes(searchQuery);
     const matchesProject = selectedProject === "all" || (employee.projectId?.toString() === selectedProject);
-    const matchesLocation = selectedLocation === "all" || (employee.locationId?.toString() === selectedLocation);
     const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
     const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
     const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
+    const matchesEntity = selectedEntity === "all" || employee.entity === getEntityName(selectedEntity);
     
-    // Remove reference to selectedActiveStatus since we're using selectedStatus now
-    return matchesSearch && (matchesProject || !employee.projectId) && matchesLocation && 
-           matchesStatus && matchesClassification && matchesCategory;
+    return matchesSearch && (matchesProject || !employee.projectId) && 
+           matchesStatus && matchesClassification && matchesCategory && matchesEntity;
   });
+
+  // Helper function to get entity name from entity ID
+  const getEntityName = (entityId: string) => {
+    if (entityId === "all") return "";
+    
+    // These would typically come from your entities array prop
+    const entityMap = {
+      "1": "Tanseeq Landscaping LLC",
+      "2": "Tanseeq Construction Ltd",
+      "3": "Tanseeq Engineering Co"
+    };
+    
+    return entityMap[entityId as keyof typeof entityMap] || "";
+  };
 
   const handleManualCheckIn = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -157,7 +177,7 @@ const CheckInTab = ({
     }
     
     toast.success(`${selectedEmployee?.name} has been manually checked in`, {
-      description: `Project: ${selectedProjectName}, Location: ${selectedLocationName}`
+      description: `Project: ${selectedProjectName}, Location: ${selectedLocationName || 'N/A'}`
     });
     setSelectedEmployee(null);
   };
@@ -170,6 +190,7 @@ const CheckInTab = ({
             <TableRow>
               <TableHead className="w-[80px]">Employee ID</TableHead>
               <TableHead className="w-[170px]">Employee Name</TableHead>
+              <TableHead>Entity</TableHead>
               <TableHead>Classification</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Check-In Status</TableHead>
@@ -189,6 +210,7 @@ const CheckInTab = ({
                       <div>{employee.name}</div>
                     </div>
                   </TableCell>
+                  <TableCell>{employee.entity}</TableCell>
                   <TableCell>{employee.classification}</TableCell>
                   <TableCell>{employee.category}</TableCell>
                   <TableCell>
@@ -222,7 +244,7 @@ const CheckInTab = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
                   No employees found matching your filters
                 </TableCell>
               </TableRow>

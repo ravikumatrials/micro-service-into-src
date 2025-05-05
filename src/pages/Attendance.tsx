@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Search, Building, MapPin, UserCheck } from "lucide-react";
+import { Upload, Search, Building, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
@@ -16,26 +16,57 @@ const Attendance = () => {
   const currentDate = new Date();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
-  const [selectedLocation, setSelectedLocation] = useState("all");
   
   // Add new state variables for the additional filter properties
   const [selectedClassification, setSelectedClassification] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedEntity, setSelectedEntity] = useState("all");
 
-  // Mock projects
+  // Mock projects with location data
   const projects = [
-    { id: 1, name: "Main Building Construction" },
-    { id: 2, name: "Bridge Expansion Project" },
-    { id: 3, name: "Highway Renovation" },
+    { id: 1, name: "Main Building Construction", location: "Al Qusais Industrial Area, Dubai" },
+    { id: 2, name: "Bridge Expansion Project", location: "Jebel Ali Industrial Area, Dubai" },
+    { id: 3, name: "Highway Renovation", location: "Business Bay, Dubai" },
   ];
 
-  // Mock locations
-  const locations = [
-    { id: 1, name: "Site A" },
-    { id: 2, name: "Site B" },
-    { id: 3, name: "Office" },
+  // Entity options
+  const entities = [
+    { id: 1, name: "Tanseeq Landscaping LLC" },
+    { id: 2, name: "Tanseeq Construction Ltd" },
+    { id: 3, name: "Tanseeq Engineering Co" },
   ];
+
+  // Classifications
+  const classifications = [
+    { id: 1, name: "Laborer" },
+    { id: 2, name: "Staff" },
+  ];
+
+  // Categories
+  const categories = [
+    { id: 1, name: "Carpenter" },
+    { id: 2, name: "Mason" },
+    { id: 3, name: "Plumber" },
+    { id: 4, name: "Electrician" },
+    { id: 5, name: "Painter" },
+  ];
+
+  // Get the current location based on selected project
+  const getProjectLocation = () => {
+    if (selectedProject === "all") return null;
+    const project = projects.find(p => p.id.toString() === selectedProject);
+    return project ? project.location : null;
+  };
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedProject("all");
+    setSelectedClassification("all");
+    setSelectedCategory("all");
+    setSelectedStatus("all");
+    setSelectedEntity("all");
+  };
 
   return (
     <div className="space-y-4">
@@ -61,53 +92,119 @@ const Attendance = () => {
         
         {/* Filter controls */}
         <div className="bg-gray-50 p-3 border-b border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-2 top-2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search employee"
-                className="pl-8 h-8 text-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* Entity Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Entity</label>
+              <Select value={selectedEntity} onValueChange={setSelectedEntity}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="All Entities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Entities</SelectItem>
+                  {entities.map((entity) => (
+                    <SelectItem key={entity.id} value={entity.id.toString()}>
+                      {entity.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Classification Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Classification</label>
+              <Select value={selectedClassification} onValueChange={setSelectedClassification}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="All Classifications" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Classifications</SelectItem>
+                  {classifications.map((classification) => (
+                    <SelectItem key={classification.id} value={classification.name}>
+                      {classification.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Category</label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.name}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Project Filter */}
-            <Select value={selectedProject} onValueChange={setSelectedProject}>
-              <SelectTrigger className="h-8 text-sm">
-                <div className="flex items-center gap-2">
-                  <Building className="h-3 w-3 text-gray-500" />
-                  <SelectValue placeholder="Project" />
+            <div className="flex flex-col">
+              <label className="block text-sm font-medium mb-1">Project</label>
+              <Select value={selectedProject} onValueChange={setSelectedProject}>
+                <SelectTrigger className="h-8 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Building className="h-3 w-3 text-gray-500" />
+                    <SelectValue placeholder="Project" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id.toString()}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {getProjectLocation() && (
+                <div className="text-xs text-gray-500 mt-1 italic">
+                  Assigned Location: {getProjectLocation()}
                 </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Projects</SelectItem>
-                {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id.toString()}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              )}
+            </div>
 
-            {/* Location Filter */}
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger className="h-8 text-sm">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-3 w-3 text-gray-500" />
-                  <SelectValue placeholder="Location" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                {locations.map((location) => (
-                  <SelectItem key={location.id} value={location.id.toString()}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Employee Search */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Employee Name/ID</label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search employee"
+                  className="pl-8 h-8 text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Filter Buttons */}
+            <div className="flex items-end space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleResetFilters}
+                className="text-gray-600 border-gray-300 hover:bg-gray-50"
+              >
+                Clear Filters
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Apply Filters
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -140,12 +237,12 @@ const Attendance = () => {
             <CheckInTab 
               searchQuery={searchQuery} 
               selectedProject={selectedProject} 
-              selectedLocation={selectedLocation} 
               selectedStatus={selectedStatus}
               projects={projects}
-              locations={locations}
+              locations={[]}
               selectedClassification={selectedClassification}
               selectedCategory={selectedCategory}
+              selectedEntity={selectedEntity}
             />
           </TabsContent>
 
@@ -153,12 +250,13 @@ const Attendance = () => {
             <CheckOutTab 
               searchQuery={searchQuery} 
               selectedProject={selectedProject} 
-              selectedLocation={selectedLocation}
+              selectedLocation=""
               projects={projects}
-              locations={locations}
+              locations={[]}
               selectedClassification={selectedClassification}
               selectedCategory={selectedCategory}
               selectedStatus={selectedStatus}
+              selectedEntity={selectedEntity}
             />
           </TabsContent>
 
@@ -166,12 +264,13 @@ const Attendance = () => {
             <ExceptionTab 
               searchQuery={searchQuery} 
               selectedProject={selectedProject} 
-              selectedLocation={selectedLocation}
+              selectedLocation=""
               projects={projects}
-              locations={locations}
+              locations={[]}
               selectedClassification={selectedClassification}
               selectedCategory={selectedCategory}
               selectedStatus={selectedStatus}
+              selectedEntity={selectedEntity}
             />
           </TabsContent>
         </Tabs>
