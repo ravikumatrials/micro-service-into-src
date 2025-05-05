@@ -1,4 +1,5 @@
 
+// Just update the interface to include the missing properties
 import React, { useState } from "react";
 import { Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,13 +28,13 @@ interface Employee {
 interface CheckInTabProps {
   searchQuery: string;
   selectedProject: string;
-  selectedLocation: string;
+  selectedLocation: string; // Add this to match expected props
   selectedStatus: string;
   selectedClassification: string;
   selectedCategory: string;
   selectedActiveStatus: string;
-  projects: { id: number; name: string }[];
-  locations: { id: number; name: string }[];
+  projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];
+  locations: { id: number; name: string }[]; // Add this to match expected props
 }
 
 const CheckInTab = ({ 
