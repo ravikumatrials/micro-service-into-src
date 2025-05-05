@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Edit, Clock, MapPin, Loader, AlertCircle } from "lucide-react";
+import { Edit, Clock, MapPin, AlertCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -39,11 +39,11 @@ const ManualCheckInDialog = ({
   
   // Location states
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [assignedLocation, setAssignedLocation] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   
-  // Nearest location based on coordinates
-  const [autoSelectedLocation, setAutoSelectedLocation] = useState("select-location");
+  // Associated location ID for the selected project
+  const [assignedLocationId, setAssignedLocationId] = useState<string>("select-location");
   
   const [errors, setErrors] = useState({
     project: false,
@@ -57,9 +57,9 @@ const ManualCheckInDialog = ({
       // Set current time as default
       setCheckInTime(format(new Date(), "HH:mm"));
       setSelectedProject("select-project");
-      setAutoSelectedLocation("select-location");
+      setAssignedLocationId("select-location");
       setReason("");
-      setCurrentLocation(null);
+      setAssignedLocation(null);
       setLocationError(null);
       setErrors({
         project: false,
@@ -69,51 +69,44 @@ const ManualCheckInDialog = ({
     }
   }, [open]);
   
-  // When project changes, fetch location
+  // When project changes, fetch assigned location
   useEffect(() => {
     if (selectedProject !== "select-project") {
-      detectCurrentLocation();
+      fetchAssignedLocation(selectedProject);
+    } else {
+      setAssignedLocation(null);
+      setLocationError(null);
     }
   }, [selectedProject]);
   
-  const detectCurrentLocation = () => {
+  const fetchAssignedLocation = (projectId: string) => {
     setIsLoadingLocation(true);
     setLocationError(null);
-    setCurrentLocation(null);
+    setAssignedLocation(null);
     
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser");
-      setIsLoadingLocation(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        setCurrentLocation(location);
+    try {
+      // Find the selected project
+      const selectedProject = projects.find(p => p.id.toString() === projectId);
+      
+      if (selectedProject && selectedProject.coordinates && selectedProject.coordinates.geofenceData) {
+        // If project has assigned coordinates/geofence
         setIsLoadingLocation(false);
+        setAssignedLocation(`Project Location: ${selectedProject.name} (Geo-Fenced Area)`);
         
-        // Auto-select the nearest location (simplified for demo)
-        // In a real implementation, you would calculate the closest location
-        // based on the coordinates
+        // Find a matching location for this project (simplified approach)
         if (locations.length > 0) {
-          setAutoSelectedLocation(locations[0].id.toString());
+          setAssignedLocationId(locations[0].id.toString());
         }
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        setLocationError(
-          error.code === 1
-            ? "Location access denied. Please enable location services."
-            : "Unable to retrieve your location. Please try again."
-        );
+      } else {
+        // If project doesn't have assigned coordinates
         setIsLoadingLocation(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+        setLocationError("No location assigned to this project");
+      }
+    } catch (error) {
+      console.error("Error fetching assigned location:", error);
+      setLocationError("Failed to retrieve project location");
+      setIsLoadingLocation(false);
+    }
   };
   
   const handleSubmit = () => {
@@ -126,14 +119,14 @@ const ManualCheckInDialog = ({
     
     setErrors(newErrors);
     
-    if (Object.values(newErrors).some(Boolean) || !currentLocation) {
-      if (!currentLocation && selectedProject !== "select-project") {
-        setLocationError("Location required. Please allow location access to continue.");
+    if (Object.values(newErrors).some(Boolean) || !assignedLocation) {
+      if (!assignedLocation && selectedProject !== "select-project") {
+        setLocationError("Project must have an assigned location to continue");
       }
       return;
     }
     
-    onComplete(selectedProject, autoSelectedLocation, checkInTime, reason);
+    onComplete(selectedProject, assignedLocationId, checkInTime, reason);
   };
   
   return (
@@ -190,8 +183,7 @@ const ManualCheckInDialog = ({
             <>
               {isLoadingLocation && (
                 <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-100">
-                  <Loader className="h-4 w-4 text-proscape animate-spin mr-2" />
-                  <span className="text-sm text-gray-600">Detecting current location...</span>
+                  <span className="text-sm text-gray-600">Retrieving assigned location...</span>
                 </div>
               )}
               
@@ -202,14 +194,14 @@ const ManualCheckInDialog = ({
                 </Alert>
               )}
               
-              {currentLocation && !locationError && (
+              {assignedLocation && !locationError && (
                 <div className="p-3 bg-green-50 rounded-lg border border-green-100">
                   <div className="flex items-center text-green-700 mb-1">
                     <MapPin className="h-4 w-4 mr-1 text-green-600" />
-                    <span className="font-medium text-sm">Location detected</span>
+                    <span className="font-medium text-sm">{assignedLocation}</span>
                   </div>
                   <p className="text-xs text-green-600">
-                    Your current location will be saved with this attendance record.
+                    This assigned location will be saved with the attendance record.
                   </p>
                 </div>
               )}
@@ -260,7 +252,7 @@ const ManualCheckInDialog = ({
           <Button 
             onClick={handleSubmit}
             className="bg-proscape hover:bg-proscape-dark"
-            disabled={isLoadingLocation || (selectedProject !== "select-project" && !currentLocation)}
+            disabled={isLoadingLocation || (selectedProject !== "select-project" && !assignedLocation)}
           >
             Submit Check-In
           </Button>

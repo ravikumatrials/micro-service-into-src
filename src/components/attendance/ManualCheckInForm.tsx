@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { User, Loader, MapPin, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { User, MapPin, AlertCircle } from "lucide-react";
 import EmployeeField from "../ManualFormFields/EmployeeField";
 import ProjectField from "../ManualFormFields/ProjectField";
 import TimeField from "../ManualFormFields/TimeField";
@@ -23,53 +23,49 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
   
   // Location states
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [assignedLocation, setAssignedLocation] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // When project is selected, fetch location
+    // When project is selected, fetch assigned location
     if (field === "project" && value) {
-      fetchCurrentLocation();
+      fetchAssignedLocation(value);
+    } else if (field === "project" && !value) {
+      // Reset location info if project is deselected
+      setAssignedLocation(null);
+      setLocationError(null);
     }
   };
 
-  // Get current location when project is selected
-  const fetchCurrentLocation = () => {
+  // Get assigned location for the selected project
+  const fetchAssignedLocation = (projectId: string) => {
     setLocationError(null);
     setIsLoadingLocation(true);
     
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser");
-      setIsLoadingLocation(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        setCurrentLocation(location);
+    try {
+      // Find the selected project
+      const selectedProject = projects.find(p => p.id.toString() === projectId);
+      
+      if (selectedProject && selectedProject.coordinates && selectedProject.coordinates.geofenceData) {
+        // If project has assigned coordinates/geofence
         setIsLoadingLocation(false);
+        setAssignedLocation(`Project Location: ${selectedProject.name} (Geo-Fenced Area)`);
         toast({
-          title: "Location detected",
-          description: "Your current location has been detected and will be saved with the attendance record."
+          title: "Location assigned",
+          description: "Project's assigned location has been retrieved."
         });
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        setLocationError(
-          error.code === 1
-            ? "Location access denied. Please enable location services."
-            : "Unable to retrieve your location. Please try again."
-        );
+      } else {
+        // If project doesn't have assigned coordinates
         setIsLoadingLocation(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+        setLocationError("No location assigned to this project.");
+      }
+    } catch (error) {
+      console.error("Error fetching assigned location:", error);
+      setLocationError("Failed to retrieve project location. Please try again.");
+      setIsLoadingLocation(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -96,17 +92,16 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
     }
     
     // Check if location was successfully fetched
-    if (!currentLocation) {
+    if (!assignedLocation) {
       toast({
         title: "Location Required",
-        description: "Please allow location access to complete check-in",
+        description: "Project must have an assigned location to complete check-in",
         variant: "destructive"
       });
       return;
     }
     
     // Submit form logic would go here
-    // In a real implementation, we would include the currentLocation in the data sent to the server
     toast({
       title: "Manual Check-In Recorded",
       description: `Employee ${formData.employeeId} checked in successfully`,
@@ -119,7 +114,7 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
       checkInTime: "",
       reason: ""
     });
-    setCurrentLocation(null);
+    setAssignedLocation(null);
   };
 
   return (
@@ -142,8 +137,7 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
           <>
             {isLoadingLocation && (
               <div className="mb-4 flex items-center justify-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <Loader className="h-5 w-5 text-proscape animate-spin mr-2" />
-                <span className="text-gray-600">Detecting current location...</span>
+                <span className="text-gray-600">Retrieving assigned location...</span>
               </div>
             )}
             
@@ -154,14 +148,14 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
               </Alert>
             )}
             
-            {currentLocation && !locationError && (
+            {assignedLocation && !locationError && (
               <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-100">
                 <div className="flex items-center text-green-700">
                   <MapPin className="h-5 w-5 mr-2 text-green-600" />
-                  <span className="font-medium">Location detected</span>
+                  <span className="font-medium">{assignedLocation}</span>
                 </div>
                 <p className="text-sm text-green-600 mt-1">
-                  Your current location will be saved with this attendance record.
+                  This assigned location will be saved with the attendance record.
                 </p>
               </div>
             )}
@@ -192,7 +186,7 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
           <button
             type="submit"
             className="bg-proscape hover:bg-proscape-dark text-white px-10 py-4 rounded-xl text-xl font-medium transition-colors shadow-md"
-            disabled={isLoadingLocation || !currentLocation}
+            disabled={isLoadingLocation || !assignedLocation}
           >
             Submit
           </button>
