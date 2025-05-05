@@ -141,12 +141,11 @@ const Attendance = () => {
               searchQuery={searchQuery} 
               selectedProject={selectedProject} 
               selectedLocation={selectedLocation} 
-              selectedStatus="all"
+              selectedStatus={selectedStatus}
               projects={projects}
               locations={locations}
               selectedClassification={selectedClassification}
               selectedCategory={selectedCategory}
-              selectedActiveStatus={selectedStatus}
             />
           </TabsContent>
 
