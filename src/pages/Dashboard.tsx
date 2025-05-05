@@ -3,9 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Users, 
-  Calendar, 
   CheckCircle, 
-  AlertTriangle, 
   Clock, 
   Package, 
   Upload,
@@ -15,11 +13,13 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
-  // Mock data for dashboard
+  // Mock data for dashboard - removed absent, pending checkouts
   const stats = [
     { 
       title: "Total Employees", 
@@ -32,27 +32,7 @@ const Dashboard = () => {
       count: "4,893", 
       icon: <CheckCircle className="h-8 w-8 text-green-500" />,
       change: "78% attendance rate"
-    },
-    { 
-      title: "Absent Today", 
-      count: "1,354", 
-      icon: <AlertTriangle className="h-8 w-8 text-amber-500" />,
-      change: "22% absence rate"
-    },
-    { 
-      title: "Pending Check-outs", 
-      count: "246", 
-      icon: <Clock className="h-8 w-8 text-red-500" />,
-      change: "4% of present employees"
     }
-  ];
-
-  const recentActivity = [
-    { id: 1, employee: "Sarah Johnson", action: "Check-in (Face)", time: "08:45 AM", location: "Main Site" },
-    { id: 2, employee: "Robert Smith", action: "Check-out (Face)", time: "05:15 PM", location: "East Wing" },
-    { id: 3, employee: "Emily Davis", action: "Check-in (Manual)", time: "09:10 AM", location: "North Site" },
-    { id: 4, employee: "James Wilson", action: "Check-out (Manual)", time: "06:00 PM", location: "West Building" },
-    { id: 5, employee: "David Taylor", action: "Check-in (Face)", time: "08:30 AM", location: "South Tower" }
   ];
 
   // New quick actions
@@ -87,6 +67,20 @@ const Dashboard = () => {
       onClick: () => {
         toast.info("Syncing data...", { duration: 2000 });
         setTimeout(() => {
+          // Format current date and time for display
+          const now = new Date();
+          const formattedDate = now.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+          });
+          const formattedTime = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+          const syncTimestamp = `${formattedDate} ${formattedTime}`;
+          setLastSyncTime(syncTimestamp);
           toast.success("Data synchronized successfully!");
         }, 2000);
       },
@@ -99,29 +93,35 @@ const Dashboard = () => {
       <div className="bg-white p-4 rounded-lg shadow-sm">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">Dashboard</h1>
         
-        {/* New Quick Actions Section */}
+        {/* Quick Actions Section */}
         <div className="bg-gray-50 p-4 rounded-lg mb-4">
           <h2 className="text-sm font-medium text-gray-500 mb-3">QUICK ACTIONS</h2>
           <div className="grid grid-cols-5 gap-4">
             {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="flex flex-col items-center gap-2 p-4 h-auto border-gray-200 hover:bg-proscape/5 hover:border-proscape hover:shadow-sm transition-all"
-                onClick={action.onClick}
-                title={action.description}
-              >
-                <div className="w-10 h-10 rounded-full bg-proscape/10 flex items-center justify-center text-proscape">
-                  {action.icon}
-                </div>
-                <span className="font-medium text-sm">{action.label}</span>
-              </Button>
+              <div key={index} className="flex flex-col">
+                <Button
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 p-4 h-auto border-gray-200 hover:bg-proscape/5 hover:border-proscape hover:shadow-sm transition-all"
+                  onClick={action.onClick}
+                  title={action.description}
+                >
+                  <div className="w-10 h-10 rounded-full bg-proscape/10 flex items-center justify-center text-proscape">
+                    {action.icon}
+                  </div>
+                  <span className="font-medium text-sm">{action.label}</span>
+                </Button>
+                {action.label === "Sync Data" && lastSyncTime && (
+                  <div className="text-xs text-gray-500 mt-1 text-center">
+                    Last Synced: {lastSyncTime}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
         {stats.map((stat, index) => (
           <Card key={index} className="p-6 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
@@ -136,53 +136,6 @@ const Dashboard = () => {
             </div>
           </Card>
         ))}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
-        <Card className="p-0 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-            <h2 className="font-semibold text-gray-800">Recent Activity</h2>
-          </div>
-          <div className="p-4">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left text-gray-500">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-4 py-3">Employee</th>
-                    <th scope="col" className="px-4 py-3">Action</th>
-                    <th scope="col" className="px-4 py-3">Time</th>
-                    <th scope="col" className="px-4 py-3">Location</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentActivity.map((activity) => (
-                    <tr key={activity.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">{activity.employee}</td>
-                      <td className="px-4 py-3">
-                        <span 
-                          className={`px-2 py-1 rounded text-xs ${
-                            activity.action.includes('Manual') 
-                              ? 'bg-amber-100 text-amber-800' 
-                              : 'bg-green-100 text-green-800'
-                          }`}
-                        >
-                          {activity.action}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">{activity.time}</td>
-                      <td className="px-4 py-3">{activity.location}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="pt-4 flex justify-center">
-              <button className="text-sm text-proscape hover:text-proscape-dark">
-                View All Activity
-              </button>
-            </div>
-          </div>
-        </Card>
       </div>
     </div>
   );

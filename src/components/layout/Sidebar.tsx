@@ -6,7 +6,6 @@ import {
   Settings, 
   Users, 
   Calendar, 
-  Clock, 
   FileText, 
   User, 
   ChevronDown, 
@@ -27,6 +26,7 @@ type MenuItem = {
   path: string;
   icon: React.ReactNode;
   subMenus?: SubMenuItem[];
+  hidden?: boolean;
 };
 
 const menuItems: MenuItem[] = [
@@ -75,7 +75,8 @@ const menuItems: MenuItem[] = [
   {
     name: "Attendance History",
     path: "/attendance-history",
-    icon: <Clock className="h-5 w-5" />
+    icon: <Calendar className="h-5 w-5" />,
+    hidden: true // Hide from the sidebar but keep the route active
   },
   {
     name: "Reports",
@@ -101,6 +102,9 @@ export function Sidebar() {
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
+
+  // Filter visible menu items
+  const visibleMenuItems = menuItems.filter(item => !item.hidden);
 
   return (
     <div className="relative">
@@ -137,7 +141,7 @@ export function Sidebar() {
         <div className="py-4">
           <nav>
             <ul className="space-y-1">
-              {menuItems.map((item) => (
+              {visibleMenuItems.map((item) => (
                 <li key={item.name}>
                   {item.subMenus ? (
                     <div>

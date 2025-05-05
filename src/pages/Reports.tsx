@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import { ReportFilters } from "@/components/reports/ReportFilters";
-import { StatCards } from "@/components/reports/StatCards";
 
 const Reports = () => {
   // Filter states
@@ -24,17 +23,7 @@ const Reports = () => {
   const [attendanceTypeFilter, setAttendanceTypeFilter] = useState("all");
   const [entryMethodFilter, setEntryMethodFilter] = useState("all");
 
-  // Mock stats data
-  const stats = {
-    present: 245,
-    absent: 25,
-    avgHours: 8.5,
-    manualEntries: 12,
-    missedCheckouts: 5,
-    pendingApprovals: 8,
-  };
-
-  // Mock report data (same as before)
+  // Mock report data
   const reportData = [
     {
       id: 1,
@@ -69,7 +58,7 @@ const Reports = () => {
       manualReason: "Face recognition system offline",
       exceptions: "Late arrival",
       approvalStatus: "Pending",
-    },
+    }
   ];
 
   const handleExport = () => {
@@ -91,8 +80,6 @@ const Reports = () => {
           Export Report
         </Button>
       </div>
-
-      <StatCards stats={stats} />
 
       <Card className="p-6 space-y-6">
         <ReportFilters
@@ -176,4 +163,3 @@ const Reports = () => {
 };
 
 export default Reports;
-

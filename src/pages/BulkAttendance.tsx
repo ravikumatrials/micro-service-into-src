@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X } from "lucide-react";
+import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -253,6 +252,42 @@ const BulkAttendance = () => {
     clearImportFilters();
   };
 
+  // Generate and download template
+  const downloadTemplate = () => {
+    // Create a table structure that can be used as a template
+    const headers = ["Employee ID", "Name", "Category", "Classification", "Project", "Location"];
+    const sampleRows = [
+      ["EMP001", "John Smith", "Carpenter", "Laborer", "Main Building Construction", "Downtown Site"],
+      ["EMP002", "Sarah Johnson", "Mason", "Laborer", "Bridge Expansion", "Bridge Zone A"],
+      ["", "", "", "", "", ""]
+    ];
+    
+    // Create CSV content
+    let csvContent = headers.join(",") + "\n";
+    sampleRows.forEach(row => {
+      csvContent += row.join(",") + "\n";
+    });
+    
+    // Create a blob and download it
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bulk_attendance_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    // Show success toast
+    toast({
+      title: "Template Downloaded",
+      description: "You can fill this template and import it back to mark attendance.",
+    });
+  };
+
   return (
     <div className="space-y-5 px-1 pt-5">
       <div>
@@ -376,7 +411,14 @@ const BulkAttendance = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={downloadTemplate}
+              >
+                <Download className="h-4 w-4" /> Download Template
+              </Button>
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2"
