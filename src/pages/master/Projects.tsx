@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Upload, Eye, Trash, Search } from "lucide-react";
 import ProjectFilters from "./ProjectFilters";
@@ -100,7 +101,8 @@ export default function ProjectsPage() {
     name: "",
     location: "",
     status: "All",
-    dateRange: undefined
+    fromDate: null,
+    toDate: null
   });
   const [importOpen, setImportOpen] = useState(false);
   const [tanseeqImportOpen, setTanseeqImportOpen] = useState(false);
@@ -120,15 +122,20 @@ export default function ProjectsPage() {
       if (filters.status && filters.status !== "All" && p.status !== filters.status) 
         return false;
       
-      if (filters.dateRange?.start || filters.dateRange?.end) {
+      // Filter by from date
+      if (filters.fromDate) {
         const projectStartDate = new Date(p.startDate);
-        const projectEndDate = new Date(p.endDate);
-        
-        if (filters.dateRange?.start && projectStartDate < filters.dateRange.start) {
+        const fromDate = new Date(filters.fromDate);
+        if (projectStartDate < fromDate) {
           return false;
         }
-        
-        if (filters.dateRange?.end && projectEndDate > filters.dateRange.end) {
+      }
+      
+      // Filter by to date
+      if (filters.toDate) {
+        const projectEndDate = new Date(p.endDate);
+        const toDate = new Date(filters.toDate);
+        if (projectEndDate > toDate) {
           return false;
         }
       }
