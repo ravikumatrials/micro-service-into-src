@@ -34,46 +34,52 @@ const ManualCheckInDialog = ({
   onComplete
 }: ManualCheckInDialogProps) => {
   const [selectedProject, setSelectedProject] = useState("select-project");
-  const [selectedLocation, setSelectedLocation] = useState("select-location");
   const [checkInTime, setCheckInTime] = useState("");
   const [reason, setReason] = useState("");
   
   // Location states
-  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [nearbyProjects, setNearbyProjects] = useState<typeof projects>([]);
+  
+  // Nearest location based on coordinates
+  const [autoSelectedLocation, setAutoSelectedLocation] = useState("select-location");
   
   const [errors, setErrors] = useState({
     project: false,
-    location: false,
     time: false,
     reason: false
   });
   
-  // Reset form and start location detection when dialog opens
+  // Reset form and initialize when dialog opens
   useEffect(() => {
     if (open) {
       // Set current time as default
       setCheckInTime(format(new Date(), "HH:mm"));
       setSelectedProject("select-project");
-      setSelectedLocation("select-location");
+      setAutoSelectedLocation("select-location");
       setReason("");
+      setCurrentLocation(null);
+      setLocationError(null);
       setErrors({
         project: false,
-        location: false,
         time: false,
         reason: false
       });
-      
-      // Start location detection
-      detectCurrentLocation();
     }
   }, [open]);
+  
+  // When project changes, fetch location
+  useEffect(() => {
+    if (selectedProject !== "select-project") {
+      detectCurrentLocation();
+    }
+  }, [selectedProject]);
   
   const detectCurrentLocation = () => {
     setIsLoadingLocation(true);
     setLocationError(null);
+    setCurrentLocation(null);
     
     if (!navigator.geolocation) {
       setLocationError("Geolocation is not supported by your browser");
@@ -89,7 +95,13 @@ const ManualCheckInDialog = ({
         };
         setCurrentLocation(location);
         setIsLoadingLocation(false);
-        findNearbyProjects(location);
+        
+        // Auto-select the nearest location (simplified for demo)
+        // In a real implementation, you would calculate the closest location
+        // based on the coordinates
+        if (locations.length > 0) {
+          setAutoSelectedLocation(locations[0].id.toString());
+        }
       },
       (error) => {
         console.error("Geolocation error:", error);
@@ -104,63 +116,24 @@ const ManualCheckInDialog = ({
     );
   };
   
-  // Find projects near the current location
-  const findNearbyProjects = (location: { lat: number; lng: number }) => {
-    // This is a simplified implementation for demonstration
-    // In a real application, you would use more complex geofencing logic
-    
-    const projectsWithCoordinates = projects.filter(project => project.coordinates?.geofenceData);
-    
-    const matchingProjects = projectsWithCoordinates.filter(project => {
-      try {
-        if (!project.coordinates?.geofenceData) return false;
-        
-        // Parse the geofence data (assuming it's a JSON string of polygon coordinates)
-        const polygonCoordinates = JSON.parse(project.coordinates.geofenceData);
-        
-        // Check if the current location is inside this project's polygon
-        // This is a simplified check - actual implementation would use proper point-in-polygon algorithm
-        return isPointInPolygon(location, polygonCoordinates);
-      } catch (error) {
-        console.error("Error parsing project coordinates:", error);
-        return false;
-      }
-    });
-    
-    setNearbyProjects(matchingProjects);
-    
-    // If we found exactly one nearby project, auto-select it
-    if (matchingProjects.length === 1) {
-      setSelectedProject(matchingProjects[0].id.toString());
-    }
-  };
-  
-  // Simplified point-in-polygon check
-  const isPointInPolygon = (
-    point: { lat: number; lng: number }, 
-    polygon: Array<{ lat: number; lng: number }>
-  ): boolean => {
-    // For demo purposes, we'll just assume the check passes
-    // In a real implementation, you would use a proper point-in-polygon algorithm
-    return true; // All projects with coordinates will match for demo purposes
-  };
-  
   const handleSubmit = () => {
     // Validation
     const newErrors = {
       project: selectedProject === "select-project",
-      location: selectedLocation === "select-location",
       time: !checkInTime,
       reason: !reason
     };
     
     setErrors(newErrors);
     
-    if (Object.values(newErrors).some(Boolean)) {
+    if (Object.values(newErrors).some(Boolean) || !currentLocation) {
+      if (!currentLocation && selectedProject !== "select-project") {
+        setLocationError("Location required. Please allow location access to continue.");
+      }
       return;
     }
     
-    onComplete(selectedProject, selectedLocation, checkInTime, reason);
+    onComplete(selectedProject, autoSelectedLocation, checkInTime, reason);
   };
   
   return (
@@ -191,40 +164,7 @@ const ManualCheckInDialog = ({
             </div>
           )}
           
-          {/* Location Status Section */}
-          {isLoadingLocation && (
-            <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <Loader className="h-4 w-4 text-proscape animate-spin mr-2" />
-              <span className="text-sm text-gray-600">Detecting current location...</span>
-            </div>
-          )}
-          
-          {locationError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-xs">{locationError}</AlertDescription>
-            </Alert>
-          )}
-          
-          {currentLocation && !locationError && (
-            <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-              <div className="flex items-center text-green-700 mb-1">
-                <MapPin className="h-4 w-4 mr-1 text-green-600" />
-                <span className="font-medium text-sm">Location detected</span>
-              </div>
-              {nearbyProjects.length > 0 ? (
-                <p className="text-xs text-green-600">
-                  {nearbyProjects.length} {nearbyProjects.length === 1 ? 'project' : 'projects'} found in this location
-                </p>
-              ) : (
-                <p className="text-xs text-amber-600">
-                  No projects found in this location. All projects will be shown.
-                </p>
-              )}
-            </div>
-          )}
-          
-          {/* Project */}
+          {/* Project - First step */}
           <div className="space-y-2">
             <Label htmlFor="project">Project <span className="text-red-500">*</span></Label>
             <Select value={selectedProject} onValueChange={setSelectedProject}>
@@ -233,9 +173,9 @@ const ManualCheckInDialog = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="select-project">Select project</SelectItem>
-                {(nearbyProjects.length > 0 ? nearbyProjects : projects).map(project => (
+                {projects.map(project => (
                   <SelectItem key={project.id} value={project.id.toString()}>
-                    {project.name} {nearbyProjects.includes(project) ? "(nearby)" : ""}
+                    {project.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -245,26 +185,36 @@ const ManualCheckInDialog = ({
             )}
           </div>
           
-          {/* Location */}
-          <div className="space-y-2">
-            <Label htmlFor="location">Location <span className="text-red-500">*</span></Label>
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger id="location" className={errors.location ? "border-red-500" : ""}>
-                <SelectValue placeholder="Select location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="select-location">Select location</SelectItem>
-                {locations.map(location => (
-                  <SelectItem key={location.id} value={location.id.toString()}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.location && (
-              <p className="text-red-500 text-sm">Location is required</p>
-            )}
-          </div>
+          {/* Location Status Section - only shown after project selection */}
+          {selectedProject !== "select-project" && (
+            <>
+              {isLoadingLocation && (
+                <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <Loader className="h-4 w-4 text-proscape animate-spin mr-2" />
+                  <span className="text-sm text-gray-600">Detecting current location...</span>
+                </div>
+              )}
+              
+              {locationError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">{locationError}</AlertDescription>
+                </Alert>
+              )}
+              
+              {currentLocation && !locationError && (
+                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                  <div className="flex items-center text-green-700 mb-1">
+                    <MapPin className="h-4 w-4 mr-1 text-green-600" />
+                    <span className="font-medium text-sm">Location detected</span>
+                  </div>
+                  <p className="text-xs text-green-600">
+                    Your current location will be saved with this attendance record.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
           
           {/* Check-in Time */}
           <div className="space-y-2">
@@ -310,6 +260,7 @@ const ManualCheckInDialog = ({
           <Button 
             onClick={handleSubmit}
             className="bg-proscape hover:bg-proscape-dark"
+            disabled={isLoadingLocation || (selectedProject !== "select-project" && !currentLocation)}
           >
             Submit Check-In
           </Button>

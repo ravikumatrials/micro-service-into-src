@@ -20,7 +20,7 @@ const ManualAttendanceRecords = () => {
 
   const [activeTab, setActiveTab] = useState("records");
   
-  // Mock data for dropdowns with coordinates added for geolocation matching
+  // Mock data for projects with coordinates added for geolocation matching
   const mockProjects = [
     { 
       id: 1, 
@@ -77,6 +77,7 @@ const ManualAttendanceRecords = () => {
     }
   ];
   
+  // Mock locations (only used for backward compatibility with CheckOutTab and ExceptionTab)
   const mockLocations = [
     { id: 1, name: "Site A" },
     { id: 2, name: "Site B" },

@@ -22,17 +22,24 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
   });
   
   // Location states
-  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [nearbyProjects, setNearbyProjects] = useState<typeof projects>([]);
   
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // When project is selected, fetch location
+    if (field === "project" && value) {
+      fetchCurrentLocation();
+    }
   };
 
-  // Get current location on component mount
-  useEffect(() => {
+  // Get current location when project is selected
+  const fetchCurrentLocation = () => {
+    setLocationError(null);
+    setIsLoadingLocation(true);
+    
     if (!navigator.geolocation) {
       setLocationError("Geolocation is not supported by your browser");
       setIsLoadingLocation(false);
@@ -47,7 +54,10 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
         };
         setCurrentLocation(location);
         setIsLoadingLocation(false);
-        findNearbyProjects(location);
+        toast({
+          title: "Location detected",
+          description: "Your current location has been detected and will be saved with the attendance record."
+        });
       },
       (error) => {
         console.error("Geolocation error:", error);
@@ -60,47 +70,6 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  }, []);
-
-  // Find projects near the current location
-  const findNearbyProjects = (location: { lat: number; lng: number }) => {
-    // This is a simplified implementation for demonstration
-    // In a real application, you would use more complex geofencing logic
-    
-    const projectsWithCoordinates = projects.filter(project => project.coordinates?.geofenceData);
-    
-    const matchingProjects = projectsWithCoordinates.filter(project => {
-      try {
-        if (!project.coordinates?.geofenceData) return false;
-        
-        // Parse the geofence data (assuming it's a JSON string of polygon coordinates)
-        const polygonCoordinates = JSON.parse(project.coordinates.geofenceData);
-        
-        // Check if the current location is inside this project's polygon
-        // This is a simplified check - actual implementation would use proper point-in-polygon algorithm
-        return isPointInPolygon(location, polygonCoordinates);
-      } catch (error) {
-        console.error("Error parsing project coordinates:", error);
-        return false;
-      }
-    });
-    
-    setNearbyProjects(matchingProjects);
-  };
-  
-  // Simplified point-in-polygon check (ray casting algorithm)
-  const isPointInPolygon = (
-    point: { lat: number; lng: number }, 
-    polygon: Array<{ lat: number; lng: number }>
-  ): boolean => {
-    // For demo purposes, we'll just check if the point is near the first coordinate
-    // In a real implementation, you would use a proper point-in-polygon algorithm
-    
-    if (!polygon || !polygon.length) return false;
-    
-    // Simple distance calculation from point to first polygon point (for demo only)
-    // In reality, ALL projects would match if they have coordinates, since this is just a demo
-    return true; // All projects with coordinates will match for demo purposes
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -126,7 +95,18 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
       return;
     }
     
+    // Check if location was successfully fetched
+    if (!currentLocation) {
+      toast({
+        title: "Location Required",
+        description: "Please allow location access to complete check-in",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Submit form logic would go here
+    // In a real implementation, we would include the currentLocation in the data sent to the server
     toast({
       title: "Manual Check-In Recorded",
       description: `Employee ${formData.employeeId} checked in successfully`,
@@ -139,6 +119,7 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
       checkInTime: "",
       reason: ""
     });
+    setCurrentLocation(null);
   };
 
   return (
@@ -148,66 +129,70 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
         Manual Check In
       </h3>
       
-      {/* Location Status Section */}
-      {isLoadingLocation && (
-        <div className="mb-8 flex items-center justify-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-          <Loader className="h-5 w-5 text-proscape animate-spin mr-2" />
-          <span className="text-gray-600">Detecting current location...</span>
-        </div>
-      )}
-      
-      {locationError && (
-        <Alert variant="destructive" className="mb-8">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{locationError}</AlertDescription>
-        </Alert>
-      )}
-      
-      {currentLocation && !locationError && (
-        <div className="mb-8 p-4 bg-green-50 rounded-lg border border-green-100">
-          <div className="flex items-center text-green-700 mb-2">
-            <MapPin className="h-5 w-5 mr-2 text-green-600" />
-            <span className="font-medium">Location detected</span>
-          </div>
-          {nearbyProjects.length > 0 ? (
-            <p className="text-sm text-green-600">
-              {nearbyProjects.length} {nearbyProjects.length === 1 ? 'project' : 'projects'} found in this location
-            </p>
-          ) : (
-            <p className="text-sm text-amber-600">
-              No projects found in this location. All projects will be shown.
-            </p>
-          )}
-        </div>
-      )}
-      
       <form className="space-y-8" onSubmit={handleSubmit}>
+        {/* Project selection comes first */}
+        <ProjectField 
+          projects={projects}
+          value={formData.project}
+          onChange={(value) => handleChange("project", value)}
+        />
+        
+        {/* Location Status Section - only shown after project selection */}
+        {formData.project && (
+          <>
+            {isLoadingLocation && (
+              <div className="mb-4 flex items-center justify-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+                <Loader className="h-5 w-5 text-proscape animate-spin mr-2" />
+                <span className="text-gray-600">Detecting current location...</span>
+              </div>
+            )}
+            
+            {locationError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{locationError}</AlertDescription>
+              </Alert>
+            )}
+            
+            {currentLocation && !locationError && (
+              <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-100">
+                <div className="flex items-center text-green-700">
+                  <MapPin className="h-5 w-5 mr-2 text-green-600" />
+                  <span className="font-medium">Location detected</span>
+                </div>
+                <p className="text-sm text-green-600 mt-1">
+                  Your current location will be saved with this attendance record.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+        
         <EmployeeField 
           label="Employee ID or Name" 
           placeholder="Enter employee ID or name" 
           value={formData.employeeId}
           onChange={(value) => handleChange("employeeId", value)}
         />
-        <ProjectField 
-          projects={nearbyProjects.length > 0 ? nearbyProjects : projects}
-          value={formData.project}
-          onChange={(value) => handleChange("project", value)}
-        />
+        
         <TimeField 
           label="Check In Time" 
           value={formData.checkInTime}
           onChange={(value) => handleChange("checkInTime", value)}
         />
+        
         <ReasonField 
           label="Reason for Manual Check In" 
           placeholder="Enter reason" 
           value={formData.reason}
           onChange={(value) => handleChange("reason", value)}
         />
+        
         <div className="flex justify-end pt-4">
           <button
             type="submit"
             className="bg-proscape hover:bg-proscape-dark text-white px-10 py-4 rounded-xl text-xl font-medium transition-colors shadow-md"
+            disabled={isLoadingLocation || !currentLocation}
           >
             Submit
           </button>
