@@ -27,7 +27,7 @@ interface Employee {
 interface CheckOutTabProps {
   searchQuery: string;
   selectedProject: string;
-  selectedLocation: string;
+  selectedLocation?: string; // Making this optional
   selectedClassification: string;
   selectedCategory: string;
   selectedStatus: string;
@@ -39,7 +39,7 @@ interface CheckOutTabProps {
 const CheckOutTab = ({
   searchQuery,
   selectedProject,
-  selectedLocation,
+  selectedLocation = "all", // Providing default value
   selectedClassification,
   selectedCategory,
   selectedStatus,

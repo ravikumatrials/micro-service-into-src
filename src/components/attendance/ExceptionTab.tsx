@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,7 @@ interface Employee {
 interface ExceptionTabProps {
   searchQuery: string;
   selectedProject: string;
-  selectedLocation: string;
+  selectedLocation?: string; // Making this optional
   selectedClassification: string;
   selectedCategory: string;
   selectedStatus: string;
@@ -39,7 +38,7 @@ interface ExceptionTabProps {
 const ExceptionTab = ({
   searchQuery,
   selectedProject,
-  selectedLocation,
+  selectedLocation = "all", // Providing default value
   selectedClassification,
   selectedCategory,
   selectedStatus,
