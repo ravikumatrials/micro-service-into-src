@@ -15,7 +15,7 @@ const ManualAttendanceRecords = () => {
     classification: "all",
     status: "all",
     project: "all",
-    location: "all"
+    entity: "all" // Added entity field
   });
 
   const [activeTab, setActiveTab] = useState("records");
@@ -77,14 +77,6 @@ const ManualAttendanceRecords = () => {
     }
   ];
   
-  // Mock locations (only used for backward compatibility with CheckOutTab and ExceptionTab)
-  const mockLocations = [
-    { id: 1, name: "Site A" },
-    { id: 2, name: "Site B" },
-    { id: 3, name: "Office" },
-    { id: 4, name: "Site C" }
-  ];
-  
   // Filtered records based on filter criteria
   const filteredRecords = mockAttendanceRecords.filter(record => {
     if (filters.employeeId && !record.employeeId.includes(filters.employeeId)) {
@@ -102,10 +94,11 @@ const ManualAttendanceRecords = () => {
     if (filters.status !== "all" && record.status !== filters.status) {
       return false;
     }
-    if (filters.location !== "all" && record.location !== filters.location) {
+    if (filters.project !== "all" && !record.checkInProject.includes(filters.project)) {
       return false;
     }
-    if (filters.project !== "all" && !record.checkInProject.includes(filters.project)) {
+    // Added entity filter (assuming records have entity property)
+    if (filters.entity !== "all" && record.entity !== filters.entity) {
       return false;
     }
     return true;
@@ -120,7 +113,7 @@ const ManualAttendanceRecords = () => {
       classification: "all",
       status: "all",
       project: "all",
-      location: "all"
+      entity: "all" // Reset entity filter
     });
   };
 
@@ -160,13 +153,11 @@ const ManualAttendanceRecords = () => {
           <CheckInTab 
             searchQuery={filters.name || filters.employeeId}
             selectedProject={filters.project}
-            selectedLocation={filters.location}
             selectedStatus="all"
             selectedClassification={filters.classification}
             selectedCategory={filters.category}
             selectedActiveStatus={filters.status}
             projects={mockProjects}
-            locations={mockLocations}
           />
         </TabsContent>
         
@@ -174,12 +165,12 @@ const ManualAttendanceRecords = () => {
           <CheckOutTab 
             searchQuery={filters.name || filters.employeeId}
             selectedProject={filters.project}
-            selectedLocation={filters.location}
+            selectedLocation="all" // Kept for backward compatibility
             selectedClassification={filters.classification}
             selectedCategory={filters.category}
             selectedStatus={filters.status}
             projects={mockProjects}
-            locations={mockLocations}
+            locations={[]} // Empty array since we're not using locations anymore
           />
         </TabsContent>
         
@@ -187,12 +178,12 @@ const ManualAttendanceRecords = () => {
           <ExceptionTab 
             searchQuery={filters.name || filters.employeeId}
             selectedProject={filters.project}
-            selectedLocation={filters.location}
+            selectedLocation="all" // Kept for backward compatibility
             selectedClassification={filters.classification}
             selectedCategory={filters.category}
             selectedStatus={filters.status}
             projects={mockProjects}
-            locations={mockLocations}
+            locations={[]} // Empty array since we're not using locations anymore
           />
         </TabsContent>
       </Tabs>

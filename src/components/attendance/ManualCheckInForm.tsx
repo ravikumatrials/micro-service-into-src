@@ -48,16 +48,28 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
       // Find the selected project
       const selectedProject = projects.find(p => p.id.toString() === projectId);
       
-      if (selectedProject && selectedProject.coordinates && selectedProject.coordinates.geofenceData) {
-        // If project has assigned coordinates/geofence
-        setIsLoadingLocation(false);
-        setAssignedLocation(`Project Location: ${selectedProject.name} (Geo-Fenced Area)`);
-        toast({
-          title: "Location assigned",
-          description: "Project's assigned location has been retrieved."
-        });
+      // Dummy location assignment based on project
+      if (selectedProject) {
+        const dummyLocations: { [key: string]: string } = {
+          "1": "Dubai Expo Zone - Sector 3B",
+          "2": "Sheikh Zayed Road - Site 17",
+          "3": "Al Quoz Industrial Area - Block C",
+          "4": "Business Bay - Tower 4 Plot",
+          "5": "Dubai Marina - Waterfront Development"
+        };
+        
+        const locationName = dummyLocations[projectId] || `${selectedProject.name} Site`;
+        
+        setTimeout(() => {
+          setIsLoadingLocation(false);
+          setAssignedLocation(`Project Location: ${locationName}`);
+          toast({
+            title: "Location assigned",
+            description: "Project's assigned location has been retrieved."
+          });
+        }, 500); // Short delay to simulate fetch
       } else {
-        // If project doesn't have assigned coordinates
+        // If project doesn't exist
         setIsLoadingLocation(false);
         setLocationError("No location assigned to this project.");
       }

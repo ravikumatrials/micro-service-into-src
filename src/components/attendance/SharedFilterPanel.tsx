@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Search, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,7 +10,7 @@ interface FilterValues {
   category: string;
   status: string;
   project: string;
-  location: string;
+  entity: string; // Added entity field
 }
 
 interface SharedFilterPanelProps {
@@ -25,7 +24,7 @@ const categoryOptions = ["All", "Carpenter", "Mason", "Plumber", "Electrician", 
 const classificationOptions = ["All", "Laborer", "Staff"];
 const statusOptions = ["All", "Active", "Inactive"];
 const projectOptions = ["All", "Main Building Construction", "Bridge Expansion", "Hospital Wing", "Warehouse Project"];
-const locationOptions = ["All", "Site A", "Site B", "Site C", "Office"];
+const entityOptions = ["All", "Tanseeq Landscaping LLC", "Tanseeq Construction Ltd", "Tanseeq Engineering Co"];
 
 const SharedFilterPanel: React.FC<SharedFilterPanelProps> = ({
   filters,
@@ -45,36 +44,49 @@ const SharedFilterPanel: React.FC<SharedFilterPanelProps> = ({
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-6 border border-gray-200">
       <h3 className="text-lg font-medium text-gray-800 mb-4">Filter Attendance Records</h3>
-      <div className="grid grid-cols-3 gap-4">
-        {/* Employee ID Filter - Numeric Only */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Employee ID/Name Filter - Combined Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Employee ID
-          </label>
-          <Input
-            type="text"
-            placeholder="Enter ID number"
-            value={filters.employeeId}
-            onChange={handleEmployeeIdChange}
-            className="w-full"
-          />
-        </div>
-
-        {/* Name Filter */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Employee Name
+            Employee Name/ID
           </label>
           <div className="relative">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
             <Input
               type="text"
-              placeholder="Search by name"
-              value={filters.name}
-              onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="Search by Name or Employee ID"
+              value={filters.name || filters.employeeId}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d+$/.test(value)) {
+                  // If numeric, update employeeId
+                  setFilters(prev => ({ ...prev, employeeId: value, name: '' }));
+                } else {
+                  // Otherwise, update name
+                  setFilters(prev => ({ ...prev, name: value, employeeId: '' }));
+                }
+              }}
               className="pl-10"
             />
           </div>
+        </div>
+
+        {/* Entity Filter - New */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Entity
+          </label>
+          <select
+            value={filters.entity}
+            onChange={(e) => setFilters(prev => ({ ...prev, entity: e.target.value }))}
+            className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+          >
+            {entityOptions.map((option) => (
+              <option key={option} value={option === "All" ? "all" : option}>
+                {option}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Classification Filter */}
@@ -148,24 +160,6 @@ const SharedFilterPanel: React.FC<SharedFilterPanelProps> = ({
             ))}
           </select>
         </div>
-
-        {/* Location Filter */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Location
-          </label>
-          <select
-            value={filters.location}
-            onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-            className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
-          >
-            {locationOptions.map((option) => (
-              <option key={option} value={option === "All" ? "all" : option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       {/* Action Buttons */}
@@ -175,7 +169,7 @@ const SharedFilterPanel: React.FC<SharedFilterPanelProps> = ({
           variant="outline"
           className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
         >
-          <X className="h-4 w-4 mr-1" /> Clear Filters
+          <X className="h-4 w-4 mr-1" /> Clear All
         </Button>
         <Button
           onClick={onApply}

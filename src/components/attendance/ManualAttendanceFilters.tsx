@@ -9,7 +9,7 @@ interface FilterValues {
   category: string;
   status: string;
   project: string;
-  location: string;
+  entity: string; // Added entity field
 }
 
 interface ManualAttendanceFiltersProps {
