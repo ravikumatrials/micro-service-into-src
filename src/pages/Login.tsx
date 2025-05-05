@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
@@ -96,9 +95,6 @@ const Login = () => {
           <h2 className="text-2xl font-bold text-gray-900">
             Tanseeq Investment
           </h2>
-          <p className="text-sm text-gray-600">
-            Welcome to Tanseeq Investment
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
