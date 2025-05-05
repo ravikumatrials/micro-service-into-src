@@ -21,6 +21,7 @@ interface Employee {
   classification: string;
   category: string;
   status: "Active" | "Inactive";
+  entity?: string;
 }
 
 interface CheckOutTabProps {
@@ -30,6 +31,7 @@ interface CheckOutTabProps {
   selectedClassification: string;
   selectedCategory: string;
   selectedStatus: string;
+  selectedEntity: string;
   projects: { id: number; name: string }[];
   locations: { id: number; name: string }[];
 }
@@ -41,6 +43,7 @@ const CheckOutTab = ({
   selectedClassification,
   selectedCategory,
   selectedStatus,
+  selectedEntity,
   projects,
   locations
 }: CheckOutTabProps) => {
@@ -103,9 +106,10 @@ const CheckOutTab = ({
     const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
     const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
     const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
+    const matchesEntity = selectedEntity === "all" || employee.entity === selectedEntity;
     
     return matchesSearch && matchesProject && matchesLocation && 
-           matchesClassification && matchesCategory && matchesStatus;
+           matchesClassification && matchesCategory && matchesStatus && matchesEntity;
   });
 
   const handleManualCheckOut = (employee: Employee) => {

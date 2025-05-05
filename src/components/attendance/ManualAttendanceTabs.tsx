@@ -41,10 +41,10 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
         <CheckInTab 
           searchQuery={filters.name || filters.employeeId}
           selectedProject={filters.project}
-          selectedLocation="all"
           selectedClassification={filters.classification}
           selectedCategory={filters.category}
-          selectedStatus={filters.status}  // Changed from selectedActiveStatus to selectedStatus
+          selectedStatus={filters.status}
+          selectedEntity={filters.entity}
           projects={projects}
           locations={emptyLocations}
         />
@@ -54,10 +54,10 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
         <CheckOutTab 
           searchQuery={filters.name || filters.employeeId}
           selectedProject={filters.project}
-          selectedLocation="all"
           selectedClassification={filters.classification}
           selectedCategory={filters.category}
           selectedStatus={filters.status}
+          selectedEntity={filters.entity}
           projects={projects}
           locations={emptyLocations}
         />
@@ -67,10 +67,10 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
         <ExceptionTab 
           searchQuery={filters.name || filters.employeeId}
           selectedProject={filters.project}
-          selectedLocation="all"
           selectedClassification={filters.classification}
           selectedCategory={filters.category}
           selectedStatus={filters.status}
+          selectedEntity={filters.entity}
           projects={projects}
           locations={emptyLocations}
         />
