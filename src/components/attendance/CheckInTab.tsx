@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,7 @@ interface CheckInTabProps {
   selectedEntity: string;
   projects: { id: number; name: string; location?: string }[];
   locations: { id: number; name: string }[];
+  selectedDate?: Date; // Added this prop to match what's being passed in ManualAttendanceTabs
 }
 
 const CheckInTab = ({ 
@@ -44,7 +44,8 @@ const CheckInTab = ({
   selectedCategory,
   selectedEntity,
   projects,
-  locations
+  locations,
+  selectedDate = new Date() // Default to today if not provided
 }: CheckInTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -237,7 +238,7 @@ const CheckInTab = ({
                       className="flex items-center space-x-1 text-xs"
                     >
                       <Edit className="h-3 w-3" />
-                      <span>Manual</span>
+                      <span>Mark Attendance</span>
                     </Button>
                   </TableCell>
                 </TableRow>
