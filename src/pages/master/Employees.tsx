@@ -599,7 +599,6 @@ const Employees = () => {
                         <TableHead>Check-In Time</TableHead>
                         <TableHead>Check-Out Time</TableHead>
                         <TableHead>Attendance Mode</TableHead>
-                        <TableHead>Status</TableHead>
                         <TableHead>Comments</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -619,11 +618,6 @@ const Employees = () => {
                               }
                             >
                               {record.checkInMethod}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800">
-                              Present
                             </Badge>
                           </TableCell>
                           <TableCell>
