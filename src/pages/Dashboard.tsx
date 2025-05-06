@@ -1,41 +1,62 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
+  Calendar,
   Users, 
   CheckCircle, 
-  Clock, 
-  Package, 
+  LogOut, 
+  RefreshCw,
+  UserCheck,
+  Package,
   Upload,
   Folder,
-  FileText,
-  RefreshCw
+  FileText
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
+import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  // Mock data for dashboard - removed absent, pending checkouts
-  const stats = [
+  // Mock data for dashboard cards - in a real application, these would be fetched based on selectedDate
+  const dashboardData = {
+    totalEmployees: "6,000",
+    checkedInToday: "2,450",
+    checkedOutToday: "1,870",
+    faceEnrolled: "541 / 6,000"
+  };
+
+  // New dashboard cards
+  const dashboardCards = [
     { 
       title: "Total Employees", 
-      count: "6,247", 
-      icon: <Users className="h-8 w-8 text-proscape" />,
-      change: "+12% from last month"
+      count: dashboardData.totalEmployees, 
+      icon: <Users className="h-8 w-8 text-proscape" />
     },
     { 
-      title: "Present Today", 
-      count: "4,893", 
-      icon: <CheckCircle className="h-8 w-8 text-green-500" />,
-      change: "78% attendance rate"
+      title: "Checked In Today", 
+      count: dashboardData.checkedInToday, 
+      icon: <CheckCircle className="h-8 w-8 text-green-500" />
+    },
+    { 
+      title: "Checked Out Today", 
+      count: dashboardData.checkedOutToday, 
+      icon: <LogOut className="h-8 w-8 text-amber-500" />
+    },
+    { 
+      title: "Face Enrolled", 
+      count: dashboardData.faceEnrolled, 
+      icon: <UserCheck className="h-8 w-8 text-blue-500" />
     }
   ];
 
-  // New quick actions
+  // Quick actions - keeping the existing ones
   const quickActions = [
     { 
       label: "Bulk Attendance", 
@@ -87,14 +108,67 @@ const Dashboard = () => {
       description: "Initiates data sync with central database"
     }
   ];
+  
+  // Handle date change
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      toast.info(`Dashboard updated for ${format(date, 'dd MMM yyyy')}`);
+      // In a real app, you would fetch new data based on this date
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="bg-white p-4 rounded-lg shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Dashboard</h1>
+        {/* Dashboard header with date picker */}
+        <div className="flex flex-wrap items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+          
+          {/* Date Picker */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 border-gray-200 bg-white"
+              >
+                <Calendar className="h-4 w-4" />
+                <span>
+                  {format(selectedDate, "dd MMM yyyy")}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateChange}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Dashboard Cards - 2x2 Grid */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 mb-6">
+          {dashboardCards.map((card, index) => (
+            <Card key={index} className="p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">{card.title}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-2">{card.count}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-full">
+                  {card.icon}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
         
-        {/* Quick Actions Section */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
+        {/* Quick Actions Section - Keeping this from the original */}
+        <div className="bg-gray-50 p-4 rounded-lg">
           <h2 className="text-sm font-medium text-gray-500 mb-3">QUICK ACTIONS</h2>
           <div className="grid grid-cols-5 gap-4">
             {quickActions.map((action, index) => (
@@ -119,23 +193,6 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-        {stats.map((stat, index) => (
-          <Card key={index} className="p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">{stat.title}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stat.count}</p>
-                <p className="text-xs text-gray-500 mt-1">{stat.change}</p>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-full">
-                {stat.icon}
-              </div>
-            </div>
-          </Card>
-        ))}
       </div>
     </div>
   );
