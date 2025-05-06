@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -25,16 +25,41 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-
-  // Mock data for dashboard cards - in a real application, these would be fetched based on selectedDate
-  const dashboardData = {
+  const [dashboardData, setDashboardData] = useState({
     totalEmployees: "6,000",
     checkedInToday: "2,450",
     checkedOutToday: "1,870",
     faceEnrolled: "541 / 6,000"
-  };
+  });
 
-  // New dashboard cards
+  // Update dashboard data when date changes
+  useEffect(() => {
+    // In a real application, this would be an API call that fetches data for the selected date
+    const fetchDashboardData = () => {
+      // Simulate API delay
+      setTimeout(() => {
+        // Simulate different data for different dates
+        const day = selectedDate.getDate();
+        const randomFactor = day % 5 + 0.8; // Creates variation based on day
+        
+        const totalEmp = 6000;
+        const checkedIn = Math.round(2450 * randomFactor);
+        const checkedOut = Math.round(1870 * randomFactor);
+        const faceEnrolled = Math.round(541 * randomFactor);
+        
+        setDashboardData({
+          totalEmployees: totalEmp.toLocaleString(),
+          checkedInToday: checkedIn.toLocaleString(),
+          checkedOutToday: checkedOut.toLocaleString(),
+          faceEnrolled: `${faceEnrolled} / ${totalEmp.toLocaleString()}`
+        });
+      }, 300);
+    };
+    
+    fetchDashboardData();
+  }, [selectedDate]);
+
+  // Dashboard cards
   const dashboardCards = [
     { 
       title: "Total Employees", 
@@ -116,7 +141,7 @@ const Dashboard = () => {
     if (date) {
       setSelectedDate(date);
       toast.info(`Dashboard updated for ${format(date, 'dd MMM yyyy')}`);
-      // In a real app, you would fetch new data based on this date
+      // Data is fetched via the useEffect hook when selectedDate changes
     }
   };
 

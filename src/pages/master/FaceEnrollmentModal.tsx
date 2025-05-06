@@ -38,8 +38,8 @@ const FaceEnrollmentModal = ({
       
       // Show success message
       toast.success(isUpdate 
-        ? "Face updated successfully" 
-        : "Face enrolled successfully"
+        ? "Face ID updated successfully" 
+        : "Face ID setup completed successfully"
       );
       
       onClose();
@@ -51,12 +51,12 @@ const FaceEnrollmentModal = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isUpdate ? "Update Face" : "Enroll Face"}
+            {isUpdate ? "Update Face ID" : "Setup Face ID"}
           </DialogTitle>
           <DialogDescription>
             {isUpdate 
               ? `Update facial data for ${employeeName} (ID: ${employeeId})` 
-              : `Enroll face for ${employeeName} (ID: ${employeeId})`
+              : `Setup face recognition for ${employeeName} (ID: ${employeeId})`
             }
           </DialogDescription>
         </DialogHeader>
@@ -86,7 +86,7 @@ const FaceEnrollmentModal = ({
               disabled={isCapturing}
               className="bg-green-600 hover:bg-green-700 text-white"
             >
-              {isCapturing ? "Processing..." : "Capture Face"}
+              {isCapturing ? "Processing..." : isUpdate ? "Update Face ID" : "Capture Face"}
             </Button>
             <DialogClose asChild>
               <Button type="button" variant="outline">
