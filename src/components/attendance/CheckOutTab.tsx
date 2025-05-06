@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Edit, UserCheck, AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { Edit, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Employee {
   id: number;
@@ -51,17 +50,6 @@ const CheckOutTab = ({
 }: CheckOutTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [showLocationWarning, setShowLocationWarning] = useState(false);
-
-  // Effect to check if selected project has a location and update warning state
-  useEffect(() => {
-    if (selectedProject !== "all") {
-      const projectHasLocation = projects.find(p => p.id.toString() === selectedProject)?.location;
-      setShowLocationWarning(!projectHasLocation);
-    } else {
-      setShowLocationWarning(false); // Hide warning when "all projects" is selected
-    }
-  }, [selectedProject, projects]);
   
   const mockCheckedInEmployees: Employee[] = [
     {
@@ -206,28 +194,11 @@ const CheckOutTab = ({
       description: `Project: ${selectedProjectName}, Time: ${time}, Reason: ${reason.substring(0, 30)}${reason.length > 30 ? '...' : ''}`
     });
     
-    // Check if project has location and show warning if not
-    const project = projects.find(p => p.id.toString() === projectId);
-    if (!project?.location) {
-      toast.warning("Note: This project does not have a geofenced location assigned", {
-        description: "Attendance has been recorded without GPS verification"
-      });
-    }
-    
     setSelectedEmployee(null);
   };
 
   return (
     <div className="space-y-4">
-      {showLocationWarning && (
-        <Alert className="bg-white border border-gray-200 mb-4">
-          <AlertCircle className="h-4 w-4 text-gray-400" />
-          <AlertDescription className="text-gray-500 italic">
-            No location defined – attendance will proceed without GPS verification
-          </AlertDescription>
-        </Alert>
-      )}
-      
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -268,16 +239,7 @@ const CheckOutTab = ({
                       <span>{employee.checkInTime}</span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div>
-                      <div>{employee.project}</div>
-                      {!employee.location && (
-                        <div className="text-xs text-gray-500 italic mt-0.5">
-                          No location defined – attendance will proceed without GPS verification
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
+                  <TableCell>{employee.project}</TableCell>
                   <TableCell className="text-right">
                     <Button 
                       onClick={() => handleManualCheckOut(employee)} 

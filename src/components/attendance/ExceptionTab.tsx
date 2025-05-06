@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Edit, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -199,36 +198,11 @@ const ExceptionTab = ({
       description: `Project: ${selectedProjectName}, Time: ${time}, Reason: ${reason.substring(0, 30)}${reason.length > 30 ? '...' : ''}`
     });
     
-    // Check if project has location and show warning if not
-    const project = projects.find(p => p.id.toString() === projectId);
-    if (!project?.location) {
-      toast.warning("Note: This project does not have a geofenced location assigned", {
-        description: "Exception has been resolved without GPS verification"
-      });
-    }
-    
     setSelectedEmployee(null);
-  };
-
-  // Show notice if the selected project has no assigned location
-  const selectedProjectHasLocation = () => {
-    if (selectedProject === "all") return true;
-    
-    const project = projects.find(p => p.id.toString() === selectedProject);
-    return project?.location ? true : false;
   };
 
   return (
     <div className="space-y-4">
-      {selectedProject !== "all" && !selectedProjectHasLocation() && (
-        <Alert className="bg-amber-50 border border-amber-200 mb-4">
-          <AlertCircle className="h-4 w-4 text-amber-500" />
-          <AlertDescription className="text-amber-600">
-            This project does not have a geofenced location assigned. Attendance exceptions will still be processed without GPS verification.
-          </AlertDescription>
-        </Alert>
-      )}
-      
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -264,16 +238,7 @@ const ExceptionTab = ({
                   <TableCell>{employee.classification}</TableCell>
                   <TableCell>{employee.category}</TableCell>
                   <TableCell>{employee.checkInTime}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div>{employee.project}</div>
-                      {!employee.location && (
-                        <div className="text-xs text-amber-600 mt-0.5">
-                          No location defined – attendance will proceed without GPS verification
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
+                  <TableCell>{employee.project}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button 

@@ -50,7 +50,6 @@ const CheckInTab = ({
 }: CheckInTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [showLocationWarning, setShowLocationWarning] = useState(false);
   
   // Effect to check if selected project has a location and update warning state
   useEffect(() => {
@@ -61,6 +60,8 @@ const CheckInTab = ({
       setShowLocationWarning(false); // Hide warning when "all projects" is selected
     }
   }, [selectedProject, projects]);
+  
+  const [showLocationWarning, setShowLocationWarning] = useState(false);
   
   // Additional sample employees for the demonstration
   const mockEmployees: Employee[] = [
@@ -227,14 +228,8 @@ const CheckInTab = ({
     }
     
     toast.success(`${selectedEmployee?.name} has been manually checked in`, {
-      description: `Project: ${selectedProjectName}, Location: ${selectedLocationName}`
+      description: `Project: ${selectedProjectName}`
     });
-    
-    if (!selectedLocationName || selectedLocationName === "No location defined") {
-      toast.warning("Note: This project does not have a geofenced location assigned", {
-        description: "Attendance has been recorded without GPS verification"
-      });
-    }
     
     setSelectedEmployee(null);
   };
