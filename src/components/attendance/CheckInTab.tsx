@@ -1,10 +1,12 @@
+
 import React, { useState } from "react";
-import { Edit, UserCheck, UserX } from "lucide-react";
+import { Edit, UserCheck, UserX, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
 import ManualCheckInDialog from "./dialogs/ManualCheckInDialog";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Employee {
   id: number;
@@ -50,7 +52,7 @@ const CheckInTab = ({
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   
-  // Mock employees data with additional fields including entity
+  // Additional sample employees for the demonstration
   const mockEmployees: Employee[] = [
     {
       id: 1,
@@ -123,6 +125,43 @@ const CheckInTab = ({
       status: "checkedin",
       imageUrl: "https://randomuser.me/api/portraits/men/3.jpg",
       entity: "Tanseeq Construction Ltd"
+    },
+    // Additional employees for testing
+    {
+      id: 6,
+      employeeId: "10006",
+      name: "Amanda Garcia",
+      role: "Project Manager",
+      category: "Mason",
+      classification: "Staff",
+      activeStatus: "Active",
+      status: "notcheckedin",
+      imageUrl: "https://randomuser.me/api/portraits/women/3.jpg",
+      entity: "Tanseeq Engineering Co"
+    },
+    {
+      id: 7,
+      employeeId: "10007",
+      name: "Robert Chen",
+      role: "Foreman",
+      category: "Carpenter",
+      classification: "Laborer",
+      activeStatus: "Active",
+      status: "notcheckedin",
+      imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
+      entity: "Tanseeq Landscaping LLC"
+    },
+    {
+      id: 8,
+      employeeId: "10008",
+      name: "Jennifer Lopez",
+      role: "Safety Inspector",
+      category: "Plumber",
+      classification: "Staff",
+      activeStatus: "Active",
+      status: "notcheckedin",
+      imageUrl: "https://randomuser.me/api/portraits/women/4.jpg",
+      entity: "Tanseeq Construction Ltd"
     }
   ];
 
@@ -168,7 +207,7 @@ const CheckInTab = ({
     setOpenManualDialog(false);
     
     const selectedProjectName = projects.find(p => p.id.toString() === projectId)?.name;
-    const selectedLocationName = locations.find(l => l.id.toString() === locationId)?.name;
+    const selectedLocationName = locations.find(l => l.id.toString() === locationId)?.name || "No location defined";
     
     // Handle auto check-out logic if employee was checked into another project
     if (selectedEmployee?.status === "checkedin" && selectedEmployee.checkedInProject) {
@@ -178,13 +217,37 @@ const CheckInTab = ({
     }
     
     toast.success(`${selectedEmployee?.name} has been manually checked in`, {
-      description: `Project: ${selectedProjectName}, Location: ${selectedLocationName || 'N/A'}`
+      description: `Project: ${selectedProjectName}, Location: ${selectedLocationName}`
     });
+    
+    if (!selectedLocationName || selectedLocationName === "No location defined") {
+      toast.warning("Note: This project does not have a geofenced location assigned", {
+        description: "Attendance has been recorded without GPS verification"
+      });
+    }
+    
     setSelectedEmployee(null);
+  };
+
+  // Show notice if the selected project has no assigned location
+  const selectedProjectHasLocation = () => {
+    if (selectedProject === "all") return true;
+    
+    const project = projects.find(p => p.id.toString() === selectedProject);
+    return project?.location ? true : false;
   };
 
   return (
     <div className="space-y-4">
+      {selectedProject !== "all" && !selectedProjectHasLocation() && (
+        <Alert className="bg-amber-50 border border-amber-200 mb-4">
+          <AlertCircle className="h-4 w-4 text-amber-500" />
+          <AlertDescription className="text-amber-600">
+            This project does not have a geofenced location assigned. Attendance will still be recorded without GPS verification.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>

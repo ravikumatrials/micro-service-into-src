@@ -1,10 +1,12 @@
+
 import React, { useState } from "react";
-import { Edit, UserCheck } from "lucide-react";
+import { Edit, UserCheck, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Employee {
   id: number;
@@ -96,6 +98,55 @@ const CheckOutTab = ({
       locationId: 1,
       checkInTime: "08:00 AM",
       imageUrl: "https://randomuser.me/api/portraits/women/4.jpg"
+    },
+    // Additional sample records
+    {
+      id: 11,
+      employeeId: "10011",
+      name: "Robert Green",
+      role: "Foreman",
+      classification: "Staff",
+      category: "Carpenter",
+      status: "Active",
+      project: "Dubai Mall Expansion",
+      projectId: 4,
+      location: "Mall Site",
+      locationId: 4,
+      checkInTime: "07:45 AM",
+      imageUrl: "https://randomuser.me/api/portraits/men/5.jpg",
+      entity: "Tanseeq Construction Ltd"
+    },
+    {
+      id: 12,
+      employeeId: "10012",
+      name: "Linda Martinez",
+      role: "Safety Inspector",
+      classification: "Staff",
+      category: "Electrician",
+      status: "Active",
+      project: "Marina Towers",
+      projectId: 5,
+      location: "Marina Site",
+      locationId: 5,
+      checkInTime: "08:10 AM",
+      imageUrl: "https://randomuser.me/api/portraits/women/6.jpg",
+      entity: "Tanseeq Engineering Co"
+    },
+    {
+      id: 13,
+      employeeId: "10013",
+      name: "Ahmed Hassan",
+      role: "Crane Operator",
+      classification: "Laborer",
+      category: "Mason",
+      status: "Active",
+      project: "Highway Renovation",
+      projectId: 3,
+      location: "Highway Site",
+      locationId: 6,
+      checkInTime: "06:30 AM",
+      imageUrl: "https://randomuser.me/api/portraits/men/7.jpg",
+      entity: "Tanseeq Landscaping LLC"
     }
   ];
 
@@ -107,11 +158,25 @@ const CheckOutTab = ({
     const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
     const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
     const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
-    const matchesEntity = selectedEntity === "all" || employee.entity === selectedEntity;
+    const matchesEntity = selectedEntity === "all" || employee.entity === getEntityName(selectedEntity);
     
     return matchesSearch && matchesProject && matchesLocation && 
            matchesClassification && matchesCategory && matchesStatus && matchesEntity;
   });
+
+  // Helper function to get entity name from entity ID
+  const getEntityName = (entityId: string) => {
+    if (entityId === "all") return "";
+    
+    // These would typically come from your entities array prop
+    const entityMap = {
+      "1": "Tanseeq Landscaping LLC",
+      "2": "Tanseeq Construction Ltd",
+      "3": "Tanseeq Engineering Co"
+    };
+    
+    return entityMap[entityId as keyof typeof entityMap] || "";
+  };
 
   const handleManualCheckOut = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -130,11 +195,37 @@ const CheckOutTab = ({
     toast.success(`${selectedEmployee?.name} has been manually checked out`, {
       description: `Project: ${selectedProjectName}, Time: ${time}, Reason: ${reason.substring(0, 30)}${reason.length > 30 ? '...' : ''}`
     });
+    
+    // Check if project has location and show warning if not
+    const project = projects.find(p => p.id.toString() === projectId);
+    if (!project?.location) {
+      toast.warning("Note: This project does not have a geofenced location assigned", {
+        description: "Attendance has been recorded without GPS verification"
+      });
+    }
+    
     setSelectedEmployee(null);
+  };
+
+  // Show notice if the selected project has no assigned location
+  const selectedProjectHasLocation = () => {
+    if (selectedProject === "all") return true;
+    
+    const project = projects.find(p => p.id.toString() === selectedProject);
+    return project?.location ? true : false;
   };
 
   return (
     <div className="space-y-4">
+      {selectedProject !== "all" && !selectedProjectHasLocation() && (
+        <Alert className="bg-amber-50 border border-amber-200 mb-4">
+          <AlertCircle className="h-4 w-4 text-amber-500" />
+          <AlertDescription className="text-amber-600">
+            This project does not have a geofenced location assigned. Attendance will still be recorded without GPS verification.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -175,7 +266,16 @@ const CheckOutTab = ({
                       <span>{employee.checkInTime}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{employee.project}</TableCell>
+                  <TableCell>
+                    <div>
+                      <div>{employee.project}</div>
+                      {!employee.location && (
+                        <div className="text-xs text-amber-600 mt-0.5">
+                          No location defined – attendance will proceed without GPS verification
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button 
                       onClick={() => handleManualCheckOut(employee)} 

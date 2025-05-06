@@ -29,10 +29,11 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid grid-cols-3 w-full mb-4">
+      <TabsList className="grid grid-cols-4 w-full mb-4">
         <TabsTrigger value="records">Attendance Records</TabsTrigger>
         <TabsTrigger value="check-in">Check In</TabsTrigger>
         <TabsTrigger value="check-out">Check Out</TabsTrigger>
+        <TabsTrigger value="exceptions">Exceptions</TabsTrigger>
       </TabsList>
       
       <TabsContent value="records" className="mt-0">

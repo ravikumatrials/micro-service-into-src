@@ -1,10 +1,12 @@
+
 import React, { useState } from "react";
-import { Edit } from "lucide-react";
+import { Edit, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Employee {
   id: number;
@@ -13,14 +15,15 @@ interface Employee {
   role: string;
   project: string;
   projectId: number;
-  location: string;
-  locationId: number;
+  location?: string;
+  locationId?: number;
   checkInTime: string;
   imageUrl: string;
   classification: string;
   category: string;
   status: "Active" | "Inactive";
   entity?: string;
+  exceptionReason?: string;
 }
 
 interface ExceptionTabProps {
@@ -66,7 +69,8 @@ const ExceptionTab = ({
       imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
       classification: "Laborer",
       category: "Carpenter",
-      status: "Active"
+      status: "Active",
+      exceptionReason: "No checkout recorded for yesterday"
     },
     {
       id: 9,
@@ -81,7 +85,69 @@ const ExceptionTab = ({
       imageUrl: "https://randomuser.me/api/portraits/women/5.jpg",
       classification: "Staff",
       category: "Electrician",
-      status: "Inactive"
+      status: "Inactive",
+      exceptionReason: "No checkout recorded for yesterday"
+    },
+    // Additional employees with exceptions
+    {
+      id: 14,
+      employeeId: "10014",
+      name: "Fatima Al-Qahtani",
+      role: "Project Engineer",
+      project: "Marina Towers",
+      projectId: 5,
+      checkInTime: "07:30 AM",
+      imageUrl: "https://randomuser.me/api/portraits/women/8.jpg",
+      classification: "Staff",
+      category: "Mason",
+      status: "Active",
+      entity: "Tanseeq Engineering Co",
+      exceptionReason: "No checkout recorded for yesterday"
+    },
+    {
+      id: 15,
+      employeeId: "10015",
+      name: "Carlos Rodriguez",
+      role: "Foreman",
+      project: "Dubai Mall Expansion",
+      projectId: 4,
+      checkInTime: "06:45 AM",
+      imageUrl: "https://randomuser.me/api/portraits/men/9.jpg",
+      classification: "Laborer",
+      category: "Carpenter",
+      status: "Active",
+      entity: "Tanseeq Construction Ltd",
+      exceptionReason: "No checkout recorded for yesterday"
+    },
+    {
+      id: 16,
+      employeeId: "10016",
+      name: "Aisha Mohammed",
+      role: "Safety Manager",
+      project: "Highway Renovation",
+      projectId: 3,
+      checkInTime: "08:05 AM",
+      imageUrl: "https://randomuser.me/api/portraits/women/9.jpg",
+      classification: "Staff",
+      category: "Plumber",
+      status: "Active",
+      entity: "Tanseeq Engineering Co",
+      exceptionReason: "GPS not detected during check-in"
+    },
+    {
+      id: 17,
+      employeeId: "10017",
+      name: "John Peterson",
+      role: "Electrician",
+      project: "Marina Towers",
+      projectId: 5,
+      checkInTime: "07:50 AM",
+      imageUrl: "https://randomuser.me/api/portraits/men/10.jpg",
+      classification: "Laborer",
+      category: "Electrician",
+      status: "Active",
+      entity: "Tanseeq Landscaping LLC",
+      exceptionReason: "Manually checked in outside of geofence"
     }
   ];
 
@@ -90,15 +156,30 @@ const ExceptionTab = ({
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.employeeId.includes(searchQuery);
     const matchesProject = selectedProject === "all" || employee.projectId.toString() === selectedProject;
-    const matchesLocation = selectedLocation === "all" || employee.locationId.toString() === selectedLocation;
+    const matchesLocation = selectedLocation === "all" || 
+                          (employee.locationId && employee.locationId.toString() === selectedLocation);
     const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
     const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
     const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
-    const matchesEntity = selectedEntity === "all" || employee.entity === selectedEntity;
+    const matchesEntity = selectedEntity === "all" || employee.entity === getEntityName(selectedEntity);
     
-    return matchesSearch && matchesProject && matchesLocation && 
+    return matchesSearch && matchesProject && (matchesLocation || !employee.locationId) && 
            matchesClassification && matchesCategory && matchesStatus && matchesEntity;
   });
+
+  // Helper function to get entity name from entity ID
+  const getEntityName = (entityId: string) => {
+    if (entityId === "all") return "";
+    
+    // These would typically come from your entities array prop
+    const entityMap = {
+      "1": "Tanseeq Landscaping LLC",
+      "2": "Tanseeq Construction Ltd",
+      "3": "Tanseeq Engineering Co"
+    };
+    
+    return entityMap[entityId as keyof typeof entityMap] || "";
+  };
 
   const handleManualCheckOut = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -117,11 +198,37 @@ const ExceptionTab = ({
     toast.success(`${selectedEmployee?.name} exception has been resolved`, {
       description: `Project: ${selectedProjectName}, Time: ${time}, Reason: ${reason.substring(0, 30)}${reason.length > 30 ? '...' : ''}`
     });
+    
+    // Check if project has location and show warning if not
+    const project = projects.find(p => p.id.toString() === projectId);
+    if (!project?.location) {
+      toast.warning("Note: This project does not have a geofenced location assigned", {
+        description: "Exception has been resolved without GPS verification"
+      });
+    }
+    
     setSelectedEmployee(null);
+  };
+
+  // Show notice if the selected project has no assigned location
+  const selectedProjectHasLocation = () => {
+    if (selectedProject === "all") return true;
+    
+    const project = projects.find(p => p.id.toString() === selectedProject);
+    return project?.location ? true : false;
   };
 
   return (
     <div className="space-y-4">
+      {selectedProject !== "all" && !selectedProjectHasLocation() && (
+        <Alert className="bg-amber-50 border border-amber-200 mb-4">
+          <AlertCircle className="h-4 w-4 text-amber-500" />
+          <AlertDescription className="text-amber-600">
+            This project does not have a geofenced location assigned. Attendance exceptions will still be processed without GPS verification.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -157,7 +264,16 @@ const ExceptionTab = ({
                   <TableCell>{employee.classification}</TableCell>
                   <TableCell>{employee.category}</TableCell>
                   <TableCell>{employee.checkInTime}</TableCell>
-                  <TableCell>{employee.project}</TableCell>
+                  <TableCell>
+                    <div>
+                      <div>{employee.project}</div>
+                      {!employee.location && (
+                        <div className="text-xs text-amber-600 mt-0.5">
+                          No location defined – attendance will proceed without GPS verification
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button 
