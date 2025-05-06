@@ -11,7 +11,8 @@ import {
   Package,
   Upload,
   Folder,
-  FileText
+  FileText,
+  AlertCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -20,16 +21,19 @@ import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dashboardData, setDashboardData] = useState({
-    totalEmployees: "6,000",
-    checkedInToday: "2,450",
-    checkedOutToday: "1,870",
-    faceEnrolled: "541 / 6,000"
+    totalEmployees: 6000,
+    checkedInToday: 0,
+    checkedOutToday: 0,
+    faceEnrolled: 0,
+    pendingCheckouts: 0
   });
 
   // Update dashboard data when date changes
@@ -42,16 +46,18 @@ const Dashboard = () => {
         const day = selectedDate.getDate();
         const randomFactor = day % 5 + 0.8; // Creates variation based on day
         
-        const totalEmp = 6000;
-        const checkedIn = Math.round(2450 * randomFactor);
-        const checkedOut = Math.round(1870 * randomFactor);
+        const totalEmp = 6000; // This should remain constant regardless of date
+        const checkedIn = Math.min(Math.round(4500 * randomFactor), totalEmp);
+        const checkedOut = Math.min(Math.round(checkedIn * 0.85), checkedIn); // Ensure checked out ≤ checked in
+        const pendingCheckouts = checkedIn - checkedOut;
         const faceEnrolled = Math.round(541 * randomFactor);
         
         setDashboardData({
-          totalEmployees: totalEmp.toLocaleString(),
-          checkedInToday: checkedIn.toLocaleString(),
-          checkedOutToday: checkedOut.toLocaleString(),
-          faceEnrolled: `${faceEnrolled} / ${totalEmp.toLocaleString()}`
+          totalEmployees: totalEmp,
+          checkedInToday: checkedIn,
+          checkedOutToday: checkedOut,
+          faceEnrolled: faceEnrolled,
+          pendingCheckouts: pendingCheckouts
         });
       }, 300);
     };
@@ -63,22 +69,23 @@ const Dashboard = () => {
   const dashboardCards = [
     { 
       title: "Total Employees", 
-      count: dashboardData.totalEmployees, 
+      count: dashboardData.totalEmployees.toLocaleString(), 
       icon: <Users className="h-8 w-8 text-proscape" />
     },
     { 
       title: "Checked In Today", 
-      count: dashboardData.checkedInToday, 
+      count: dashboardData.checkedInToday.toLocaleString(), 
       icon: <CheckCircle className="h-8 w-8 text-green-500" />
     },
     { 
       title: "Checked Out Today", 
-      count: dashboardData.checkedOutToday, 
-      icon: <LogOut className="h-8 w-8 text-amber-500" />
+      count: dashboardData.checkedOutToday.toLocaleString(), 
+      icon: <LogOut className="h-8 w-8 text-amber-500" />,
+      pendingCheckouts: dashboardData.pendingCheckouts > 0 ? dashboardData.pendingCheckouts : null
     },
     { 
       title: "Face Enrolled", 
-      count: dashboardData.faceEnrolled, 
+      count: `${dashboardData.faceEnrolled} / ${dashboardData.totalEmployees.toLocaleString()}`, 
       icon: <UserCheck className="h-8 w-8 text-blue-500" />
     }
   ];
@@ -184,7 +191,26 @@ const Dashboard = () => {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500">{card.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-2">{card.count}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <p className="text-2xl font-bold text-gray-900">{card.count}</p>
+                    {card.pendingCheckouts && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="inline-flex">
+                              <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                <span>{card.pendingCheckouts.toLocaleString()}</span>
+                              </Badge>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{card.pendingCheckouts.toLocaleString()} pending check-outs</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-full">
                   {card.icon}
