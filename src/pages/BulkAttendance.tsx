@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,30 +53,29 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Mock data for employees
 const MOCK_EMPLOYEES = [
-  { id: "EMP001", name: "John Smith", category: "Carpenter", classification: "Laborer", entity: "Acme Construction", project: "Main Building Construction", location: "Downtown Site" },
-  { id: "EMP002", name: "Sarah Johnson", category: "Mason", classification: "Laborer", entity: "Acme Construction", project: "Main Building Construction", location: "Downtown Site" },
-  { id: "EMP003", name: "Emily Davis", category: "Plumber", classification: "Laborer", entity: "Skyline Builders", project: "Bridge Expansion", location: "Bridge Zone A" },
-  { id: "EMP004", name: "Robert Williams", category: "Electrician", classification: "Laborer", entity: "Skyline Builders", project: "Bridge Expansion", location: "Bridge Zone A" },
-  { id: "EMP005", name: "Michael Brown", category: "Supervisor", classification: "Staff", entity: "Acme Construction", project: "Warehouse Project", location: "East Industrial" },
-  { id: "EMP006", name: "Lisa Wilson", category: "Carpenter", classification: "Laborer", entity: "Metro Developers", project: "Main Building Construction", location: "Downtown Site" },
-  { id: "EMP007", name: "David Lee", category: "Manager", classification: "Staff", entity: "Metro Developers", project: "Warehouse Project", location: "East Industrial" },
-  { id: "EMP008", name: "Jennifer Taylor", category: "Electrician", classification: "Laborer", entity: "Skyline Builders", project: "Bridge Expansion", location: "Bridge Zone A" },
-  { id: "EMP009", name: "James Anderson", category: "Mason", classification: "Laborer", entity: "Acme Construction", project: "Main Building Construction", location: "Downtown Site" },
-  { id: "EMP010", name: "Maria Garcia", category: "Site Engineer", classification: "Staff", entity: "Metro Developers", project: "Warehouse Project", location: "East Industrial" },
+  { id: "EMP001", name: "John Smith", category: "Carpenter", classification: "Laborer", entity: "Acme Construction", project: "Main Building Construction" },
+  { id: "EMP002", name: "Sarah Johnson", category: "Mason", classification: "Laborer", entity: "Acme Construction", project: "Main Building Construction" },
+  { id: "EMP003", name: "Emily Davis", category: "Plumber", classification: "Laborer", entity: "Skyline Builders", project: "Bridge Expansion" },
+  { id: "EMP004", name: "Robert Williams", category: "Electrician", classification: "Laborer", entity: "Skyline Builders", project: "Bridge Expansion" },
+  { id: "EMP005", name: "Michael Brown", category: "Supervisor", classification: "Staff", entity: "Acme Construction", project: "Warehouse Project" },
+  { id: "EMP006", name: "Lisa Wilson", category: "Carpenter", classification: "Laborer", entity: "Metro Developers", project: "Main Building Construction" },
+  { id: "EMP007", name: "David Lee", category: "Manager", classification: "Staff", entity: "Metro Developers", project: "Warehouse Project" },
+  { id: "EMP008", name: "Jennifer Taylor", category: "Electrician", classification: "Laborer", entity: "Skyline Builders", project: "Bridge Expansion" },
+  { id: "EMP009", name: "James Anderson", category: "Mason", classification: "Laborer", entity: "Acme Construction", project: "Main Building Construction" },
+  { id: "EMP010", name: "Maria Garcia", category: "Site Engineer", classification: "Staff", entity: "Metro Developers", project: "Warehouse Project" },
 ];
 
 // Dummy Excel data
 const DUMMY_EXCEL_DATA = [
-  { id: "101", name: "Ahmed Khan", category: "Mason", classification: "Laborer", project: "Project A", location: "Abu Dhabi" },
-  { id: "102", name: "Ramesh Iyer", category: "Electrician", classification: "Staff", project: "Project B", location: "Dubai" },
-  { id: "103", name: "Sara Al Marzooqi", category: "Engineer", classification: "Staff", project: "Project A", location: "Abu Dhabi" },
-  { id: "104", name: "John Peterson", category: "Carpenter", classification: "Laborer", project: "Project C", location: "Sharjah" },
-  { id: "105", name: "Ali Mohammed", category: "Supervisor", classification: "Staff", project: "Project B", location: "Dubai" },
+  { id: "101", name: "Ahmed Khan", category: "Mason", classification: "Laborer", project: "Project A" },
+  { id: "102", name: "Ramesh Iyer", category: "Electrician", classification: "Staff", project: "Project B" },
+  { id: "103", name: "Sara Al Marzooqi", category: "Engineer", classification: "Staff", project: "Project A" },
+  { id: "104", name: "John Peterson", category: "Carpenter", classification: "Laborer", project: "Project C" },
+  { id: "105", name: "Ali Mohammed", category: "Supervisor", classification: "Staff", project: "Project B" },
 ];
 
 // Mock data for filter options
 const PROJECTS = ["Main Building Construction", "Bridge Expansion", "Warehouse Project"];
-const LOCATIONS = ["Downtown Site", "Bridge Zone A", "East Industrial"];
 const ENTITIES = ["Acme Construction", "Skyline Builders", "Metro Developers"];
 const CATEGORIES = ["Carpenter", "Mason", "Electrician", "Plumber", "Supervisor", "Manager", "Site Engineer"];
 const CLASSIFICATIONS = ["Laborer", "Staff"];
@@ -84,7 +84,6 @@ const BulkAttendance = () => {
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [project, setProject] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [classification, setClassification] = useState<string>("");
   const [status, setStatus] = useState<string>("all");
@@ -112,7 +111,6 @@ const BulkAttendance = () => {
   
   // Import filters state
   const [importProjectFilter, setImportProjectFilter] = useState<string>("");
-  const [importLocationFilter, setImportLocationFilter] = useState<string>("");
   const [importCategoryFilter, setImportCategoryFilter] = useState<string>("");
   const [importClassificationFilter, setImportClassificationFilter] = useState<string>("");
   const [importSearchQuery, setImportSearchQuery] = useState<string>("");
@@ -122,7 +120,6 @@ const BulkAttendance = () => {
   // Filter employees based on filters
   const filteredEmployees = isDataImported ? MOCK_EMPLOYEES.filter((employee) => {
     if (project && employee.project !== project) return false;
-    if (location && employee.location !== location) return false;
     if (category && employee.category !== category) return false;
     if (classification && employee.classification !== classification) return false;
     if (searchQuery && 
@@ -134,7 +131,6 @@ const BulkAttendance = () => {
   // Filter imported employees based on import filters
   const filteredImportEmployees = importPreviewData.filter((employee) => {
     if (importProjectFilter && employee.project !== importProjectFilter) return false;
-    if (importLocationFilter && employee.location !== importLocationFilter) return false;
     if (importCategoryFilter && employee.category !== importCategoryFilter) return false;
     if (importClassificationFilter && employee.classification !== importClassificationFilter) return false;
     if (importSearchQuery && 
@@ -205,7 +201,6 @@ const BulkAttendance = () => {
   // Clear import filters
   const clearImportFilters = () => {
     setImportProjectFilter("");
-    setImportLocationFilter("");
     setImportCategoryFilter("");
     setImportClassificationFilter("");
     setImportSearchQuery("");
@@ -255,11 +250,11 @@ const BulkAttendance = () => {
   // Generate and download template
   const downloadTemplate = () => {
     // Create a table structure that can be used as a template
-    const headers = ["Employee ID", "Name", "Category", "Classification", "Project", "Location"];
+    const headers = ["Employee ID", "Name", "Category", "Classification", "Project"];
     const sampleRows = [
-      ["EMP001", "John Smith", "Carpenter", "Laborer", "Main Building Construction", "Downtown Site"],
-      ["EMP002", "Sarah Johnson", "Mason", "Laborer", "Bridge Expansion", "Bridge Zone A"],
-      ["", "", "", "", "", ""]
+      ["EMP001", "John Smith", "Carpenter", "Laborer", "Main Building Construction"],
+      ["EMP002", "Sarah Johnson", "Mason", "Laborer", "Bridge Expansion"],
+      ["", "", "", "", ""]
     ];
     
     // Create CSV content
@@ -295,7 +290,7 @@ const BulkAttendance = () => {
         
         {/* Filter Section */}
         <Card className="p-5 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Date Filter */}
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
@@ -328,25 +323,9 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-projects">All Projects</SelectItem>
+                  <SelectItem value="">All Projects</SelectItem>
                   {PROJECTS.map((p) => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Location Filter */}
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Select value={location} onValueChange={setLocation}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Locations" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all-locations">All Locations</SelectItem>
-                  {LOCATIONS.map((l) => (
-                    <SelectItem key={l} value={l}>{l}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -360,7 +339,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Classifications" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-classifications">All Classifications</SelectItem>
+                  <SelectItem value="">All Classifications</SelectItem>
                   {CLASSIFICATIONS.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -376,7 +355,7 @@ const BulkAttendance = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-categories">All Categories</SelectItem>
+                  <SelectItem value="">All Categories</SelectItem>
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -458,7 +437,6 @@ const BulkAttendance = () => {
                   <TableHead>Category</TableHead>
                   <TableHead>Classification</TableHead>
                   <TableHead>Project</TableHead>
-                  <TableHead>Location</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -485,12 +463,11 @@ const BulkAttendance = () => {
                         </span>
                       </TableCell>
                       <TableCell>{employee.project}</TableCell>
-                      <TableCell>{employee.location}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-gray-400">
+                    <TableCell colSpan={6} className="text-center py-8 text-gray-400">
                       No employees found matching the filters.
                     </TableCell>
                   </TableRow>
@@ -667,7 +644,7 @@ const BulkAttendance = () => {
                 
                 {/* Filter Section */}
                 <Card className="p-4 mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Project Filter */}
                     <div className="space-y-1">
                       <Label htmlFor="import-project" className="text-sm">Project</Label>
@@ -676,25 +653,9 @@ const BulkAttendance = () => {
                           <SelectValue placeholder="All Projects" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all-projects">All Projects</SelectItem>
+                          <SelectItem value="">All Projects</SelectItem>
                           {PROJECTS.map((p) => (
                             <SelectItem key={p} value={p}>{p}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Location Filter */}
-                    <div className="space-y-1">
-                      <Label htmlFor="import-location" className="text-sm">Location</Label>
-                      <Select value={importLocationFilter} onValueChange={setImportLocationFilter}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="All Locations" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all-locations">All Locations</SelectItem>
-                          {LOCATIONS.map((l) => (
-                            <SelectItem key={l} value={l}>{l}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -708,7 +669,7 @@ const BulkAttendance = () => {
                           <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all-categories">All Categories</SelectItem>
+                          <SelectItem value="">All Categories</SelectItem>
                           {CATEGORIES.map((c) => (
                             <SelectItem key={c} value={c}>{c}</SelectItem>
                           ))}
@@ -724,7 +685,7 @@ const BulkAttendance = () => {
                           <SelectValue placeholder="All Classifications" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all-classifications">All Classifications</SelectItem>
+                          <SelectItem value="">All Classifications</SelectItem>
                           {CLASSIFICATIONS.map((c) => (
                             <SelectItem key={c} value={c}>{c}</SelectItem>
                           ))}
@@ -781,7 +742,6 @@ const BulkAttendance = () => {
                           <TableHead>Category</TableHead>
                           <TableHead>Classification</TableHead>
                           <TableHead>Project</TableHead>
-                          <TableHead>Location</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -808,12 +768,11 @@ const BulkAttendance = () => {
                                 </span>
                               </TableCell>
                               <TableCell>{employee.project}</TableCell>
-                              <TableCell>{employee.location}</TableCell>
                             </TableRow>
                           ))
                         ) : (
                           <TableRow>
-                            <TableCell colSpan={7} className="text-center py-8 text-gray-400">
+                            <TableCell colSpan={6} className="text-center py-8 text-gray-400">
                               No employees found matching the filters.
                             </TableCell>
                           </TableRow>
