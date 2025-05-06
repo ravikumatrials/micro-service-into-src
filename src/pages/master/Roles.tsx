@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash, X } from "lucide-react";
@@ -21,7 +20,7 @@ const initialRoles = [
     code: "SUP", 
     name: "Supervisor", 
     description: "Manages workers and can mark their attendance", 
-    webPermissions: ["Attendance History", "View Reports"], 
+    webPermissions: ["View Reports"], 
     mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History"],
     createdAt: "01/01/2023"
   },
@@ -30,7 +29,7 @@ const initialRoles = [
     code: "SADM", 
     name: "Super Admin", 
     description: "Has full access to all system functionalities", 
-    webPermissions: ["Manual Attendance", "Attendance History", "View Reports", "Manage Employees", "Manage Projects", "Manage Roles", "Manage Locations", "Export Reports"], 
+    webPermissions: ["Manual Attendance", "View Reports", "Manage Employees", "Manage Projects", "Manage Locations", "Export Reports"], 
     mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History", "Manage Employees"],
     createdAt: "01/01/2023"
   },
@@ -39,20 +38,18 @@ const initialRoles = [
     code: "RADM", 
     name: "Report Admin", 
     description: "Can view and export all reports", 
-    webPermissions: ["Attendance History", "View Reports", "Export Reports"], 
+    webPermissions: ["View Reports", "Export Reports"], 
     mobilePermissions: ["Attendance History"],
     createdAt: "01/01/2023"
   },
 ];
 
-// Lists of all possible permissions separated by platform
+// Lists of all possible permissions separated by platform - removed "Attendance History" and "Manage Roles"
 const webPermissions = [
   "Manual Attendance",
-  "Attendance History",
   "View Reports",
   "Manage Employees",
   "Manage Projects",
-  "Manage Roles",
   "Manage Locations",
   "Export Reports"
 ];
