@@ -13,6 +13,7 @@ interface ManualAttendanceTabsProps {
   filteredRecords: any[];
   filters: AttendanceFilters;
   projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];
+  selectedDate: Date;
 }
 
 const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
@@ -20,7 +21,8 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
   setActiveTab,
   filteredRecords,
   filters,
-  projects
+  projects,
+  selectedDate
 }) => {
   // Empty array for locations since we're not using them anymore
   const emptyLocations: { id: number; name: string }[] = [];
@@ -47,6 +49,7 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
           selectedEntity={filters.entity}
           projects={projects}
           locations={emptyLocations}
+          selectedDate={selectedDate}
         />
       </TabsContent>
       
@@ -60,6 +63,7 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
           selectedEntity={filters.entity}
           projects={projects}
           locations={emptyLocations}
+          selectedDate={selectedDate}
         />
       </TabsContent>
       
@@ -73,6 +77,7 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
           selectedEntity={filters.entity}
           projects={projects}
           locations={emptyLocations}
+          selectedDate={selectedDate}
         />
       </TabsContent>
     </Tabs>

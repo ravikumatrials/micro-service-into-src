@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ interface ExceptionTabProps {
   selectedEntity: string;
   projects: { id: number; name: string }[];
   locations: { id: number; name: string }[];
+  selectedDate?: Date; // Make this optional for backwards compatibility
 }
 
 const ExceptionTab = ({
@@ -44,7 +46,8 @@ const ExceptionTab = ({
   selectedStatus,
   selectedEntity,
   projects,
-  locations
+  locations,
+  selectedDate = new Date() // Default to today if not provided
 }: ExceptionTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -165,7 +168,7 @@ const ExceptionTab = ({
                         className="flex items-center space-x-1 text-xs"
                       >
                         <Edit className="h-3 w-3" />
-                        <span>Manual</span>
+                        <span>Mark Attendance</span>
                       </Button>
                     </div>
                   </TableCell>
