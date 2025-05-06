@@ -33,7 +33,7 @@ interface CheckInTabProps {
   selectedClassification: string;
   selectedCategory: string;
   selectedEntity: string;
-  projects: { id: number; name: string; location?: string }[];
+  projects: { id: number; name: string; location?: string; coordinates?: { geofenceData: string } }[];
   locations: { id: number; name: string }[];
   selectedDate?: Date; // Added this prop to match what's being passed in ManualAttendanceTabs
 }

@@ -33,7 +33,7 @@ interface CheckOutTabProps {
   selectedCategory: string;
   selectedStatus: string;
   selectedEntity: string;
-  projects: { id: number; name: string }[];
+  projects: { id: number; name: string; location?: string; coordinates?: { geofenceData: string } }[];
   locations: { id: number; name: string }[];
   selectedDate?: Date; // Make this optional for backwards compatibility
 }

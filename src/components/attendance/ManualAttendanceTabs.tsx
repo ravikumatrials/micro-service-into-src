@@ -12,7 +12,7 @@ interface ManualAttendanceTabsProps {
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
   filteredRecords: any[];
   filters: AttendanceFilters;
-  projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];
+  projects: { id: number; name: string; coordinates?: { geofenceData: string }; location?: string }[];
   selectedDate: Date;
 }
 
