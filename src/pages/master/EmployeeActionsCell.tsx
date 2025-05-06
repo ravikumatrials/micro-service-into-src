@@ -1,5 +1,5 @@
 
-import { Camera } from "lucide-react";
+import { Camera, IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Tooltip, 
@@ -28,9 +28,12 @@ const EmployeeActionsCell = ({ employee, onEnrollFace }: EmployeeActionsCellProp
               size="icon"
               className="h-8 w-8"
               onClick={() => onEnrollFace(employee)}
-              style={{ color: employee.hasFaceEnrolled ? '#F97316' : '#3b82f6' }}
             >
-              <Camera className="h-4 w-4" />
+              {employee.hasFaceEnrolled ? (
+                <IdCard className="h-4 w-4 text-orange-500" />
+              ) : (
+                <Camera className="h-4 w-4 text-blue-500" />
+              )}
               <span className="sr-only">
                 {employee.hasFaceEnrolled ? "Update Face ID" : "Setup Face ID"}
               </span>

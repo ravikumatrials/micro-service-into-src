@@ -17,9 +17,9 @@ const Profile = () => {
     role: "Super Admin",
     email: "michael.brown@example.com",
     phone: "+1 (555) 123-4567",
-    address: "123 Main St, Anytown, USA",
-    department: "Administration",
-    joiningDate: "01/01/2023",
+    entity: "Tanseeq Landscaping LLC",
+    category: "Manager",
+    classification: "Staff",
     profileImage: null // In a real app, this would be a URL
   });
   
@@ -163,36 +163,6 @@ const Profile = () => {
               </div>
             </div>
           </Card>
-
-          <Card className="mt-6 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">System Access</h3>
-            <div className="space-y-3">
-              <div>
-                <h4 className="text-sm font-medium text-gray-700">Role</h4>
-                <p className="text-sm text-gray-900">{userData.role}</p>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-medium text-gray-700">Permissions</h4>
-                <div className="mt-1 space-y-1">
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">Self Attendance</div>
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">Mark Attendance</div>
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">View Reports</div>
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">Manage Employees</div>
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">Manage Roles</div>
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">Manage Projects</div>
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">Manage Locations</div>
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">Export Data</div>
-                  <div className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded inline-block mr-1 mb-1">System Settings</div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-medium text-gray-700">Last Login</h4>
-                <p className="text-sm text-gray-900">22 Apr 2025, 08:15 AM</p>
-              </div>
-            </div>
-          </Card>
         </div>
         
         <div className="lg:col-span-2">
@@ -270,49 +240,57 @@ const Profile = () => {
                   )}
                 </div>
                 
-                <div className="md:col-span-2">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Address
+                    Entity
                   </label>
                   {isEditing ? (
-                    <textarea
-                      name="address"
-                      rows={3}
+                    <input
+                      type="text"
+                      name="entity"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                      value={userData.address}
+                      value={userData.entity}
                       onChange={handleInputChange}
-                    ></textarea>
+                    />
                   ) : (
-                    <p className="text-gray-900">{userData.address}</p>
+                    <p className="text-gray-900">{userData.entity}</p>
                   )}
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Department
+                    Category
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="category"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                      value={userData.category}
+                      onChange={handleInputChange}
+                    />
+                  ) : (
+                    <p className="text-gray-900">{userData.category}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Classification
                   </label>
                   {isEditing ? (
                     <select
-                      name="department"
+                      name="classification"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-                      value={userData.department}
+                      value={userData.classification}
                       onChange={handleInputChange}
                     >
-                      <option value="Administration">Administration</option>
-                      <option value="Construction">Construction</option>
-                      <option value="Engineering">Engineering</option>
-                      <option value="HR">HR</option>
+                      <option value="Staff">Staff</option>
+                      <option value="Laborer">Laborer</option>
                     </select>
                   ) : (
-                    <p className="text-gray-900">{userData.department}</p>
+                    <p className="text-gray-900">{userData.classification}</p>
                   )}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Joining Date
-                  </label>
-                  <p className="text-gray-900">{userData.joiningDate}</p>
                 </div>
               </div>
               
@@ -463,41 +441,6 @@ const Profile = () => {
               </div>
             </Card>
           )}
-
-          <Card className="mt-6 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                  <Lock className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-gray-900 font-medium">Password Changed</p>
-                  <p className="text-sm text-gray-500">15 Apr 2025, 10:30 AM</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                  <Edit className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-gray-900 font-medium">Profile Updated</p>
-                  <p className="text-sm text-gray-500">10 Apr 2025, 2:15 PM</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center mr-3">
-                  <Camera className="h-4 w-4 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-gray-900 font-medium">Photo Updated</p>
-                  <p className="text-sm text-gray-500">05 Apr 2025, 9:45 AM</p>
-                </div>
-              </div>
-            </div>
-          </Card>
         </div>
       </div>
     </div>
