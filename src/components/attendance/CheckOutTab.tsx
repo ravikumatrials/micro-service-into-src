@@ -270,7 +270,7 @@ const CheckOutTab = ({
                     <div>
                       <div>{employee.project}</div>
                       {!employee.location && (
-                        <div className="text-xs text-amber-600 mt-0.5">
+                        <div className="text-xs text-gray-500 italic mt-0.5">
                           No location defined – attendance will proceed without GPS verification
                         </div>
                       )}
