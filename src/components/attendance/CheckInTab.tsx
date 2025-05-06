@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Edit, UserCheck, UserX, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -51,6 +50,17 @@ const CheckInTab = ({
 }: CheckInTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [showLocationWarning, setShowLocationWarning] = useState(false);
+  
+  // Effect to check if selected project has a location and update warning state
+  useEffect(() => {
+    if (selectedProject !== "all") {
+      const projectHasLocation = projects.find(p => p.id.toString() === selectedProject)?.location;
+      setShowLocationWarning(!projectHasLocation);
+    } else {
+      setShowLocationWarning(false); // Hide warning when "all projects" is selected
+    }
+  }, [selectedProject, projects]);
   
   // Additional sample employees for the demonstration
   const mockEmployees: Employee[] = [
@@ -229,21 +239,13 @@ const CheckInTab = ({
     setSelectedEmployee(null);
   };
 
-  // Show notice if the selected project has no assigned location
-  const selectedProjectHasLocation = () => {
-    if (selectedProject === "all") return true;
-    
-    const project = projects.find(p => p.id.toString() === selectedProject);
-    return project?.location ? true : false;
-  };
-
   return (
     <div className="space-y-4">
-      {selectedProject !== "all" && !selectedProjectHasLocation() && (
-        <Alert className="bg-amber-50 border border-amber-200 mb-4">
-          <AlertCircle className="h-4 w-4 text-amber-500" />
-          <AlertDescription className="text-amber-600">
-            This project does not have a geofenced location assigned. Attendance will still be recorded without GPS verification.
+      {showLocationWarning && (
+        <Alert className="bg-white border border-gray-200 mb-4">
+          <AlertCircle className="h-4 w-4 text-gray-400" />
+          <AlertDescription className="text-gray-500 italic">
+            No location defined – attendance will proceed without GPS verification
           </AlertDescription>
         </Alert>
       )}
