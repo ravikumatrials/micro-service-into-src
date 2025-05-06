@@ -198,7 +198,7 @@ const Reports = () => {
                     <SelectValue placeholder="Select entity" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Entities</SelectItem>
+                    <SelectItem value="all">All Entities</SelectItem>
                     <SelectItem value="tanseeq">Tanseeq Construction</SelectItem>
                     <SelectItem value="alpha">Alpha Contractors</SelectItem>
                     <SelectItem value="beta">Beta Services Ltd</SelectItem>
@@ -219,7 +219,7 @@ const Reports = () => {
                     <SelectValue placeholder="Select classification" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Classifications</SelectItem>
+                    <SelectItem value="all">All Classifications</SelectItem>
                     <SelectItem value="laborer">Laborer</SelectItem>
                     <SelectItem value="staff">Staff</SelectItem>
                   </SelectContent>
@@ -242,7 +242,7 @@ const Reports = () => {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     <SelectItem value="engineer">Engineer</SelectItem>
                     <SelectItem value="supervisor">Supervisor</SelectItem>
                     <SelectItem value="mason">Mason</SelectItem>
@@ -264,7 +264,7 @@ const Reports = () => {
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Projects</SelectItem>
+                    <SelectItem value="all">All Projects</SelectItem>
                     <SelectItem value="main-building">Main Building Construction</SelectItem>
                     <SelectItem value="bridge">Bridge Expansion</SelectItem>
                     <SelectItem value="interior">Interior Finishing</SelectItem>
