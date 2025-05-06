@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -18,6 +19,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -125,7 +127,7 @@ const Dashboard = () => {
         <div className="flex flex-wrap items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
           
-          {/* Date Picker */}
+          {/* Date Picker - Fixed implementation */}
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -139,7 +141,7 @@ const Dashboard = () => {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
+              <CalendarComponent
                 mode="single"
                 selected={selectedDate}
                 onSelect={handleDateChange}
@@ -167,7 +169,7 @@ const Dashboard = () => {
           ))}
         </div>
         
-        {/* Quick Actions Section - Keeping this from the original */}
+        {/* Quick Actions Section */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h2 className="text-sm font-medium text-gray-500 mb-3">QUICK ACTIONS</h2>
           <div className="grid grid-cols-5 gap-4">
