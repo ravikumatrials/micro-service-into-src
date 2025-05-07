@@ -1,6 +1,5 @@
-
 import { useState, useMemo } from 'react';
-import { Eye, Search, Building, User, Briefcase, ActivitySquare } from "lucide-react";
+import { Eye, Search, Building, User, Briefcase, ActivitySquare, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -34,6 +33,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
+import { CreateAccountModal } from "@/components/password-management/CreateAccountModal";
+import { ResetPasswordModal } from "@/components/password-management/ResetPasswordModal";
+import { toast } from "sonner";
 
 // Updated mock data to include roles
 const USERS = [
@@ -46,7 +49,9 @@ const USERS = [
     status: "Active",
     role: "Supervisor", 
     assignedBy: "Admin User", 
-    assignmentDate: "2025-03-15" 
+    assignmentDate: "2025-03-15",
+    email: "john.smith@tanseeq.ae",
+    hasAccount: true
   },
   { 
     employeeId: "EMP003", 
@@ -57,7 +62,9 @@ const USERS = [
     status: "Active",
     role: "Admin", 
     assignedBy: "Admin User", 
-    assignmentDate: "2025-02-20" 
+    assignmentDate: "2025-02-20",
+    email: "emily.davis@tanseeq.ae",
+    hasAccount: true
   },
   { 
     employeeId: "EMP005", 
@@ -68,7 +75,9 @@ const USERS = [
     status: "Inactive",
     role: "Clerk", 
     assignedBy: "Jane Doe", 
-    assignmentDate: "2025-01-10" 
+    assignmentDate: "2025-01-10",
+    email: "michael.brown@tanseeq.ae",
+    hasAccount: false
   },
   { 
     employeeId: "EMP007", 
@@ -79,7 +88,9 @@ const USERS = [
     status: "Active",
     role: "Supervisor", 
     assignedBy: "Admin User", 
-    assignmentDate: "2025-04-05" 
+    assignmentDate: "2025-04-05",
+    email: "david.lee@tanseeq.ae",
+    hasAccount: false
   },
 ];
 
@@ -107,6 +118,22 @@ const Users = () => {
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  
+  // Role assignment dialog
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
+  const [roleDialogUser, setRoleDialogUser] = useState<{
+    name: string;
+    employeeId: string;
+    currentRole?: string;
+  } | null>(null);
+  
+  // Account creation dialog
+  const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
+  const [accountUser, setAccountUser] = useState<typeof USERS[0] | null>(null);
+  
+  // Reset password dialog
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
+  const [resetPasswordUser, setResetPasswordUser] = useState<typeof USERS[0] | null>(null);
   
   // Filtered users
   const filteredUsers = useMemo(() => {
@@ -155,6 +182,35 @@ const Users = () => {
   const handleOpenViewModal = (user: typeof USERS[0]) => {
     setSelectedUser(user);
     setIsViewModalOpen(true);
+  };
+
+  // Handle assigning a role
+  const handleAssignRole = (user: typeof USERS[0]) => {
+    setRoleDialogUser({
+      name: user.name,
+      employeeId: user.employeeId,
+      currentRole: user.role
+    });
+    setIsRoleDialogOpen(true);
+  };
+
+  // Handle role assigned
+  const handleRoleAssigned = (role: string) => {
+    // Simulate updating role in database
+    toast.success(`Role assigned successfully to ${roleDialogUser?.name}`);
+    
+    // After role assignment, prompt for account creation if user doesn't have an account
+    const user = USERS.find(u => u.employeeId === roleDialogUser?.employeeId);
+    if (user && !user.hasAccount) {
+      setAccountUser(user);
+      setIsCreateAccountOpen(true);
+    }
+  };
+  
+  // Handle reset password
+  const handleResetPassword = (user: typeof USERS[0]) => {
+    setResetPasswordUser(user);
+    setIsResetPasswordOpen(true);
   };
 
   return (
@@ -383,12 +439,33 @@ const Users = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className="bg-blue-100 text-blue-800">
-                        {user.role}
+                      <Badge 
+                        className="bg-blue-100 text-blue-800 cursor-pointer"
+                        onClick={() => handleAssignRole(user)}
+                      >
+                        {user.role || "Assign Role"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end">
+                      <div className="flex justify-end gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                onClick={() => handleResetPassword(user)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
+                                <Lock className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Reset Password</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -476,6 +553,35 @@ const Users = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Role Assignment Dialog */}
+        <RoleAssignDialog
+          open={isRoleDialogOpen}
+          onOpenChange={setIsRoleDialogOpen}
+          employee={roleDialogUser}
+          roles={[
+            { name: "Admin" },
+            { name: "Supervisor" },
+            { name: "Clerk" },
+            { name: "Manager" },
+            { name: "Super Admin" }
+          ]}
+          onAssignRole={handleRoleAssigned}
+        />
+        
+        {/* Account Creation Modal */}
+        <CreateAccountModal
+          open={isCreateAccountOpen}
+          onOpenChange={setIsCreateAccountOpen}
+          user={accountUser}
+        />
+        
+        {/* Reset Password Modal */}
+        <ResetPasswordModal
+          open={isResetPasswordOpen}
+          onOpenChange={setIsResetPasswordOpen}
+          user={resetPasswordUser}
+        />
       </div>
     </div>
   );

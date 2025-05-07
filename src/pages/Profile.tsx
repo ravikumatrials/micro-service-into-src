@@ -1,7 +1,30 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, User, Lock, Camera, Save, X, Eye, EyeOff } from "lucide-react";
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem, 
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+// Password change form schema
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -23,10 +46,14 @@ const Profile = () => {
     profileImage: null // In a real app, this would be a URL
   });
   
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: ""
+  // Password form
+  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    },
   });
   
   const handleEditToggle = () => {
@@ -46,43 +73,25 @@ const Profile = () => {
   const handleSaveProfile = () => {
     // In a real app, this would save to the database
     setIsEditing(false);
-    alert("Profile updated successfully");
+    toast.success("Profile updated successfully");
   };
   
-  const handleSavePassword = () => {
-    // Validation
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("New password and confirm password do not match");
-      return;
-    }
+  const handleSavePassword = (data: z.infer<typeof passwordSchema>) => {
+    // In a real application, this would verify the current password with the server
+    console.log("Password change data:", data);
     
-    if (passwordData.newPassword.length < 8) {
-      alert("Password must be at least 8 characters long");
-      return;
-    }
-    
-    // In a real app, this would verify the current password and save the new one
+    // Reset form and close password change section
+    passwordForm.reset();
     setIsChangingPassword(false);
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: ""
-    });
-    alert("Password changed successfully");
+    
+    // Show success toast
+    toast.success("Password updated successfully");
   };
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserData({
       ...userData,
-      [name]: value
-    });
-  };
-  
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData({
-      ...passwordData,
       [name]: value
     });
   };
@@ -326,112 +335,122 @@ const Profile = () => {
             <Card className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
-                <button
-                  onClick={handleSavePassword}
-                  className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                  disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Password
-                </button>
               </div>
               
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="currentPassword"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape pr-10"
-                      placeholder="Enter current password"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordChange}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
+              <Form {...passwordForm}>
+                <form onSubmit={passwordForm.handleSubmit(handleSavePassword)} className="space-y-6">
+                  <FormField
+                    control={passwordForm.control}
+                    name="currentPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Password</FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Enter current password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={passwordForm.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Input
+                              type={showNewPassword ? "text" : "password"}
+                              placeholder="Enter new password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                          >
+                            {showNewPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                        <p className="mt-1 text-xs text-gray-500">
+                          Password must be at least 6 characters long
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Input
+                              type={showConfirmPassword ? "text" : "password"}
+                              placeholder="Confirm new password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex justify-end">
+                    <Button variant="ghost" type="button" onClick={() => setIsChangingPassword(false)} className="mr-2">
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Password
+                    </Button>
                   </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showNewPassword ? "text" : "password"}
-                      name="newPassword"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape pr-10"
-                      placeholder="Enter new password"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                    >
-                      {showNewPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Password must be at least 8 characters long and include numbers and special characters
-                  </p>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape pr-10"
-                      placeholder="Confirm new password"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                  {passwordData.newPassword && passwordData.confirmPassword && 
-                   passwordData.newPassword !== passwordData.confirmPassword && (
-                    <p className="mt-1 text-xs text-red-500">
-                      Passwords do not match
-                    </p>
-                  )}
-                </div>
-              </div>
+                </form>
+              </Form>
               
               <div className="mt-8 border-t pt-6">
                 <h3 className="text-md font-medium text-gray-900 mb-3">Password Security Tips</h3>
                 <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
-                  <li>Use a minimum of 8 characters</li>
+                  <li>Use a minimum of 6 characters</li>
                   <li>Include at least one uppercase letter</li>
                   <li>Include at least one number</li>
                   <li>Include at least one special character (e.g., !@#$%)</li>
