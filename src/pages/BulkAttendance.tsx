@@ -31,6 +31,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Mock data for employees
 const MOCK_EMPLOYEES = [
@@ -147,6 +155,9 @@ const BulkAttendance = () => {
   const [importClassificationFilter, setImportClassificationFilter] = useState<string>("");
   const [importLocationFilter, setImportLocationFilter] = useState<string>("");
   const [importSearchQuery, setImportSearchQuery] = useState<string>("");
+  
+  // New confirmation dialog state
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
   // Filter employees based on filters
   const filteredEmployees = isDataImported ? MOCK_EMPLOYEES.filter((employee) => {
@@ -216,7 +227,12 @@ const BulkAttendance = () => {
     }
   };
   
-  // Handle import attendance marking - SIMPLIFIED as per new requirements
+  // Open confirmation dialog instead of directly marking attendance
+  const openConfirmationDialog = () => {
+    setShowConfirmationDialog(true);
+  };
+  
+  // Handle import attendance marking after confirmation
   const handleImportAttendanceMark = () => {
     const employeeCount = filteredImportEmployees.length;
     toast({
@@ -238,6 +254,7 @@ const BulkAttendance = () => {
     setImportPreviewData([]);
     setImportComment("");
     clearImportFilters();
+    setShowConfirmationDialog(false);
   };
   
   // Exit import mode
@@ -539,11 +556,12 @@ const BulkAttendance = () => {
                 <p>Showing {filteredImportEmployees.length} of {importPreviewData.length} employees</p>
               </div>
               
-              {/* Mark Attendance Button - Prominent and Fixed - SIMPLIFIED per new requirements */}
+              {/* Mark Attendance Button - Now opens confirmation dialog instead */}
               <div className="sticky bottom-0 pt-4 pb-4 bg-white border-t flex justify-center">
                 <Button 
                   className="bg-proscape hover:bg-proscape-dark text-white px-12 py-6 h-auto text-lg"
-                  onClick={handleImportAttendanceMark}
+                  onClick={openConfirmationDialog}
+                  disabled={showConfirmationDialog}
                 >
                   <CheckCircle className="mr-2 h-5 w-5" /> Mark Attendance
                 </Button>
@@ -551,6 +569,45 @@ const BulkAttendance = () => {
             </>
           )}
         </Card>
+        
+        {/* Confirmation Dialog */}
+        <Dialog open={showConfirmationDialog} onOpenChange={setShowConfirmationDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirm Attendance Marking</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to mark attendance for the following {filteredImportEmployees.length} employees?
+              </DialogDescription>
+            </DialogHeader>
+            
+            {filteredImportEmployees.length > 0 && (
+              <div className="py-2">
+                <ul className="text-sm space-y-1">
+                  {filteredImportEmployees.slice(0, 5).map((employee) => (
+                    <li key={employee.id} className="flex items-center gap-2">
+                      <span className="font-medium">{employee.id}:</span> {employee.name}
+                    </li>
+                  ))}
+                  {filteredImportEmployees.length > 5 && (
+                    <li className="text-muted-foreground">+ {filteredImportEmployees.length - 5} more employees...</li>
+                  )}
+                </ul>
+              </div>
+            )}
+            
+            <DialogFooter className="flex sm:justify-between gap-2">
+              <Button variant="outline" onClick={() => setShowConfirmationDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleImportAttendanceMark}
+                className="bg-proscape hover:bg-proscape-dark text-white"
+              >
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
