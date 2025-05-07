@@ -66,7 +66,6 @@ const RoleMapping = () => {
   const categories = Array.from(new Set(mockEmployees.map(emp => emp.category)));
 
   const filteredEmployees = mockEmployees.filter(employee => {
-    // ... keep existing code (filtering logic)
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
@@ -97,7 +96,6 @@ const RoleMapping = () => {
   };
 
   const handleClearFilters = () => {
-    // ... keep existing code (filter clearing)
     setSearchTerm("");
     setRoleFilter("all");
     setEntityFilter("all");
@@ -107,7 +105,6 @@ const RoleMapping = () => {
 
   // Handle checkbox selection
   const handleSelectEmployee = (employeeId: number, checked: boolean) => {
-    // ... keep existing code (employee selection logic)
     if (checked) {
       setSelectedEmployees([...selectedEmployees, employeeId]);
     } else {
@@ -117,7 +114,6 @@ const RoleMapping = () => {
 
   // Handle "Select All" checkbox
   const handleSelectAll = (checked: boolean) => {
-    // ... keep existing code (select all logic)
     if (checked) {
       const allEmployeeIds = filteredEmployees.map(emp => emp.id);
       setSelectedEmployees(allEmployeeIds);
@@ -132,10 +128,8 @@ const RoleMapping = () => {
 
   // Handle bulk role assignment
   const handleBulkAssign = () => {
-    // ... keep existing code (bulk assignment logic)
     if (!bulkRoleToAssign) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Please select a role to assign",
         variant: "destructive",
       });
@@ -167,8 +161,7 @@ const RoleMapping = () => {
     });
 
     // Show success toast
-    toast({
-      title: "Success",
+    toast("Success", {
       description: `Role assigned to ${selectedEmployees.length} employees successfully.`,
       variant: "default",
     });
@@ -218,7 +211,6 @@ const RoleMapping = () => {
 
       {/* Bulk Action Bar - Shown when employees are selected */}
       {selectedEmployees.length > 0 && (
-        // ... keep existing code (bulk action bar)
         <Card className="p-4 bg-blue-50 border-blue-200 sticky top-0 z-10">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-2">
@@ -259,7 +251,6 @@ const RoleMapping = () => {
 
       <Card className="p-0 overflow-hidden">
         {isMobile ? (
-          // ... keep existing code (mobile view)
           <div className="divide-y divide-gray-200">
             {filteredEmployees.map((employee) => (
               <div key={employee.id} className="p-4 space-y-2">
@@ -305,7 +296,6 @@ const RoleMapping = () => {
             ))}
           </div>
         ) : (
-          // ... keep existing code (desktop view)
           <Table>
             <TableHeader>
               <TableRow>
