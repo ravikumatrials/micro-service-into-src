@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,16 +32,6 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
   Table,
   TableBody,
   TableCell,
@@ -64,13 +55,68 @@ const MOCK_EMPLOYEES = [
   { id: "EMP010", name: "Maria Garcia", category: "Site Engineer", classification: "Staff", entity: "Metro Developers", project: "Warehouse Project" },
 ];
 
-// Dummy Excel data
+// Updated Excel data with the new column structure
 const DUMMY_EXCEL_DATA = [
-  { id: "101", name: "Ahmed Khan", category: "Mason", classification: "Laborer", project: "Project A" },
-  { id: "102", name: "Ramesh Iyer", category: "Electrician", classification: "Staff", project: "Project B" },
-  { id: "103", name: "Sara Al Marzooqi", category: "Engineer", classification: "Staff", project: "Project A" },
-  { id: "104", name: "John Peterson", category: "Carpenter", classification: "Laborer", project: "Project C" },
-  { id: "105", name: "Ali Mohammed", category: "Supervisor", classification: "Staff", project: "Project B" },
+  { 
+    id: "101", 
+    name: "Ahmed Khan", 
+    category: "Mason", 
+    classification: "Laborer", 
+    project: "Project A",
+    location: "Downtown Site",
+    checkInDate: "2025-05-07",
+    checkOutDate: "2025-05-07",
+    checkInTime: "08:00",
+    checkOutTime: "17:00"
+  },
+  { 
+    id: "102", 
+    name: "Ramesh Iyer", 
+    category: "Electrician", 
+    classification: "Staff", 
+    project: "Project B",
+    location: "Bridge Zone A",
+    checkInDate: "2025-05-07",
+    checkOutDate: "2025-05-07",
+    checkInTime: "08:30",
+    checkOutTime: "17:30"
+  },
+  { 
+    id: "103", 
+    name: "Sara Al Marzooqi", 
+    category: "Engineer", 
+    classification: "Staff", 
+    project: "Project A",
+    location: "Site Office",
+    checkInDate: "2025-05-07",
+    checkOutDate: "2025-05-07",
+    checkInTime: "09:00",
+    checkOutTime: "18:00"
+  },
+  { 
+    id: "104", 
+    name: "John Peterson", 
+    category: "Carpenter", 
+    classification: "Laborer", 
+    project: "Project C",
+    location: "Building 7",
+    checkInDate: "2025-05-07",
+    checkOutDate: "2025-05-07",
+    checkInTime: "07:30",
+    checkOutTime: "16:30"
+  },
+  { 
+    id: "105", 
+    name: "Ali Mohammed", 
+    category: "Supervisor", 
+    classification: "Staff", 
+    project: "Project B",
+    location: "North Tower",
+    checkInDate: "2025-05-07",
+    checkOutDate: "2025-05-07",
+    checkInTime: "08:15",
+    checkOutTime: "17:45"
+  },
 ];
 
 // Mock data for filter options
@@ -78,6 +124,7 @@ const PROJECTS = ["Main Building Construction", "Bridge Expansion", "Warehouse P
 const ENTITIES = ["Acme Construction", "Skyline Builders", "Metro Developers"];
 const CATEGORIES = ["Carpenter", "Mason", "Electrician", "Plumber", "Supervisor", "Manager", "Site Engineer"];
 const CLASSIFICATIONS = ["Laborer", "Staff"];
+const LOCATIONS = ["Downtown Site", "Bridge Zone A", "Site Office", "Building 7", "North Tower"];
 
 const BulkAttendance = () => {
   const { toast } = useToast();
@@ -96,8 +143,8 @@ const BulkAttendance = () => {
   const [attendanceTime, setAttendanceTime] = useState(format(new Date(), "HH:mm"));
   const [reason, setReason] = useState("");
   
-  // Import drawer state
-  const [isImportDrawerOpen, setIsImportDrawerOpen] = useState(false);
+  // Import state
+  const [isImportMode, setIsImportMode] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreviewData, setImportPreviewData] = useState<typeof DUMMY_EXCEL_DATA>([]);
   const [importComment, setImportComment] = useState("");
@@ -112,6 +159,7 @@ const BulkAttendance = () => {
   const [importProjectFilter, setImportProjectFilter] = useState<string>("");
   const [importCategoryFilter, setImportCategoryFilter] = useState<string>("");
   const [importClassificationFilter, setImportClassificationFilter] = useState<string>("");
+  const [importLocationFilter, setImportLocationFilter] = useState<string>("");
   const [importSearchQuery, setImportSearchQuery] = useState<string>("");
   const [importSelectedEmployees, setImportSelectedEmployees] = useState<string[]>([]);
   const [importSelectAll, setImportSelectAll] = useState(false);
@@ -132,6 +180,7 @@ const BulkAttendance = () => {
     if (importProjectFilter && employee.project !== importProjectFilter) return false;
     if (importCategoryFilter && employee.category !== importCategoryFilter) return false;
     if (importClassificationFilter && employee.classification !== importClassificationFilter) return false;
+    if (importLocationFilter && employee.location !== importLocationFilter) return false;
     if (importSearchQuery && 
         !employee.name.toLowerCase().includes(importSearchQuery.toLowerCase()) && 
         !employee.id.toLowerCase().includes(importSearchQuery.toLowerCase())) return false;
@@ -194,7 +243,7 @@ const BulkAttendance = () => {
   
   // Handle import button click
   const handleImportClick = () => {
-    setIsImportDrawerOpen(true);
+    setIsImportMode(true);
   };
   
   // Clear import filters
@@ -202,6 +251,7 @@ const BulkAttendance = () => {
     setImportProjectFilter("");
     setImportCategoryFilter("");
     setImportClassificationFilter("");
+    setImportLocationFilter("");
     setImportSearchQuery("");
   };
   
@@ -237,12 +287,20 @@ const BulkAttendance = () => {
       setShowSuccessMessage(false);
     }, 5000);
     
-    setIsImportDrawerOpen(false);
+    setIsImportMode(false);
     setImportFile(null);
     setImportPreviewData([]);
     setImportComment("");
     setImportSelectedEmployees([]);
     setImportSelectAll(false);
+    clearImportFilters();
+  };
+  
+  // Exit import mode
+  const exitImportMode = () => {
+    setIsImportMode(false);
+    setImportFile(null);
+    setImportPreviewData([]);
     clearImportFilters();
   };
 
@@ -293,6 +351,313 @@ const BulkAttendance = () => {
       description: "You can fill this template and import it back to mark attendance.",
     });
   };
+
+  // If in import mode, show the import view
+  if (isImportMode) {
+    return (
+      <div className="space-y-5 px-1 pt-5">
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-2xl font-bold text-gray-800">Bulk Attendance Import</h1>
+          <Button
+            variant="outline"
+            onClick={exitImportMode}
+            className="flex items-center gap-2"
+          >
+            <X className="h-4 w-4" /> Cancel Import
+          </Button>
+        </div>
+        
+        <Card className="p-6 mb-6 shadow-sm">
+          {!importFile ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="max-w-lg text-center">
+                <Upload className="h-16 w-16 text-gray-400 mb-4 mx-auto" />
+                <h3 className="text-xl font-medium text-gray-700 mb-2">Upload an Excel file to import attendance data</h3>
+                <p className="text-gray-500 mb-6">The file should follow the template format with all required columns.</p>
+                <div className="space-y-4">
+                  <div className="flex justify-center">
+                    <Label 
+                      htmlFor="file-upload" 
+                      className="bg-proscape hover:bg-proscape-dark text-white px-6 py-3 rounded cursor-pointer flex items-center gap-2"
+                    >
+                      <FileUp className="h-5 w-5" />
+                      Select File
+                    </Label>
+                    <Input
+                      type="file"
+                      id="file-upload"
+                      className="hidden"
+                      accept=".xlsx, .xls, .csv"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                      onClick={downloadTemplate}
+                    >
+                      <Download className="h-4 w-4" /> Download Template
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="text-lg font-medium">Imported Data</h3>
+                  <p className="text-sm text-gray-500">
+                    {importFile.name} • {importPreviewData.length} employees
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setImportFile(null);
+                    setImportPreviewData([]);
+                    clearImportFilters();
+                    setImportSelectedEmployees([]);
+                    setImportSelectAll(false);
+                  }}
+                >
+                  Change File
+                </Button>
+              </div>
+              
+              {/* Filter Section */}
+              <Card className="p-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {/* Project Filter */}
+                  <div className="space-y-1">
+                    <Label htmlFor="import-project" className="text-sm">Project</Label>
+                    <Select value={importProjectFilter} onValueChange={setImportProjectFilter}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="All Projects" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Projects</SelectItem>
+                        {PROJECTS.map((p) => (
+                          <SelectItem key={p} value={p}>{p}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="space-y-1">
+                    <Label htmlFor="import-category" className="text-sm">Category</Label>
+                    <Select value={importCategoryFilter} onValueChange={setImportCategoryFilter}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="All Categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Categories</SelectItem>
+                        {CATEGORIES.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Classification Filter */}
+                  <div className="space-y-1">
+                    <Label htmlFor="import-classification" className="text-sm">Classification</Label>
+                    <Select value={importClassificationFilter} onValueChange={setImportClassificationFilter}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="All Classifications" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Classifications</SelectItem>
+                        {CLASSIFICATIONS.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Location Filter */}
+                  <div className="space-y-1">
+                    <Label htmlFor="import-location" className="text-sm">Location</Label>
+                    <Select value={importLocationFilter} onValueChange={setImportLocationFilter}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="All Locations" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Locations</SelectItem>
+                        {LOCATIONS.map((l) => (
+                          <SelectItem key={l} value={l}>{l}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Search by Name/ID */}
+                  <div className="space-y-1">
+                    <Label htmlFor="import-search" className="text-sm">Search by Name/ID</Label>
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      <Input
+                        id="import-search"
+                        placeholder="Search..."
+                        className="pl-8 h-9"
+                        value={importSearchQuery}
+                        onChange={(e) => setImportSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Reset Filters Button */}
+                <div className="mt-3 flex justify-end">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearImportFilters} 
+                    className="text-xs"
+                  >
+                    <X className="h-3 w-3 mr-1" /> Clear Filters
+                  </Button>
+                </div>
+              </Card>
+              
+              <Separator className="my-4" />
+              
+              {/* Preview Table */}
+              <div className="border rounded mb-4">
+                <div className="max-h-96 overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-gray-50">
+                      <TableRow>
+                        <TableHead className="w-16">
+                          <Checkbox 
+                            checked={importSelectAll} 
+                            onCheckedChange={handleImportSelectAll}
+                            aria-label="Select all employees"
+                          />
+                        </TableHead>
+                        <TableHead>Employee ID</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Classification</TableHead>
+                        <TableHead>Project</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Check-In Date</TableHead>
+                        <TableHead>Check-Out Date</TableHead>
+                        <TableHead>Check-In Time</TableHead>
+                        <TableHead>Check-Out Time</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredImportEmployees.length > 0 ? (
+                        filteredImportEmployees.map((employee) => (
+                          <TableRow key={employee.id}>
+                            <TableCell>
+                              <Checkbox 
+                                checked={importSelectedEmployees.includes(employee.id)}
+                                onCheckedChange={() => handleImportCheckboxChange(employee.id)}
+                                aria-label={`Select ${employee.name}`}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">{employee.id}</TableCell>
+                            <TableCell>{employee.name}</TableCell>
+                            <TableCell>{employee.category}</TableCell>
+                            <TableCell>
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                employee.classification === "Staff" 
+                                  ? "bg-blue-100 text-blue-700" 
+                                  : "bg-green-100 text-green-700"
+                              }`}>
+                                {employee.classification}
+                              </span>
+                            </TableCell>
+                            <TableCell>{employee.project}</TableCell>
+                            <TableCell>{employee.location}</TableCell>
+                            <TableCell>{employee.checkInDate}</TableCell>
+                            <TableCell>{employee.checkOutDate}</TableCell>
+                            <TableCell>{employee.checkInTime}</TableCell>
+                            <TableCell>{employee.checkOutTime}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={11} className="text-center py-8 text-gray-400">
+                            No employees found matching the filters.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+              
+              {/* Summary */}
+              <div className="mb-4 text-sm text-gray-600">
+                <p>Showing {filteredImportEmployees.length} of {importPreviewData.length} employees</p>
+                <p>Selected: {importSelectedEmployees.length} employees</p>
+              </div>
+              
+              {/* Attendance Type and Comment */}
+              <div className="space-y-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Attendance Type</Label>
+                    <Select 
+                      value={importAttendanceType} 
+                      onValueChange={(value) => setImportAttendanceType(value as "check-in" | "check-out")}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="check-in">Check-In</SelectItem>
+                        <SelectItem value="check-out">Check-Out</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="time">Time</Label>
+                    <Input 
+                      id="import-time"
+                      type="time" 
+                      value={attendanceTime}
+                      onChange={(e) => setAttendanceTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="importComment">Reason/Comment</Label>
+                  <Textarea 
+                    id="importComment"
+                    placeholder="Enter reason for bulk attendance marking..."
+                    value={importComment}
+                    onChange={(e) => setImportComment(e.target.value)}
+                    rows={3}
+                  />
+                  <p className="text-xs text-gray-500">Required for manual entry</p>
+                </div>
+              </div>
+              
+              {/* Fixed Mark Attendance button */}
+              <div className="sticky bottom-0 pt-2 pb-4 bg-white border-t flex justify-end">
+                <Button 
+                  className="bg-proscape hover:bg-proscape-dark text-white px-8 py-6 h-auto text-lg"
+                  onClick={handleImportAttendanceMark}
+                  disabled={!importFile || !importComment.trim() || importSelectedEmployees.length === 0}
+                >
+                  <CheckCircle className="mr-2 h-5 w-5" /> Mark Attendance
+                </Button>
+              </div>
+            </>
+          )}
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 px-1 pt-5">
@@ -593,276 +958,6 @@ const BulkAttendance = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      {/* Import Drawer */}
-      <Drawer open={isImportDrawerOpen} onOpenChange={setIsImportDrawerOpen}>
-        <DrawerContent className="max-h-[90vh] p-0">
-          <DrawerHeader className="px-6 py-4 border-b">
-            <DrawerTitle className="text-xl">Import Attendance Data</DrawerTitle>
-            <DrawerDescription>
-              Upload an Excel file containing employee data for bulk attendance marking.
-            </DrawerDescription>
-          </DrawerHeader>
-          
-          <div className="p-6 overflow-y-auto">
-            {!importFile ? (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <div className="mx-auto flex flex-col items-center">
-                  <Upload className="h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Upload Attendance Data</h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Supported formats: Excel (.xlsx)
-                  </p>
-                  <Input
-                    type="file"
-                    id="file-upload"
-                    className="hidden"
-                    accept=".xlsx"
-                    onChange={handleFileChange}
-                  />
-                  <Label 
-                    htmlFor="file-upload" 
-                    className="bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded cursor-pointer flex items-center gap-2"
-                  >
-                    <Upload className="h-4 w-4" />
-                    Select File
-                  </Label>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium">Preview Data</h3>
-                    <p className="text-sm text-gray-500">
-                      {importFile.name} • {importPreviewData.length} employees
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setImportFile(null);
-                      setImportPreviewData([]);
-                      clearImportFilters();
-                      setImportSelectedEmployees([]);
-                      setImportSelectAll(false);
-                    }}
-                  >
-                    Change File
-                  </Button>
-                </div>
-                
-                {/* Filter Section */}
-                <Card className="p-4 mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Project Filter */}
-                    <div className="space-y-1">
-                      <Label htmlFor="import-project" className="text-sm">Project</Label>
-                      <Select value={importProjectFilter} onValueChange={setImportProjectFilter}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="All Projects" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">All Projects</SelectItem>
-                          {PROJECTS.map((p) => (
-                            <SelectItem key={p} value={p}>{p}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Category Filter */}
-                    <div className="space-y-1">
-                      <Label htmlFor="import-category" className="text-sm">Category</Label>
-                      <Select value={importCategoryFilter} onValueChange={setImportCategoryFilter}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="All Categories" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">All Categories</SelectItem>
-                          {CATEGORIES.map((c) => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Classification Filter */}
-                    <div className="space-y-1">
-                      <Label htmlFor="import-classification" className="text-sm">Classification</Label>
-                      <Select value={importClassificationFilter} onValueChange={setImportClassificationFilter}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="All Classifications" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">All Classifications</SelectItem>
-                          {CLASSIFICATIONS.map((c) => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    {/* Search by Name/ID */}
-                    <div className="space-y-1">
-                      <Label htmlFor="import-search" className="text-sm">Search by Name/ID</Label>
-                      <div className="relative">
-                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <Input
-                          id="import-search"
-                          placeholder="Search..."
-                          className="pl-8 h-9"
-                          value={importSearchQuery}
-                          onChange={(e) => setImportSearchQuery(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Reset Filters Button */}
-                  <div className="mt-3 flex justify-end">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={clearImportFilters} 
-                      className="text-xs"
-                    >
-                      <X className="h-3 w-3 mr-1" /> Clear Filters
-                    </Button>
-                  </div>
-                </Card>
-                
-                <Separator className="my-4" />
-                
-                {/* Preview Table */}
-                <div className="border rounded mb-4">
-                  <div className="max-h-64 overflow-y-auto">
-                    <Table>
-                      <TableHeader className="sticky top-0 bg-gray-50">
-                        <TableRow>
-                          <TableHead className="w-16">
-                            <Checkbox 
-                              checked={importSelectAll} 
-                              onCheckedChange={handleImportSelectAll}
-                              aria-label="Select all employees"
-                            />
-                          </TableHead>
-                          <TableHead>Employee ID</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Classification</TableHead>
-                          <TableHead>Project</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredImportEmployees.length > 0 ? (
-                          filteredImportEmployees.map((employee) => (
-                            <TableRow key={employee.id}>
-                              <TableCell>
-                                <Checkbox 
-                                  checked={importSelectedEmployees.includes(employee.id)}
-                                  onCheckedChange={() => handleImportCheckboxChange(employee.id)}
-                                  aria-label={`Select ${employee.name}`}
-                                />
-                              </TableCell>
-                              <TableCell className="font-medium">{employee.id}</TableCell>
-                              <TableCell>{employee.name}</TableCell>
-                              <TableCell>{employee.category}</TableCell>
-                              <TableCell>
-                                <span className={`px-2 py-1 rounded-full text-xs ${
-                                  employee.classification === "Staff" 
-                                    ? "bg-blue-100 text-blue-700" 
-                                    : "bg-green-100 text-green-700"
-                                }`}>
-                                  {employee.classification}
-                                </span>
-                              </TableCell>
-                              <TableCell>{employee.project}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-center py-8 text-gray-400">
-                              No employees found matching the filters.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-                
-                {/* Summary */}
-                <div className="mb-4 text-sm text-gray-600">
-                  <p>Showing {filteredImportEmployees.length} of {importPreviewData.length} employees</p>
-                  <p>Selected: {importSelectedEmployees.length} employees</p>
-                </div>
-                
-                {/* Attendance Type and Comment */}
-                <div className="space-y-4 mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Attendance Type</Label>
-                      <Select 
-                        value={importAttendanceType} 
-                        onValueChange={(value) => setImportAttendanceType(value as "check-in" | "check-out")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="check-in">Check-In</SelectItem>
-                          <SelectItem value="check-out">Check-Out</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="time">Time</Label>
-                      <Input 
-                        id="import-time"
-                        type="time" 
-                        value={attendanceTime}
-                        onChange={(e) => setAttendanceTime(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="importComment">Reason/Comment</Label>
-                    <Textarea 
-                      id="importComment"
-                      placeholder="Enter reason for bulk attendance marking..."
-                      value={importComment}
-                      onChange={(e) => setImportComment(e.target.value)}
-                      rows={3}
-                    />
-                    <p className="text-xs text-gray-500">Required for manual entry</p>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          <DrawerFooter className="border-t p-4">
-            <div className="flex justify-end gap-2">
-              <DrawerClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DrawerClose>
-              {importFile && (
-                <Button 
-                  className="bg-proscape hover:bg-proscape-dark text-white"
-                  onClick={handleImportAttendanceMark}
-                  disabled={!importFile || !importComment.trim() || importSelectedEmployees.length === 0}
-                >
-                  <FileUp className="mr-2 h-4 w-4" /> Import
-                </Button>
-              )}
-            </div>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
     </div>
   );
 };
