@@ -232,29 +232,27 @@ const BulkAttendance = () => {
     setShowConfirmationDialog(true);
   };
   
-  // Handle import attendance marking after confirmation
+  // Handle import attendance marking after confirmation - UPDATED to reset UI completely
   const handleImportAttendanceMark = () => {
     const employeeCount = filteredImportEmployees.length;
+    
+    // Show success toast
     toast({
       title: "Success!",
       description: `Attendance marked successfully for ${employeeCount} employees.`,
     });
     
-    // Set imported data flag to true
-    setIsDataImported(true);
-    setShowSuccessMessage(true);
-    
-    // Hide success message after 5 seconds
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 5000);
-    
+    // Reset all import-related state
     setIsImportMode(false);
     setImportFile(null);
     setImportPreviewData([]);
     setImportComment("");
     clearImportFilters();
     setShowConfirmationDialog(false);
+    
+    // Reset the main screen state too - this is the key change
+    // NOT setting isDataImported to true, which was causing the list to show again
+    // This ensures we don't reload or show the list after marking attendance
   };
   
   // Exit import mode
