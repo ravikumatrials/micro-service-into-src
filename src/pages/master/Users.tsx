@@ -276,8 +276,8 @@ const Users = () => {
                     <SelectContent>
                       <SelectItem value="all">All Entities</SelectItem>
                       {ENTITIES.map((entity) => (
-                        <SelectItem key={entity} value={entity}>
-                          {entity}
+                        <SelectItem key={typeof entity === 'string' ? entity : String(entity)} value={typeof entity === 'string' ? entity : String(entity)}>
+                          {typeof entity === 'string' ? entity : String(entity)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -301,8 +301,8 @@ const Users = () => {
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
                       {CATEGORIES.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
+                        <SelectItem key={typeof category === 'string' ? category : String(category)} value={typeof category === 'string' ? category : String(category)}>
+                          {typeof category === 'string' ? category : String(category)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -326,8 +326,8 @@ const Users = () => {
                     <SelectContent>
                       <SelectItem value="all">All Classifications</SelectItem>
                       {CLASSIFICATIONS.map((classification) => (
-                        <SelectItem key={classification} value={classification}>
-                          {classification}
+                        <SelectItem key={typeof classification === 'string' ? classification : String(classification)} value={typeof classification === 'string' ? classification : String(classification)}>
+                          {typeof classification === 'string' ? classification : String(classification)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -351,8 +351,8 @@ const Users = () => {
                     <SelectContent>
                       <SelectItem value="all">All Statuses</SelectItem>
                       {STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
+                        <SelectItem key={typeof status === 'string' ? status : String(status)} value={typeof status === 'string' ? status : String(status)}>
+                          {typeof status === 'string' ? status : String(status)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -376,8 +376,8 @@ const Users = () => {
                     <SelectContent>
                       <SelectItem value="all">All Roles</SelectItem>
                       {ROLES.map((role) => (
-                        <SelectItem key={role} value={role}>
-                          {role}
+                        <SelectItem key={typeof role === 'string' ? role : String(role)} value={typeof role === 'string' ? role : String(role)}>
+                          {typeof role === 'string' ? role : String(role)}
                         </SelectItem>
                       ))}
                     </SelectContent>

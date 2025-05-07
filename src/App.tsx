@@ -20,35 +20,39 @@ import Projects from "./pages/master/Projects";
 import Users from "./pages/master/Users";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-            <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-            <Route path="/attendance" element={<Layout><Attendance /></Layout>} />
-            <Route path="/bulk-attendance" element={<Layout><BulkAttendance /></Layout>} />
-            <Route path="/attendance-history" element={<Layout><AttendanceHistory /></Layout>} />
-            <Route path="/role-mapping" element={<Layout><RoleMapping /></Layout>} />
-            <Route path="/reports" element={<Layout><Reports /></Layout>} />
-            <Route path="/profile" element={<Layout><Profile /></Layout>} />
-            <Route path="/master/employees" element={<Layout><Employees /></Layout>} />
-            <Route path="/master/roles" element={<Layout><Roles /></Layout>} />
-            <Route path="/master/projects" element={<Layout><Projects /></Layout>} />
-            <Route path="/master/users" element={<Layout><Users /></Layout>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+// Create a new QueryClient instance inside the component to ensure it's created when React is ready
+const App = () => {
+  // Initialize QueryClient inside the component
+  const queryClient = new QueryClient();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+              <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+              <Route path="/attendance" element={<Layout><Attendance /></Layout>} />
+              <Route path="/bulk-attendance" element={<Layout><BulkAttendance /></Layout>} />
+              <Route path="/attendance-history" element={<Layout><AttendanceHistory /></Layout>} />
+              <Route path="/role-mapping" element={<Layout><RoleMapping /></Layout>} />
+              <Route path="/reports" element={<Layout><Reports /></Layout>} />
+              <Route path="/profile" element={<Layout><Profile /></Layout>} />
+              <Route path="/master/employees" element={<Layout><Employees /></Layout>} />
+              <Route path="/master/roles" element={<Layout><Roles /></Layout>} />
+              <Route path="/master/projects" element={<Layout><Projects /></Layout>} />
+              <Route path="/master/users" element={<Layout><Users /></Layout>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
