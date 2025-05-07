@@ -30,6 +30,8 @@ export default function ProjectTable({
       <table className="min-w-full text-sm text-left text-gray-700">
         <thead className="text-xs uppercase bg-gray-50 border-b">
           <tr>
+            <th className="px-4 py-3">Entity</th>
+            <th className="px-4 py-3">Project ID</th>
             <th className="px-4 py-3">Project Name</th>
             <th className="px-4 py-3">Location</th>
             <th className="px-4 py-3">Start Date</th>
@@ -42,13 +44,20 @@ export default function ProjectTable({
           {projects.length ? (
             projects.map((project) => (
               <tr key={project.id} className="border-b last:border-0 hover:bg-gray-50">
-                {/* Name */}
+                {/* Entity */}
+                <td className="px-4 py-3">{project.entity || "N/A"}</td>
+                
+                {/* Project ID */}
+                <td className="px-4 py-3">{project.projectId || project.id}</td>
+                
+                {/* Project Name */}
                 <td className="px-4 py-3 font-medium">{project.name}</td>
+                
                 {/* Location */}
                 <td className="px-4 py-3">
-                  {project.coordinates ? (
+                  {project.location ? (
                     <span className="inline-block px-2 py-0.5 rounded-full font-medium text-xs bg-proscape/10 text-proscape">
-                      Configured
+                      {project.location}
                     </span>
                   ) : (
                     <span className="inline-block px-2 py-0.5 rounded-full font-medium text-xs bg-gray-200 text-gray-500">
@@ -56,10 +65,13 @@ export default function ProjectTable({
                     </span>
                   )}
                 </td>
+                
                 {/* Start Date */}
                 <td className="px-4 py-3">{formatDate(project.startDate)}</td>
+                
                 {/* End Date */}
                 <td className="px-4 py-3">{formatDate(project.endDate)}</td>
+                
                 {/* Status */}
                 <td className="px-4 py-3">
                   <span className={`inline-block px-2 py-0.5 rounded-full font-medium text-xs ${project.status === "Active"
@@ -69,6 +81,7 @@ export default function ProjectTable({
                     {project.status}
                   </span>
                 </td>
+                
                 {/* Actions */}
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
@@ -117,7 +130,7 @@ export default function ProjectTable({
             ))
           ) : (
             <tr>
-              <td colSpan={6} className="text-center py-8 text-gray-400">No projects found</td>
+              <td colSpan={8} className="text-center py-8 text-gray-400">No projects found</td>
             </tr>
           )}
         </tbody>

@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { Upload, Eye, Trash, Search } from "lucide-react";
 import ProjectFilters from "./ProjectFilters";
@@ -16,8 +15,10 @@ import { useToast } from "@/hooks/use-toast";
 const DUMMY_PROJECTS = [
   {
     id: "1",
+    projectId: "P001",
     name: "Main Building Construction",
     location: "Downtown Site",
+    entity: "Tanseeq Construction Ltd",
     assignedEmployees: [
       { id: "e1", name: "John Smith" },
       { id: "e2", name: "Sarah Johnson" }
@@ -28,8 +29,10 @@ const DUMMY_PROJECTS = [
   },
   {
     id: "2",
+    projectId: "P002",
     name: "Bridge Expansion",
     location: "Bridge Zone A",
+    entity: "Tanseeq Engineering Co",
     assignedEmployees: [{ id: "e3", name: "Emily Davis" }],
     startDate: "2025-01-15",
     endDate: "2025-06-01",
@@ -37,8 +40,10 @@ const DUMMY_PROJECTS = [
   },
   {
     id: "3",
+    projectId: "P003",
     name: "Warehouse Project",
     location: "East Industrial",
+    entity: "Tanseeq Landscaping LLC",
     assignedEmployees: [{ id: "e4", name: "Robert Williams" }],
     startDate: "2025-02-10",
     endDate: "2025-04-01",
@@ -62,8 +67,10 @@ const DUMMY_LOCATIONS = [
 const DUMMY_IMPORTED_PROJECTS = [
   {
     id: "np101",
+    projectId: "P004",
     name: "Highway Renovation",
     location: "North Express",
+    entity: "Tanseeq Construction Ltd",
     assignedEmployees: [
       { id: "e5", name: "Brian Carson" },
       { id: "e6", name: "Amy Howard" }
@@ -74,8 +81,10 @@ const DUMMY_IMPORTED_PROJECTS = [
   },
   {
     id: "np102",
+    projectId: "P005",
     name: "School Campus",
     location: "Greenfield",
+    entity: "Tanseeq Engineering Co",
     assignedEmployees: [{ id: "e2", name: "Sarah Johnson" }],
     startDate: "2025-07-01",
     endDate: "2026-02-15",
@@ -83,8 +92,10 @@ const DUMMY_IMPORTED_PROJECTS = [
   },
   {
     id: "np103",
+    projectId: "P006",
     name: "Hospital Wing",
     location: "Central Med",
+    entity: "Tanseeq Landscaping LLC",
     assignedEmployees: [
       { id: "e4", name: "Robert Williams" },
       { id: "e3", name: "Emily Davis" }
@@ -176,12 +187,13 @@ export default function ProjectsPage() {
     setDeleteProject(null);
   };
 
-  const handleAssignLocation = (projectId: string, geofenceData: string) => {
+  const handleAssignLocation = (projectId: string, geofenceData: string, locationName: string) => {
     setProjects(prev => 
       prev.map(p => {
         if (p.id === projectId) {
           return {
             ...p,
+            location: locationName, // Store the location name
             coordinates: {
               geofenceData
             }

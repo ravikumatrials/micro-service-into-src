@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -68,7 +67,7 @@ const Dashboard = () => {
   // Dashboard cards
   const dashboardCards = [
     { 
-      title: "Total Employees", 
+      title: "Assigned Employees", // Changed from "Total Employees" to "Assigned Employees"
       count: dashboardData.totalEmployees.toLocaleString(), 
       icon: <Users className="h-8 w-8 text-proscape" />
     },

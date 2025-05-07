@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -247,14 +246,26 @@ const BulkAttendance = () => {
     clearImportFilters();
   };
 
-  // Generate and download template
+  // Generate and download template with updated columns
   const downloadTemplate = () => {
-    // Create a table structure that can be used as a template
-    const headers = ["Employee ID", "Name", "Category", "Classification", "Project"];
+    // Create a table structure that can be used as a template with updated columns
+    const headers = [
+      "Employee ID", 
+      "Name", 
+      "Category", 
+      "Classification", 
+      "Project", 
+      "Location",
+      "Check-In Date",
+      "Check-Out Date",
+      "Check-In Time",
+      "Check-Out Time"
+    ];
+    
     const sampleRows = [
-      ["EMP001", "John Smith", "Carpenter", "Laborer", "Main Building Construction"],
-      ["EMP002", "Sarah Johnson", "Mason", "Laborer", "Bridge Expansion"],
-      ["", "", "", "", ""]
+      ["EMP001", "John Smith", "Carpenter", "Laborer", "Main Building Construction", "Downtown Site", "2025-05-07", "2025-05-07", "08:00", "17:00"],
+      ["EMP002", "Sarah Johnson", "Mason", "Laborer", "Bridge Expansion", "Bridge Zone A", "2025-05-07", "2025-05-07", "08:30", "17:30"],
+      ["", "", "", "", "", "", "", "", "", ""]
     ];
     
     // Create CSV content

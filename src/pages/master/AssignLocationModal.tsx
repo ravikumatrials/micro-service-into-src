@@ -1,10 +1,11 @@
-
 import { useState, useEffect, useRef } from "react";
 import { MapPin, Hexagon, Square } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "@googlemaps/js-api-loader";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Use a valid Google Maps API key
 const GOOGLE_MAPS_API_KEY = "AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg"; // Google Maps public test API key
@@ -13,7 +14,7 @@ interface AssignLocationProps {
   project: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (projectId: string, geofenceData: string) => void;
+  onSave: (projectId: string, geofenceData: string, locationName: string) => void;
 }
 
 export default function AssignLocationModal({
@@ -26,6 +27,7 @@ export default function AssignLocationModal({
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
   const [mapLoadFailed, setMapLoadFailed] = useState(false);
+  const [locationName, setLocationName] = useState(project?.location || "");
   const { toast } = useToast();
   
   const mapRef = useRef<HTMLDivElement>(null);
@@ -88,6 +90,7 @@ export default function AssignLocationModal({
     
     setIsMapLoading(true);
     setMapLoadFailed(false);
+    setLocationName(project?.location || "");
     
     let coordinates: Array<{lat: number, lng: number}> = [];
     
@@ -340,6 +343,15 @@ export default function AssignLocationModal({
       return;
     }
     
+    if (!locationName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a name for this location.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Prepare polygon data - either real coordinates or dummy data
     const geofenceData = mapLoadFailed ? 
       JSON.stringify([
@@ -350,7 +362,7 @@ export default function AssignLocationModal({
       ]) : 
       JSON.stringify(polygonCoordinates);
       
-    onSave(project.id, geofenceData);
+    onSave(project.id, geofenceData, locationName);
     
     // Show success toast
     toast({
@@ -423,6 +435,18 @@ export default function AssignLocationModal({
             Project: <span className="text-gray-700">{project?.name}</span>
           </div>
           
+          {/* Location Name Input */}
+          <div className="space-y-2">
+            <Label htmlFor="location-name">Location Name</Label>
+            <Input
+              id="location-name"
+              value={locationName}
+              onChange={(e) => setLocationName(e.target.value)}
+              placeholder="Enter a name for this location"
+              className="w-full"
+            />
+          </div>
+          
           {/* Map Container - Show Google Maps or Dummy Map */}
           {!mapLoadFailed ? (
             <div 
@@ -482,7 +506,7 @@ export default function AssignLocationModal({
             <Button
               className="bg-proscape hover:bg-proscape-dark text-white"
               onClick={handleSave}
-              disabled={!mapLoadFailed && polygonCoordinates.length < 3}
+              disabled={(!mapLoadFailed && polygonCoordinates.length < 3) || !locationName.trim()}
             >
               {mapLoadFailed ? "Confirm Location" : "Save Location"}
             </Button>
