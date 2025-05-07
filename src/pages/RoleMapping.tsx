@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { RoleMappingFilters } from "@/components/role-mapping/RoleMappingFilters";
 import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
+import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -27,10 +27,10 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 
 const mockEmployees = [
-  { id: 1, name: "John Smith", employeeId: "EMP001", location: "Site A", project: "Project X", entity: "Tanseeq Investment", category: "Carpenter", classification: "Laborer", currentRole: "Labour" },
-  { id: 2, name: "Sarah Johnson", employeeId: "EMP002", location: "Site B", project: "Project Y", entity: "Tanseeq Landscaping LLC", category: "Manager", classification: "Staff", currentRole: "Supervisor" },
-  { id: 3, name: "Robert Williams", employeeId: "EMP003", location: "Site A", project: "Project X", entity: "Gulf Builders International", category: "Electrician", classification: "Laborer", currentRole: undefined },
-  { id: 4, name: "Emily Davis", employeeId: "EMP004", location: "Site C", project: "Project Z", entity: "Al Maha Projects", category: "Plumber", classification: "Laborer", currentRole: "Labour" },
+  { id: 1, name: "John Smith", employeeId: "EMP001", location: "Site A", project: "Project X", entity: "Tanseeq Investment", category: "Carpenter", classification: "Laborer", currentRole: "Labour", email: "john.smith@example.com" },
+  { id: 2, name: "Sarah Johnson", employeeId: "EMP002", location: "Site B", project: "Project Y", entity: "Tanseeq Landscaping LLC", category: "Manager", classification: "Staff", currentRole: "Supervisor", email: "sarah.johnson@example.com" },
+  { id: 3, name: "Robert Williams", employeeId: "EMP003", location: "Site A", project: "Project X", entity: "Gulf Builders International", category: "Electrician", classification: "Laborer", currentRole: undefined, email: "robert.williams@example.com" },
+  { id: 4, name: "Emily Davis", employeeId: "EMP004", location: "Site C", project: "Project Z", entity: "Al Maha Projects", category: "Plumber", classification: "Laborer", currentRole: "Labour", email: "emily.davis@example.com" },
 ];
 
 const mockRoles = [
@@ -51,6 +51,10 @@ const RoleMapping = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   
+  // Add state for login credentials modal
+  const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
+  const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
+  
   // Bulk selection state
   const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
   const [bulkRoleToAssign, setBulkRoleToAssign] = useState<string>("");
@@ -63,6 +67,7 @@ const RoleMapping = () => {
   const categories = Array.from(new Set(mockEmployees.map(emp => emp.category)));
 
   const filteredEmployees = mockEmployees.filter(employee => {
+    // ... keep existing code (filtering logic)
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
@@ -86,9 +91,17 @@ const RoleMapping = () => {
         emp.currentRole = role;
       }
     });
+    
+    // Check if the role is Super Admin, which requires login credentials
+    if (role === "Super Admin") {
+      // Open credentials dialog
+      setEmployeeForCredentials(selectedEmployee);
+      setCredentialsDialogOpen(true);
+    }
   };
 
   const handleClearFilters = () => {
+    // ... keep existing code (filter clearing)
     setSearchTerm("");
     setRoleFilter("all");
     setEntityFilter("all");
@@ -98,6 +111,7 @@ const RoleMapping = () => {
 
   // Handle checkbox selection
   const handleSelectEmployee = (employeeId: number, checked: boolean) => {
+    // ... keep existing code (employee selection logic)
     if (checked) {
       setSelectedEmployees([...selectedEmployees, employeeId]);
     } else {
@@ -107,6 +121,7 @@ const RoleMapping = () => {
 
   // Handle "Select All" checkbox
   const handleSelectAll = (checked: boolean) => {
+    // ... keep existing code (select all logic)
     if (checked) {
       const allEmployeeIds = filteredEmployees.map(emp => emp.id);
       setSelectedEmployees(allEmployeeIds);
@@ -121,6 +136,7 @@ const RoleMapping = () => {
 
   // Handle bulk role assignment
   const handleBulkAssign = () => {
+    // ... keep existing code (bulk assignment logic)
     if (!bulkRoleToAssign) {
       toast({
         title: "Error",
@@ -147,6 +163,7 @@ const RoleMapping = () => {
 
   // Confirm bulk assignment
   const confirmBulkAssignment = () => {
+    // ... keep existing code (bulk assignment confirmation)
     // In a real app, this would update the backend
     mockEmployees.forEach(emp => {
       if (selectedEmployees.includes(emp.id)) {
@@ -160,6 +177,17 @@ const RoleMapping = () => {
       description: `Role assigned to ${selectedEmployees.length} employees successfully.`,
       variant: "default",
     });
+
+    // Check if any employees were assigned the Super Admin role
+    const superAdminAssigned = bulkRoleToAssign === "Super Admin";
+    if (superAdminAssigned && selectedEmployees.length === 1) {
+      // Find the employee to set credentials for
+      const employeeToSetup = mockEmployees.find(emp => emp.id === selectedEmployees[0]);
+      if (employeeToSetup) {
+        setEmployeeForCredentials(employeeToSetup);
+        setCredentialsDialogOpen(true);
+      }
+    }
 
     // Reset selection state
     setSelectedEmployees([]);
@@ -196,6 +224,7 @@ const RoleMapping = () => {
 
       {/* Bulk Action Bar - Shown when employees are selected */}
       {selectedEmployees.length > 0 && (
+        // ... keep existing code (bulk action bar)
         <Card className="p-4 bg-blue-50 border-blue-200 sticky top-0 z-10">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-2">
@@ -236,6 +265,7 @@ const RoleMapping = () => {
 
       <Card className="p-0 overflow-hidden">
         {isMobile ? (
+          // ... keep existing code (mobile view)
           <div className="divide-y divide-gray-200">
             {filteredEmployees.map((employee) => (
               <div key={employee.id} className="p-4 space-y-2">
@@ -281,6 +311,7 @@ const RoleMapping = () => {
             ))}
           </div>
         ) : (
+          // ... keep existing code (desktop view)
           <Table>
             <TableHeader>
               <TableRow>
@@ -344,6 +375,13 @@ const RoleMapping = () => {
         employee={selectedEmployee}
         roles={mockRoles}
         onAssignRole={handleRoleAssigned}
+      />
+
+      {/* Set Login Credentials Dialog */}
+      <SetLoginCredentialsDialog
+        open={credentialsDialogOpen}
+        onOpenChange={setCredentialsDialogOpen}
+        employee={employeeForCredentials}
       />
 
       {/* Standard confirmation dialog */}
