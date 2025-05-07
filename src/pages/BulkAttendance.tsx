@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Calendar, CheckCircle, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -59,8 +60,6 @@ const DUMMY_EXCEL_DATA = [
   { 
     id: "101", 
     name: "Ahmed Khan", 
-    category: "Mason", 
-    classification: "Laborer", 
     project: "Project A",
     location: "Downtown Site",
     checkInDate: "2025-05-07",
@@ -71,8 +70,6 @@ const DUMMY_EXCEL_DATA = [
   { 
     id: "102", 
     name: "Ramesh Iyer", 
-    category: "Electrician", 
-    classification: "Staff", 
     project: "Project B",
     location: "Bridge Zone A",
     checkInDate: "2025-05-07",
@@ -83,8 +80,6 @@ const DUMMY_EXCEL_DATA = [
   { 
     id: "103", 
     name: "Sara Al Marzooqi", 
-    category: "Engineer", 
-    classification: "Staff", 
     project: "Project A",
     location: "Site Office",
     checkInDate: "2025-05-07",
@@ -95,8 +90,6 @@ const DUMMY_EXCEL_DATA = [
   { 
     id: "104", 
     name: "John Peterson", 
-    category: "Carpenter", 
-    classification: "Laborer", 
     project: "Project C",
     location: "Building 7",
     checkInDate: "2025-05-07",
@@ -107,8 +100,6 @@ const DUMMY_EXCEL_DATA = [
   { 
     id: "105", 
     name: "Ali Mohammed", 
-    category: "Supervisor", 
-    classification: "Staff", 
     project: "Project B",
     location: "North Tower",
     checkInDate: "2025-05-07",
@@ -119,62 +110,38 @@ const DUMMY_EXCEL_DATA = [
 ];
 
 // Mock data for filter options
-const PROJECTS = ["Main Building Construction", "Bridge Expansion", "Warehouse Project"];
-const ENTITIES = ["Acme Construction", "Skyline Builders", "Metro Developers"];
-const CATEGORIES = ["Carpenter", "Mason", "Electrician", "Plumber", "Supervisor", "Manager", "Site Engineer"];
-const CLASSIFICATIONS = ["Laborer", "Staff"];
+const PROJECTS = ["Main Building Construction", "Bridge Expansion", "Warehouse Project", "Project A", "Project B", "Project C"];
 const LOCATIONS = ["Downtown Site", "Bridge Zone A", "Site Office", "Building 7", "North Tower"];
 
 const BulkAttendance = () => {
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [project, setProject] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
-  const [classification, setClassification] = useState<string>("");
-  const [status, setStatus] = useState<string>("all");
+  const [location, setLocation] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // State for selected employees and modal
-  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const [selectAll, setSelectAll] = useState(false);
-  
-  // Import state
+  // State for import mode
   const [isImportMode, setIsImportMode] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreviewData, setImportPreviewData] = useState<typeof DUMMY_EXCEL_DATA>([]);
   const [importComment, setImportComment] = useState("");
   
-  // New state for tracking if data has been imported
-  const [isDataImported, setIsDataImported] = useState(false);
-  // New state for showing success message
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  // State for selection
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
   
   // Import filters state
   const [importProjectFilter, setImportProjectFilter] = useState<string>("");
-  const [importCategoryFilter, setImportCategoryFilter] = useState<string>("");
-  const [importClassificationFilter, setImportClassificationFilter] = useState<string>("");
   const [importLocationFilter, setImportLocationFilter] = useState<string>("");
   const [importSearchQuery, setImportSearchQuery] = useState<string>("");
   
-  // New confirmation dialog state
+  // Confirmation dialog states
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [showNoSelectionDialog, setShowNoSelectionDialog] = useState(false);
 
-  // Filter employees based on filters
-  const filteredEmployees = isDataImported ? MOCK_EMPLOYEES.filter((employee) => {
-    if (project && employee.project !== project) return false;
-    if (category && employee.category !== category) return false;
-    if (classification && employee.classification !== classification) return false;
-    if (searchQuery && 
-        !employee.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !employee.id.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  }) : [];
-  
   // Filter imported employees based on import filters
   const filteredImportEmployees = importPreviewData.filter((employee) => {
     if (importProjectFilter && employee.project !== importProjectFilter) return false;
-    if (importCategoryFilter && employee.category !== importCategoryFilter) return false;
-    if (importClassificationFilter && employee.classification !== importClassificationFilter) return false;
     if (importLocationFilter && employee.location !== importLocationFilter) return false;
     if (importSearchQuery && 
         !employee.name.toLowerCase().includes(importSearchQuery.toLowerCase()) && 
@@ -187,7 +154,8 @@ const BulkAttendance = () => {
     if (selectAll) {
       setSelectedEmployees([]);
     } else {
-      setSelectedEmployees(filteredEmployees.map(e => e.id));
+      // If filter is applied, only select filtered employees
+      setSelectedEmployees(filteredImportEmployees.map(e => e.id));
     }
     setSelectAll(!selectAll);
   };
@@ -204,13 +172,13 @@ const BulkAttendance = () => {
   // Handle import button click
   const handleImportClick = () => {
     setIsImportMode(true);
+    setSelectedEmployees([]);
+    setSelectAll(false);
   };
   
   // Clear import filters
   const clearImportFilters = () => {
     setImportProjectFilter("");
-    setImportCategoryFilter("");
-    setImportClassificationFilter("");
     setImportLocationFilter("");
     setImportSearchQuery("");
   };
@@ -227,14 +195,22 @@ const BulkAttendance = () => {
     }
   };
   
-  // Open confirmation dialog instead of directly marking attendance
-  const openConfirmationDialog = () => {
-    setShowConfirmationDialog(true);
+  // Open confirmation dialog
+  const handleMarkAttendanceClick = () => {
+    if (selectedEmployees.length === 0) {
+      // Show dialog asking if they want to mark for all employees
+      setShowNoSelectionDialog(true);
+    } else {
+      // Show confirmation dialog for selected employees
+      setShowConfirmationDialog(true);
+    }
   };
   
-  // Handle import attendance marking after confirmation - UPDATED to reset UI completely
-  const handleImportAttendanceMark = () => {
-    const employeeCount = filteredImportEmployees.length;
+  // Handle marking attendance for selected employees
+  const handleMarkAttendance = () => {
+    const employeeCount = selectedEmployees.length > 0 
+      ? selectedEmployees.length 
+      : filteredImportEmployees.length;
     
     // Show success toast
     toast({
@@ -242,35 +218,24 @@ const BulkAttendance = () => {
       description: `Attendance marked successfully for ${employeeCount} employees.`,
     });
     
-    // Reset all import-related state
+    // Reset the interface
     setIsImportMode(false);
     setImportFile(null);
     setImportPreviewData([]);
     setImportComment("");
+    setSelectedEmployees([]);
+    setSelectAll(false);
     clearImportFilters();
     setShowConfirmationDialog(false);
-    
-    // Reset the main screen state too - this is the key change
-    // NOT setting isDataImported to true, which was causing the list to show again
-    // This ensures we don't reload or show the list after marking attendance
+    setShowNoSelectionDialog(false);
   };
   
-  // Exit import mode
-  const exitImportMode = () => {
-    setIsImportMode(false);
-    setImportFile(null);
-    setImportPreviewData([]);
-    clearImportFilters();
-  };
-
-  // Generate and download template with updated columns
+  // Generate and download template
   const downloadTemplate = () => {
-    // Create a table structure that can be used as a template with updated columns
+    // Create a table structure that can be used as a template
     const headers = [
       "Employee ID", 
       "Name", 
-      "Category", 
-      "Classification", 
       "Project", 
       "Location",
       "Check-In Date",
@@ -280,9 +245,9 @@ const BulkAttendance = () => {
     ];
     
     const sampleRows = [
-      ["EMP001", "John Smith", "Carpenter", "Laborer", "Main Building Construction", "Downtown Site", "2025-05-07", "08:00", "2025-05-07", "17:00"],
-      ["EMP002", "Sarah Johnson", "Mason", "Laborer", "Bridge Expansion", "Bridge Zone A", "2025-05-07", "08:30", "2025-05-07", "17:30"],
-      ["", "", "", "", "", "", "", "", "", ""]
+      ["EMP001", "John Smith", "Main Building Construction", "Downtown Site", "2025-05-07", "08:00", "2025-05-07", "17:00"],
+      ["EMP002", "Sarah Johnson", "Bridge Expansion", "Bridge Zone A", "2025-05-07", "08:30", "2025-05-07", "17:30"],
+      ["", "", "", "", "", "", "", ""]
     ];
     
     // Create CSV content
@@ -319,7 +284,12 @@ const BulkAttendance = () => {
           <h1 className="text-2xl font-bold text-gray-800">Bulk Attendance Import</h1>
           <Button
             variant="outline"
-            onClick={exitImportMode}
+            onClick={() => {
+              setIsImportMode(false);
+              setImportFile(null);
+              setImportPreviewData([]);
+              clearImportFilters();
+            }}
             className="flex items-center gap-2"
           >
             <X className="h-4 w-4" /> Cancel Import
@@ -378,6 +348,8 @@ const BulkAttendance = () => {
                     setImportFile(null);
                     setImportPreviewData([]);
                     clearImportFilters();
+                    setSelectedEmployees([]);
+                    setSelectAll(false);
                   }}
                 >
                   Change File
@@ -399,7 +371,7 @@ const BulkAttendance = () => {
               
               {/* Filter Section */}
               <Card className="p-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Project Filter */}
                   <div className="space-y-1">
                     <Label htmlFor="import-project" className="text-sm">Project</Label>
@@ -411,38 +383,6 @@ const BulkAttendance = () => {
                         <SelectItem value="">All Projects</SelectItem>
                         {PROJECTS.map((p) => (
                           <SelectItem key={p} value={p}>{p}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Category Filter */}
-                  <div className="space-y-1">
-                    <Label htmlFor="import-category" className="text-sm">Category</Label>
-                    <Select value={importCategoryFilter} onValueChange={setImportCategoryFilter}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="All Categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All Categories</SelectItem>
-                        {CATEGORIES.map((c) => (
-                          <SelectItem key={c} value={c}>{c}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Classification Filter */}
-                  <div className="space-y-1">
-                    <Label htmlFor="import-classification" className="text-sm">Classification</Label>
-                    <Select value={importClassificationFilter} onValueChange={setImportClassificationFilter}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="All Classifications" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All Classifications</SelectItem>
-                        {CLASSIFICATIONS.map((c) => (
-                          <SelectItem key={c} value={c}>{c}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -493,18 +433,34 @@ const BulkAttendance = () => {
                 </div>
               </Card>
               
-              <Separator className="my-4" />
+              {/* Mark Attendance Button - Top */}
+              <div className="mb-4 flex justify-between items-center">
+                <p className="text-sm text-gray-600">
+                  Showing {filteredImportEmployees.length} of {importPreviewData.length} employees
+                </p>
+                <Button 
+                  className="bg-proscape hover:bg-proscape-dark text-white px-6 flex items-center gap-2"
+                  onClick={handleMarkAttendanceClick}
+                >
+                  <CheckCircle className="mr-1 h-5 w-5" /> Mark Attendance
+                </Button>
+              </div>
               
-              {/* Preview Table - Updated to match requested columns */}
+              {/* Preview Table */}
               <div className="border rounded mb-4">
-                <div className="max-h-96 overflow-y-auto">
+                <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-gray-50">
                       <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox 
+                            checked={selectAll} 
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all employees"
+                          />
+                        </TableHead>
                         <TableHead>Employee ID</TableHead>
                         <TableHead>Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Classification</TableHead>
                         <TableHead>Project</TableHead>
                         <TableHead>Location</TableHead>
                         <TableHead>Check-In Date</TableHead>
@@ -517,18 +473,15 @@ const BulkAttendance = () => {
                       {filteredImportEmployees.length > 0 ? (
                         filteredImportEmployees.map((employee) => (
                           <TableRow key={employee.id}>
+                            <TableCell>
+                              <Checkbox 
+                                checked={selectedEmployees.includes(employee.id)}
+                                onCheckedChange={() => handleCheckboxChange(employee.id)}
+                                aria-label={`Select ${employee.name}`}
+                              />
+                            </TableCell>
                             <TableCell className="font-medium">{employee.id}</TableCell>
                             <TableCell>{employee.name}</TableCell>
-                            <TableCell>{employee.category}</TableCell>
-                            <TableCell>
-                              <span className={`px-2 py-1 rounded-full text-xs ${
-                                employee.classification === "Staff" 
-                                  ? "bg-blue-100 text-blue-700" 
-                                  : "bg-green-100 text-green-700"
-                              }`}>
-                                {employee.classification}
-                              </span>
-                            </TableCell>
                             <TableCell>{employee.project}</TableCell>
                             <TableCell>{employee.location}</TableCell>
                             <TableCell>{employee.checkInDate}</TableCell>
@@ -539,7 +492,7 @@ const BulkAttendance = () => {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={10} className="text-center py-8 text-gray-400">
+                          <TableCell colSpan={9} className="text-center py-8 text-gray-400">
                             No employees found matching the filters.
                           </TableCell>
                         </TableRow>
@@ -549,45 +502,46 @@ const BulkAttendance = () => {
                 </div>
               </div>
               
-              {/* Summary */}
-              <div className="mb-4 text-sm text-gray-600">
-                <p>Showing {filteredImportEmployees.length} of {importPreviewData.length} employees</p>
-              </div>
-              
-              {/* Mark Attendance Button - Now opens confirmation dialog instead */}
-              <div className="sticky bottom-0 pt-4 pb-4 bg-white border-t flex justify-center">
+              {/* Summary and Mark Attendance Button - Bottom */}
+              <div className="mt-4 flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  <p>Selected: {selectedEmployees.length} of {filteredImportEmployees.length} employees</p>
+                </div>
                 <Button 
-                  className="bg-proscape hover:bg-proscape-dark text-white px-12 py-6 h-auto text-lg"
-                  onClick={openConfirmationDialog}
-                  disabled={showConfirmationDialog}
+                  className="bg-proscape hover:bg-proscape-dark text-white px-6 flex items-center gap-2"
+                  onClick={handleMarkAttendanceClick}
                 >
-                  <CheckCircle className="mr-2 h-5 w-5" /> Mark Attendance
+                  <CheckCircle className="mr-1 h-5 w-5" /> Mark Attendance
                 </Button>
               </div>
             </>
           )}
         </Card>
         
-        {/* Confirmation Dialog */}
+        {/* Confirmation Dialog - Selected Employees */}
         <Dialog open={showConfirmationDialog} onOpenChange={setShowConfirmationDialog}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Confirm Attendance Marking</DialogTitle>
               <DialogDescription>
-                Are you sure you want to mark attendance for the following {filteredImportEmployees.length} employees?
+                Are you sure you want to mark attendance for the following {selectedEmployees.length} employees?
               </DialogDescription>
             </DialogHeader>
             
-            {filteredImportEmployees.length > 0 && (
-              <div className="py-2">
+            {selectedEmployees.length > 0 && (
+              <div className="py-2 max-h-60 overflow-y-auto">
                 <ul className="text-sm space-y-1">
-                  {filteredImportEmployees.slice(0, 5).map((employee) => (
-                    <li key={employee.id} className="flex items-center gap-2">
-                      <span className="font-medium">{employee.id}:</span> {employee.name}
-                    </li>
-                  ))}
-                  {filteredImportEmployees.length > 5 && (
-                    <li className="text-muted-foreground">+ {filteredImportEmployees.length - 5} more employees...</li>
+                  {filteredImportEmployees
+                    .filter(employee => selectedEmployees.includes(employee.id))
+                    .slice(0, 10)
+                    .map((employee) => (
+                      <li key={employee.id} className="flex items-center gap-2">
+                        <span className="font-medium">{employee.id}:</span> {employee.name}
+                      </li>
+                    ))
+                  }
+                  {selectedEmployees.length > 10 && (
+                    <li className="text-muted-foreground">+ {selectedEmployees.length - 10} more employees...</li>
                   )}
                 </ul>
               </div>
@@ -598,10 +552,34 @@ const BulkAttendance = () => {
                 Cancel
               </Button>
               <Button 
-                onClick={handleImportAttendanceMark}
+                onClick={handleMarkAttendance}
                 className="bg-proscape hover:bg-proscape-dark text-white"
               >
-                Confirm
+                Yes, Mark Attendance
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* No Selection Dialog */}
+        <Dialog open={showNoSelectionDialog} onOpenChange={setShowNoSelectionDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>No Employees Selected</DialogTitle>
+              <DialogDescription>
+                No employees selected. Do you want to mark attendance for all {filteredImportEmployees.length} imported employees?
+              </DialogDescription>
+            </DialogHeader>
+            
+            <DialogFooter className="flex sm:justify-between gap-2">
+              <Button variant="outline" onClick={() => setShowNoSelectionDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleMarkAttendance}
+                className="bg-proscape hover:bg-proscape-dark text-white"
+              >
+                Yes, Mark All
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -618,7 +596,7 @@ const BulkAttendance = () => {
         
         {/* Filter Section */}
         <Card className="p-5 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Date Filter */}
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
@@ -659,66 +637,41 @@ const BulkAttendance = () => {
               </Select>
             </div>
 
-            {/* Classification Filter */}
+            {/* Location Filter */}
             <div className="space-y-2">
-              <Label htmlFor="classification">Classification</Label>
-              <Select value={classification} onValueChange={setClassification}>
+              <Label htmlFor="location">Location</Label>
+              <Select value={location} onValueChange={setLocation}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Classifications" />
+                  <SelectValue placeholder="All Locations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Classifications</SelectItem>
-                  {CLASSIFICATIONS.map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Category Filter */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  <SelectItem value="">All Locations</SelectItem>
+                  {LOCATIONS.map((l) => (
+                    <SelectItem key={l} value={l}>{l}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Status Filter */}
+            {/* Search by Name/ID */}
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="present">Present</SelectItem>
-                  <SelectItem value="absent">Absent</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="search">Search by Name/ID</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Input
+                  id="search"
+                  placeholder="Search..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Search and Action Buttons */}
-          <div className="flex flex-col md:flex-row justify-between mt-4 gap-4">
-            <div className="relative w-full md:w-96">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <Input
-                placeholder="Search by name or ID..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2">
+          {/* Action Buttons */}
+          <div className="flex flex-col md:flex-row justify-end mt-4 gap-4">
+            <div className="flex gap-2 justify-end">
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2"
@@ -737,110 +690,40 @@ const BulkAttendance = () => {
           </div>
         </Card>
 
-        {/* Success Message */}
-        {showSuccessMessage && isDataImported && (
-          <Alert className="mb-4 bg-green-50 border-green-200 text-green-800">
-            <AlertDescription className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-              Employees imported successfully.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Employees Table or Empty State */}
-        {isDataImported ? (
-          <Card className="p-0 overflow-x-auto shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16">
-                    <Checkbox 
-                      checked={selectAll} 
-                      onCheckedChange={handleSelectAll} 
-                      aria-label="Select all employees"
-                    />
-                  </TableHead>
-                  <TableHead>Employee ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Classification</TableHead>
-                  <TableHead>Project</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredEmployees.length > 0 ? (
-                  filteredEmployees.map((employee) => (
-                    <TableRow key={employee.id}>
-                      <TableCell>
-                        <Checkbox 
-                          checked={selectedEmployees.includes(employee.id)}
-                          onCheckedChange={() => handleCheckboxChange(employee.id)}
-                          aria-label={`Select ${employee.name}`}
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">{employee.id}</TableCell>
-                      <TableCell>{employee.name}</TableCell>
-                      <TableCell>{employee.category}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          employee.classification === "Staff" 
-                            ? "bg-blue-100 text-blue-700" 
-                            : "bg-green-100 text-green-700"
-                        }`}>
-                          {employee.classification}
-                        </span>
-                      </TableCell>
-                      <TableCell>{employee.project}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-400">
-                      No employees found matching the filters.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </Card>
-        ) : (
-          <Card className="p-8 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px]">
-            <div className="max-w-lg">
-              <Upload className="h-16 w-16 text-gray-400 mb-4 mx-auto" />
-              <h3 className="text-xl font-medium text-gray-700 mb-2">Please import an Excel file to mark attendance</h3>
-              <p className="text-gray-500 mb-6">You can upload up to 500 employees at once.</p>
-              <div className="flex justify-center">
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={handleImportClick}
-                >
-                  <FileUp className="h-4 w-4" /> Import File
-                </Button>
-              </div>
+        {/* Empty State - Initial View */}
+        <Card className="p-8 shadow-sm text-center flex flex-col items-center justify-center min-h-[300px]">
+          <div className="max-w-lg">
+            <Upload className="h-16 w-16 text-gray-400 mb-4 mx-auto" />
+            <h3 className="text-xl font-medium text-gray-700 mb-2">Import an Excel file to mark attendance</h3>
+            <p className="text-gray-500 mb-6">Follow these steps to mark attendance in bulk:</p>
+            <ol className="text-left mb-6 space-y-2 text-gray-700">
+              <li className="flex items-start gap-2">
+                <span className="bg-gray-100 rounded-full h-6 w-6 flex items-center justify-center text-sm flex-shrink-0">1</span>
+                <span>Download the template using the button above</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="bg-gray-100 rounded-full h-6 w-6 flex items-center justify-center text-sm flex-shrink-0">2</span>
+                <span>Fill in the employee attendance data</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="bg-gray-100 rounded-full h-6 w-6 flex items-center justify-center text-sm flex-shrink-0">3</span>
+                <span>Import the file and select employees</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="bg-gray-100 rounded-full h-6 w-6 flex items-center justify-center text-sm flex-shrink-0">4</span>
+                <span>Click "Mark Attendance" to save the records</span>
+              </li>
+            </ol>
+            <div className="flex justify-center">
+              <Button 
+                className="bg-proscape hover:bg-proscape-dark text-white flex items-center gap-2"
+                onClick={handleImportClick}
+              >
+                <FileUp className="h-4 w-4" /> Import Excel File
+              </Button>
             </div>
-          </Card>
-        )}
-
-        {/* Show Mark Attendance button only if data has been imported */}
-        {isDataImported && filteredEmployees.length > 0 && (
-          <div className="flex justify-end mt-6">
-            <Button 
-              className="bg-proscape hover:bg-proscape-dark text-white"
-              disabled={selectedEmployees.length === 0}
-            >
-              <CheckCircle className="mr-2 h-4 w-4" /> Mark Attendance
-            </Button>
           </div>
-        )}
-
-        {/* Summary Footer - Only show if data is imported */}
-        {isDataImported && filteredEmployees.length > 0 && (
-          <div className="mt-4 flex justify-between items-center text-sm text-gray-600 px-2">
-            <p>Total: {filteredEmployees.length} employees</p>
-            <p>Selected: {selectedEmployees.length} employees</p>
-          </div>
-        )}
+        </Card>
       </div>
     </div>
   );
