@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -55,7 +54,7 @@ const MOCK_EMPLOYEES = [
   { id: "EMP010", name: "Maria Garcia", category: "Site Engineer", classification: "Staff", entity: "Metro Developers", project: "Warehouse Project" },
 ];
 
-// Updated Excel data with the new column structure
+// Updated Excel data with the column structure
 const DUMMY_EXCEL_DATA = [
   { 
     id: "101", 
@@ -65,8 +64,8 @@ const DUMMY_EXCEL_DATA = [
     project: "Project A",
     location: "Downtown Site",
     checkInDate: "2025-05-07",
-    checkOutDate: "2025-05-07",
     checkInTime: "08:00",
+    checkOutDate: "2025-05-07",
     checkOutTime: "17:00"
   },
   { 
@@ -77,8 +76,8 @@ const DUMMY_EXCEL_DATA = [
     project: "Project B",
     location: "Bridge Zone A",
     checkInDate: "2025-05-07",
-    checkOutDate: "2025-05-07",
     checkInTime: "08:30",
+    checkOutDate: "2025-05-07",
     checkOutTime: "17:30"
   },
   { 
@@ -89,8 +88,8 @@ const DUMMY_EXCEL_DATA = [
     project: "Project A",
     location: "Site Office",
     checkInDate: "2025-05-07",
-    checkOutDate: "2025-05-07",
     checkInTime: "09:00",
+    checkOutDate: "2025-05-07",
     checkOutTime: "18:00"
   },
   { 
@@ -101,8 +100,8 @@ const DUMMY_EXCEL_DATA = [
     project: "Project C",
     location: "Building 7",
     checkInDate: "2025-05-07",
-    checkOutDate: "2025-05-07",
     checkInTime: "07:30",
+    checkOutDate: "2025-05-07",
     checkOutTime: "16:30"
   },
   { 
@@ -113,8 +112,8 @@ const DUMMY_EXCEL_DATA = [
     project: "Project B",
     location: "North Tower",
     checkInDate: "2025-05-07",
-    checkOutDate: "2025-05-07",
     checkInTime: "08:15",
+    checkOutDate: "2025-05-07",
     checkOutTime: "17:45"
   },
 ];
@@ -148,7 +147,6 @@ const BulkAttendance = () => {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreviewData, setImportPreviewData] = useState<typeof DUMMY_EXCEL_DATA>([]);
   const [importComment, setImportComment] = useState("");
-  const [importAttendanceType, setImportAttendanceType] = useState<"check-in" | "check-out">("check-in");
   
   // New state for tracking if data has been imported
   const [isDataImported, setIsDataImported] = useState(false);
@@ -161,8 +159,6 @@ const BulkAttendance = () => {
   const [importClassificationFilter, setImportClassificationFilter] = useState<string>("");
   const [importLocationFilter, setImportLocationFilter] = useState<string>("");
   const [importSearchQuery, setImportSearchQuery] = useState<string>("");
-  const [importSelectedEmployees, setImportSelectedEmployees] = useState<string[]>([]);
-  const [importSelectAll, setImportSelectAll] = useState(false);
 
   // Filter employees based on filters
   const filteredEmployees = isDataImported ? MOCK_EMPLOYEES.filter((employee) => {
@@ -196,29 +192,10 @@ const BulkAttendance = () => {
     }
     setSelectAll(!selectAll);
   };
-  
-  // Handle import select all
-  const handleImportSelectAll = () => {
-    if (importSelectAll) {
-      setImportSelectedEmployees([]);
-    } else {
-      setImportSelectedEmployees(filteredImportEmployees.map(e => e.id));
-    }
-    setImportSelectAll(!importSelectAll);
-  };
 
   // Handle checkbox change
   const handleCheckboxChange = (employeeId: string) => {
     setSelectedEmployees(prev => 
-      prev.includes(employeeId) 
-        ? prev.filter(id => id !== employeeId)
-        : [...prev, employeeId]
-    );
-  };
-  
-  // Handle import checkbox change
-  const handleImportCheckboxChange = (employeeId: string) => {
-    setImportSelectedEmployees(prev => 
       prev.includes(employeeId) 
         ? prev.filter(id => id !== employeeId)
         : [...prev, employeeId]
@@ -269,14 +246,10 @@ const BulkAttendance = () => {
   
   // Handle import attendance marking
   const handleImportAttendanceMark = () => {
-    if (importComment.trim() === "") {
-      toast({
-        title: "Error",
-        description: "Please provide a reason for the import.",
-        variant: "destructive"
-      });
-      return;
-    }
+    toast({
+      title: "Success!",
+      description: `Attendance marked successfully for ${importPreviewData.length} employees.`,
+    });
     
     // Set imported data flag to true
     setIsDataImported(true);
@@ -291,8 +264,6 @@ const BulkAttendance = () => {
     setImportFile(null);
     setImportPreviewData([]);
     setImportComment("");
-    setImportSelectedEmployees([]);
-    setImportSelectAll(false);
     clearImportFilters();
   };
   
@@ -315,14 +286,14 @@ const BulkAttendance = () => {
       "Project", 
       "Location",
       "Check-In Date",
-      "Check-Out Date",
       "Check-In Time",
+      "Check-Out Date",
       "Check-Out Time"
     ];
     
     const sampleRows = [
-      ["EMP001", "John Smith", "Carpenter", "Laborer", "Main Building Construction", "Downtown Site", "2025-05-07", "2025-05-07", "08:00", "17:00"],
-      ["EMP002", "Sarah Johnson", "Mason", "Laborer", "Bridge Expansion", "Bridge Zone A", "2025-05-07", "2025-05-07", "08:30", "17:30"],
+      ["EMP001", "John Smith", "Carpenter", "Laborer", "Main Building Construction", "Downtown Site", "2025-05-07", "08:00", "2025-05-07", "17:00"],
+      ["EMP002", "Sarah Johnson", "Mason", "Laborer", "Bridge Expansion", "Bridge Zone A", "2025-05-07", "08:30", "2025-05-07", "17:30"],
       ["", "", "", "", "", "", "", "", "", ""]
     ];
     
@@ -381,7 +352,7 @@ const BulkAttendance = () => {
                       className="bg-proscape hover:bg-proscape-dark text-white px-6 py-3 rounded cursor-pointer flex items-center gap-2"
                     >
                       <FileUp className="h-5 w-5" />
-                      Select File
+                      Choose Excel File
                     </Label>
                     <Input
                       type="file"
@@ -419,12 +390,23 @@ const BulkAttendance = () => {
                     setImportFile(null);
                     setImportPreviewData([]);
                     clearImportFilters();
-                    setImportSelectedEmployees([]);
-                    setImportSelectAll(false);
                   }}
                 >
                   Change File
                 </Button>
+              </div>
+
+              {/* Comment field for all employees */}
+              <div className="mb-6">
+                <Label htmlFor="importComment" className="text-sm font-medium">Comment (applies to all employees)</Label>
+                <Textarea 
+                  id="importComment"
+                  placeholder="Enter comment for all imported attendance records..."
+                  value={importComment}
+                  onChange={(e) => setImportComment(e.target.value)}
+                  className="mt-1"
+                  rows={2}
+                />
               </div>
               
               {/* Filter Section */}
@@ -531,13 +513,6 @@ const BulkAttendance = () => {
                   <Table>
                     <TableHeader className="sticky top-0 bg-gray-50">
                       <TableRow>
-                        <TableHead className="w-16">
-                          <Checkbox 
-                            checked={importSelectAll} 
-                            onCheckedChange={handleImportSelectAll}
-                            aria-label="Select all employees"
-                          />
-                        </TableHead>
                         <TableHead>Employee ID</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Category</TableHead>
@@ -545,8 +520,8 @@ const BulkAttendance = () => {
                         <TableHead>Project</TableHead>
                         <TableHead>Location</TableHead>
                         <TableHead>Check-In Date</TableHead>
-                        <TableHead>Check-Out Date</TableHead>
                         <TableHead>Check-In Time</TableHead>
+                        <TableHead>Check-Out Date</TableHead>
                         <TableHead>Check-Out Time</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -554,13 +529,6 @@ const BulkAttendance = () => {
                       {filteredImportEmployees.length > 0 ? (
                         filteredImportEmployees.map((employee) => (
                           <TableRow key={employee.id}>
-                            <TableCell>
-                              <Checkbox 
-                                checked={importSelectedEmployees.includes(employee.id)}
-                                onCheckedChange={() => handleImportCheckboxChange(employee.id)}
-                                aria-label={`Select ${employee.name}`}
-                              />
-                            </TableCell>
                             <TableCell className="font-medium">{employee.id}</TableCell>
                             <TableCell>{employee.name}</TableCell>
                             <TableCell>{employee.category}</TableCell>
@@ -576,14 +544,14 @@ const BulkAttendance = () => {
                             <TableCell>{employee.project}</TableCell>
                             <TableCell>{employee.location}</TableCell>
                             <TableCell>{employee.checkInDate}</TableCell>
-                            <TableCell>{employee.checkOutDate}</TableCell>
                             <TableCell>{employee.checkInTime}</TableCell>
+                            <TableCell>{employee.checkOutDate}</TableCell>
                             <TableCell>{employee.checkOutTime}</TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={11} className="text-center py-8 text-gray-400">
+                          <TableCell colSpan={10} className="text-center py-8 text-gray-400">
                             No employees found matching the filters.
                           </TableCell>
                         </TableRow>
@@ -596,58 +564,13 @@ const BulkAttendance = () => {
               {/* Summary */}
               <div className="mb-4 text-sm text-gray-600">
                 <p>Showing {filteredImportEmployees.length} of {importPreviewData.length} employees</p>
-                <p>Selected: {importSelectedEmployees.length} employees</p>
               </div>
               
-              {/* Attendance Type and Comment */}
-              <div className="space-y-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Attendance Type</Label>
-                    <Select 
-                      value={importAttendanceType} 
-                      onValueChange={(value) => setImportAttendanceType(value as "check-in" | "check-out")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="check-in">Check-In</SelectItem>
-                        <SelectItem value="check-out">Check-Out</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="time">Time</Label>
-                    <Input 
-                      id="import-time"
-                      type="time" 
-                      value={attendanceTime}
-                      onChange={(e) => setAttendanceTime(e.target.value)}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="importComment">Reason/Comment</Label>
-                  <Textarea 
-                    id="importComment"
-                    placeholder="Enter reason for bulk attendance marking..."
-                    value={importComment}
-                    onChange={(e) => setImportComment(e.target.value)}
-                    rows={3}
-                  />
-                  <p className="text-xs text-gray-500">Required for manual entry</p>
-                </div>
-              </div>
-              
-              {/* Fixed Mark Attendance button */}
-              <div className="sticky bottom-0 pt-2 pb-4 bg-white border-t flex justify-end">
+              {/* Mark Attendance Button - Prominent and Fixed */}
+              <div className="sticky bottom-0 pt-4 pb-4 bg-white border-t flex justify-center">
                 <Button 
-                  className="bg-proscape hover:bg-proscape-dark text-white px-8 py-6 h-auto text-lg"
+                  className="bg-proscape hover:bg-proscape-dark text-white px-12 py-6 h-auto text-lg"
                   onClick={handleImportAttendanceMark}
-                  disabled={!importFile || !importComment.trim() || importSelectedEmployees.length === 0}
                 >
                   <CheckCircle className="mr-2 h-5 w-5" /> Mark Attendance
                 </Button>
@@ -659,6 +582,7 @@ const BulkAttendance = () => {
     );
   }
 
+  
   return (
     <div className="space-y-5 px-1 pt-5">
       <div>
@@ -907,59 +831,4 @@ const BulkAttendance = () => {
               <Label htmlFor="attendance-type">Attendance Type</Label>
               <Select 
                 value={attendanceType} 
-                onValueChange={(value) => setAttendanceType(value as "check-in" | "check-out")}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="check-in">Check-In</SelectItem>
-                  <SelectItem value="check-out">Check-Out</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="time">Time</Label>
-              <Input 
-                id="time"
-                type="time" 
-                value={attendanceTime}
-                onChange={(e) => setAttendanceTime(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="reason">Reason/Comment</Label>
-              <Input 
-                id="reason"
-                placeholder="Reason for manual entry..."
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-              <p className="text-xs text-gray-500">Required for manual entry</p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="bg-proscape hover:bg-proscape-dark text-white"
-              onClick={handleConfirm}
-              disabled={!reason.trim()}
-            >
-              <CheckCheck className="mr-2 h-4 w-4" /> Confirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
-export default BulkAttendance;
+                onValueChange={(value) => setAttendanceType(value as "check-in" | "
