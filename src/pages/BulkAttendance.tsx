@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
+import { Calendar, CheckCircle, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,14 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -138,10 +129,6 @@ const BulkAttendance = () => {
   // State for selected employees and modal
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [attendanceType, setAttendanceType] = useState<"check-in" | "check-out">("check-in");
-  const [attendanceTime, setAttendanceTime] = useState(format(new Date(), "HH:mm"));
-  const [reason, setReason] = useState("");
   
   // Import state
   const [isImportMode, setIsImportMode] = useState(false);
@@ -203,22 +190,6 @@ const BulkAttendance = () => {
     );
   };
 
-  // Handle mark attendance
-  const handleMarkAttendance = () => {
-    setIsModalOpen(true);
-  };
-
-  // Handle confirmation
-  const handleConfirm = () => {
-    toast({
-      title: "Success!",
-      description: `Attendance marked for ${selectedEmployees.length} employees on ${format(date || new Date(), "MMM dd, yyyy")}.`,
-    });
-    setIsModalOpen(false);
-    setSelectedEmployees([]);
-    setSelectAll(false);
-  };
-  
   // Handle import button click
   const handleImportClick = () => {
     setIsImportMode(true);
@@ -245,11 +216,12 @@ const BulkAttendance = () => {
     }
   };
   
-  // Handle import attendance marking
+  // Handle import attendance marking - SIMPLIFIED as per new requirements
   const handleImportAttendanceMark = () => {
+    const employeeCount = filteredImportEmployees.length;
     toast({
       title: "Success!",
-      description: `Attendance marked successfully for ${importPreviewData.length} employees.`,
+      description: `Attendance marked successfully for ${employeeCount} employees.`,
     });
     
     // Set imported data flag to true
@@ -508,7 +480,7 @@ const BulkAttendance = () => {
               
               <Separator className="my-4" />
               
-              {/* Preview Table */}
+              {/* Preview Table - Updated to match requested columns */}
               <div className="border rounded mb-4">
                 <div className="max-h-96 overflow-y-auto">
                   <Table>
@@ -567,7 +539,7 @@ const BulkAttendance = () => {
                 <p>Showing {filteredImportEmployees.length} of {importPreviewData.length} employees</p>
               </div>
               
-              {/* Mark Attendance Button - Prominent and Fixed */}
+              {/* Mark Attendance Button - Prominent and Fixed - SIMPLIFIED per new requirements */}
               <div className="sticky bottom-0 pt-4 pb-4 bg-white border-t flex justify-center">
                 <Button 
                   className="bg-proscape hover:bg-proscape-dark text-white px-12 py-6 h-auto text-lg"
@@ -800,7 +772,6 @@ const BulkAttendance = () => {
           <div className="flex justify-end mt-6">
             <Button 
               className="bg-proscape hover:bg-proscape-dark text-white"
-              onClick={handleMarkAttendance}
               disabled={selectedEmployees.length === 0}
             >
               <CheckCircle className="mr-2 h-4 w-4" /> Mark Attendance
@@ -816,67 +787,6 @@ const BulkAttendance = () => {
           </div>
         )}
       </div>
-
-      {/* Mark Attendance Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Mark Bulk Attendance</DialogTitle>
-            <DialogDescription>
-              You're marking attendance for {selectedEmployees.length} employees on {format(date || new Date(), "MMM dd, yyyy")}.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-3">
-            <div className="space-y-2">
-              <Label htmlFor="attendance-type">Attendance Type</Label>
-              <Select 
-                value={attendanceType} 
-                onValueChange={(value) => setAttendanceType(value as "check-in" | "check-out")}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="check-in">Check-In</SelectItem>
-                  <SelectItem value="check-out">Check-Out</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="attendance-time">
-                {attendanceType === "check-in" ? "Check-In Time" : "Check-Out Time"}
-              </Label>
-              <Input 
-                id="attendance-time" 
-                type="time" 
-                value={attendanceTime} 
-                onChange={(e) => setAttendanceTime(e.target.value)} 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="reason">Comment (Optional)</Label>
-              <Textarea 
-                id="reason" 
-                placeholder="Enter a reason or comment for this attendance record" 
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirm} className="bg-proscape hover:bg-proscape-dark text-white">
-              <CheckCheck className="mr-2 h-4 w-4" /> Confirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
