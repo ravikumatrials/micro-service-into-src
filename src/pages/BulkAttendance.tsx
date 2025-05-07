@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Calendar, CheckCircle, CheckCheck, Search, Upload, FileUp, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -831,4 +832,53 @@ const BulkAttendance = () => {
               <Label htmlFor="attendance-type">Attendance Type</Label>
               <Select 
                 value={attendanceType} 
-                onValueChange={(value) => setAttendanceType(value as "check-in" | "
+                onValueChange={(value) => setAttendanceType(value as "check-in" | "check-out")}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="check-in">Check-In</SelectItem>
+                  <SelectItem value="check-out">Check-Out</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="attendance-time">
+                {attendanceType === "check-in" ? "Check-In Time" : "Check-Out Time"}
+              </Label>
+              <Input 
+                id="attendance-time" 
+                type="time" 
+                value={attendanceTime} 
+                onChange={(e) => setAttendanceTime(e.target.value)} 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="reason">Comment (Optional)</Label>
+              <Textarea 
+                id="reason" 
+                placeholder="Enter a reason or comment for this attendance record" 
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirm} className="bg-proscape hover:bg-proscape-dark text-white">
+              <CheckCheck className="mr-2 h-4 w-4" /> Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default BulkAttendance;
