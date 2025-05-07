@@ -129,10 +129,8 @@ const RoleMapping = () => {
   // Handle bulk role assignment
   const handleBulkAssign = () => {
     if (!bulkRoleToAssign) {
-      toast("Error", {
-        description: "Please select a role to assign",
-        variant: "destructive",
-      });
+      // Fix: Remove 'variant' property and use toast.error instead
+      toast.error("Please select a role to assign");
       return;
     }
 
@@ -160,11 +158,8 @@ const RoleMapping = () => {
       }
     });
 
-    // Show success toast
-    toast("Success", {
-      description: `Role assigned to ${selectedEmployees.length} employees successfully.`,
-      variant: "default",
-    });
+    // Show success toast - Fix: Remove 'variant' property and use toast.success instead
+    toast.success(`Role assigned to ${selectedEmployees.length} employees successfully.`);
 
     // If only one employee was assigned, open credentials dialog
     if (selectedEmployees.length === 1) {
