@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,29 @@ const RoleMapping = () => {
     // Always open credentials dialog after role assignment
     setEmployeeForCredentials(selectedEmployee);
     setCredentialsDialogOpen(true);
+  };
+
+  // Handle role removal
+  const handleRemoveRole = () => {
+    if (!selectedEmployee) return;
+
+    // In a real app, this would update the backend
+    mockEmployees.forEach(emp => {
+      if (emp.id === selectedEmployee.id) {
+        emp.currentRole = undefined;
+      }
+    });
+    
+    // Create audit log
+    const auditLog = {
+      employeeId: selectedEmployee.employeeId,
+      removedRole: selectedEmployee.currentRole,
+      removedBy: "Admin User", // This would come from authentication in a real app
+      timestamp: new Date().toISOString(),
+    };
+    
+    // In a real app, this would be sent to a backend API to store in the audit logs
+    console.log("Role removal audit log:", auditLog);
   };
 
   const handleClearFilters = () => {
@@ -373,6 +397,7 @@ const RoleMapping = () => {
         employee={selectedEmployee}
         roles={mockRoles}
         onAssignRole={handleRoleAssigned}
+        onRemoveRole={handleRemoveRole}
       />
 
       {/* Set Login Credentials Dialog - For single employee */}
