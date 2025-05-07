@@ -6,6 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { RoleMappingFilters } from "@/components/role-mapping/RoleMappingFilters";
 import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
+import { BulkLoginCredentialsDialog } from "@/components/role-mapping/BulkLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -53,6 +54,10 @@ const RoleMapping = () => {
   // Add state for login credentials modal
   const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
   const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
+  
+  // Add state for bulk credentials modal
+  const [bulkCredentialsDialogOpen, setBulkCredentialsDialogOpen] = useState(false);
+  const [employeesForBulkCredentials, setEmployeesForBulkCredentials] = useState([]);
   
   // Bulk selection state
   const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
@@ -129,7 +134,6 @@ const RoleMapping = () => {
   // Handle bulk role assignment
   const handleBulkAssign = () => {
     if (!bulkRoleToAssign) {
-      // Fix: Remove 'variant' property and use toast.error instead
       toast.error("Please select a role to assign");
       return;
     }
@@ -158,17 +162,32 @@ const RoleMapping = () => {
       }
     });
 
-    // Show success toast - Fix: Remove 'variant' property and use toast.success instead
+    // Show success toast
     toast.success(`Role assigned to ${selectedEmployees.length} employees successfully.`);
 
-    // If only one employee was assigned, open credentials dialog
-    if (selectedEmployees.length === 1) {
+    // Prepare for bulk credentials setup
+    const selectedEmployeesData = mockEmployees.filter(emp => 
+      selectedEmployees.includes(emp.id)
+    );
+
+    // For 5 or more employees, open the bulk credentials dialog
+    if (selectedEmployees.length >= 5) {
+      setEmployeesForBulkCredentials(selectedEmployeesData);
+      setBulkCredentialsDialogOpen(true);
+    } 
+    // For a single employee, use the existing credentials dialog
+    else if (selectedEmployees.length === 1) {
       // Find the employee to set credentials for
       const employeeToSetup = mockEmployees.find(emp => emp.id === selectedEmployees[0]);
       if (employeeToSetup) {
         setEmployeeForCredentials(employeeToSetup);
         setCredentialsDialogOpen(true);
       }
+    }
+    // For 2-4 employees, we'll still use the bulk dialog for consistency
+    else if (selectedEmployees.length > 1) {
+      setEmployeesForBulkCredentials(selectedEmployeesData);
+      setBulkCredentialsDialogOpen(true);
     }
 
     // Reset selection state
@@ -356,11 +375,18 @@ const RoleMapping = () => {
         onAssignRole={handleRoleAssigned}
       />
 
-      {/* Set Login Credentials Dialog */}
+      {/* Set Login Credentials Dialog - For single employee */}
       <SetLoginCredentialsDialog
         open={credentialsDialogOpen}
         onOpenChange={setCredentialsDialogOpen}
         employee={employeeForCredentials}
+      />
+
+      {/* Bulk Login Credentials Dialog - For multiple employees */}
+      <BulkLoginCredentialsDialog
+        open={bulkCredentialsDialogOpen}
+        onOpenChange={setBulkCredentialsDialogOpen}
+        employees={employeesForBulkCredentials}
       />
 
       {/* Standard confirmation dialog */}
