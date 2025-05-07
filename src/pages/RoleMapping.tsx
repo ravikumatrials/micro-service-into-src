@@ -8,7 +8,7 @@ import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -42,7 +42,6 @@ const mockRoles = [
 
 const RoleMapping = () => {
   const isMobile = useIsMobile();
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
@@ -92,12 +91,9 @@ const RoleMapping = () => {
       }
     });
     
-    // Check if the role is Super Admin, which requires login credentials
-    if (role === "Super Admin") {
-      // Open credentials dialog
-      setEmployeeForCredentials(selectedEmployee);
-      setCredentialsDialogOpen(true);
-    }
+    // Always open credentials dialog after role assignment
+    setEmployeeForCredentials(selectedEmployee);
+    setCredentialsDialogOpen(true);
   };
 
   const handleClearFilters = () => {
@@ -163,7 +159,6 @@ const RoleMapping = () => {
 
   // Confirm bulk assignment
   const confirmBulkAssignment = () => {
-    // ... keep existing code (bulk assignment confirmation)
     // In a real app, this would update the backend
     mockEmployees.forEach(emp => {
       if (selectedEmployees.includes(emp.id)) {
@@ -178,9 +173,8 @@ const RoleMapping = () => {
       variant: "default",
     });
 
-    // Check if any employees were assigned the Super Admin role
-    const superAdminAssigned = bulkRoleToAssign === "Super Admin";
-    if (superAdminAssigned && selectedEmployees.length === 1) {
+    // If only one employee was assigned, open credentials dialog
+    if (selectedEmployees.length === 1) {
       // Find the employee to set credentials for
       const employeeToSetup = mockEmployees.find(emp => emp.id === selectedEmployees[0]);
       if (employeeToSetup) {

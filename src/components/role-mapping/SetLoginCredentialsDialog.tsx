@@ -65,7 +65,7 @@ export function SetLoginCredentialsDialog({
       console.log("Storing credentials for:", employee.employeeId, password);
       
       // Show success toast
-      toast.success("Login created. Please share the credentials offline.");
+      toast.success("Login created. Please share the password offline with the employee.");
     } else {
       // Store email + password (would be API call in real app)
       console.log("Storing credentials for email:", employee.email, password);
@@ -74,7 +74,7 @@ export function SetLoginCredentialsDialog({
       console.log("Sending email to:", employee.email);
       
       // Show success toast
-      toast.success("Login created and email notification sent.");
+      toast.success("Login created and email notification sent to the employee.");
     }
     
     // Reset form
@@ -92,7 +92,7 @@ export function SetLoginCredentialsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Set Login Credentials</DialogTitle>
+          <DialogTitle>Set Login Credentials for This Employee</DialogTitle>
           <DialogDescription>
             {employee.name} ({employee.employeeId})
           </DialogDescription>
