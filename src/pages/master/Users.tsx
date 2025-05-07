@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/select";
 import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
 import { CreateAccountModal } from "@/components/password-management/CreateAccountModal";
-import { ResetPasswordModal } from "@/components/password-management/ResetPasswordModal";
+import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
 import { toast } from "sonner";
 
 // Updated mock data to include roles
@@ -576,8 +576,8 @@ const Users = () => {
           user={accountUser}
         />
         
-        {/* Reset Password Modal */}
-        <ResetPasswordModal
+        {/* Reset Password Dialog */}
+        <ResetPasswordDialog
           open={isResetPasswordOpen}
           onOpenChange={setIsResetPasswordOpen}
           user={resetPasswordUser}

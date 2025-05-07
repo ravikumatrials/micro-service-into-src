@@ -13,24 +13,25 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Mail } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 
-interface SetLoginCredentialsDialogProps {
+interface ResetPasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  employee: {
+  user: {
     name: string;
     employeeId: string;
     email?: string;
     currentLoginMethod?: "employeeId" | "email";
+    hasAccount?: boolean;
   } | null;
 }
 
-export function SetLoginCredentialsDialog({
+export function ResetPasswordDialog({
   open,
   onOpenChange,
-  employee,
-}: SetLoginCredentialsDialogProps) {
+  user,
+}: ResetPasswordDialogProps) {
   const [loginMethod, setLoginMethod] = useState<"employeeId" | "email">("employeeId");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -39,13 +40,13 @@ export function SetLoginCredentialsDialog({
     confirmPassword?: string;
   }>({});
 
-  // When the dialog opens, set the default login method based on employee data
+  // When the dialog opens, set the default login method based on user data
   useEffect(() => {
-    if (employee && open) {
-      // If employee has a current login method, use that as default
-      if (employee.currentLoginMethod) {
-        setLoginMethod(employee.currentLoginMethod);
-      } else if (employee.email) {
+    if (user && open) {
+      // If user has a current login method, use that as default
+      if (user.currentLoginMethod) {
+        setLoginMethod(user.currentLoginMethod);
+      } else if (user.email) {
         // If no current method but email exists, default to email
         setLoginMethod("email");
       } else {
@@ -58,7 +59,7 @@ export function SetLoginCredentialsDialog({
       setConfirmPassword("");
       setErrors({});
     }
-  }, [employee, open]);
+  }, [user, open]);
 
   const validateForm = () => {
     const newErrors: {
@@ -80,25 +81,25 @@ export function SetLoginCredentialsDialog({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
-    if (!validateForm() || !employee) return;
+  const handleResetPassword = () => {
+    if (!validateForm() || !user) return;
     
-    // In a real app, this would call an API to save the credentials
+    // In a real app, this would call an API to reset the password
     if (loginMethod === "employeeId") {
-      // Store employee ID + password (would be API call in real app)
-      console.log("Storing credentials for:", employee.employeeId, password);
+      // Reset password for employee ID login (would be API call in real app)
+      console.log("Resetting password for:", user.employeeId, password);
       
       // Show success toast
-      toast.success("Login created using Employee ID. Please share the password with the employee offline.");
+      toast.success("Password reset. Please share it offline with the employee.");
     } else {
-      // Store email + password (would be API call in real app)
-      console.log("Storing credentials for email:", employee.email, password);
+      // Reset password for email login (would be API call in real app)
+      console.log("Resetting password for email:", user.email, password);
       
-      // In a real app, this would trigger an email
-      console.log("Sending email to:", employee.email);
+      // In a real app, this would trigger a reset email
+      console.log("Sending reset email to:", user.email);
       
       // Show success toast
-      toast.success("Login created and email notification sent to the employee.");
+      toast.success("Password reset and notification email sent to the employee.");
     }
     
     // Reset form
@@ -110,56 +111,60 @@ export function SetLoginCredentialsDialog({
     onOpenChange(false);
   };
 
-  if (!employee) return null;
+  if (!user) return null;
+
+  const noAccount = user.hasAccount === false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Set Login Credentials for This Employee</DialogTitle>
+          <DialogTitle>
+            {noAccount ? "Set Password" : "Reset Password"}
+          </DialogTitle>
           <DialogDescription>
-            {employee.name} ({employee.employeeId})
+            {user.name} ({user.employeeId})
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          {/* Display employee information */}
+          {/* Display user information */}
           <div className="grid grid-cols-2 gap-2 text-sm">
             <p className="font-medium">Employee ID:</p>
-            <p>{employee.employeeId}</p>
+            <p>{user.employeeId}</p>
             
             <p className="font-medium">Email ID:</p>
-            <p>{employee.email || "–"}</p>
+            <p>{user.email || "–"}</p>
             
-            {employee.currentLoginMethod && (
+            {user.currentLoginMethod && (
               <>
                 <p className="font-medium">Current Login Method:</p>
-                <p className="capitalize">{employee.currentLoginMethod === "employeeId" ? "Employee ID" : "Email"}</p>
+                <p className="capitalize">{user.currentLoginMethod === "employeeId" ? "Employee ID" : "Email"}</p>
               </>
             )}
           </div>
           
           <div className="space-y-2">
-            <h4 className="font-medium">How should this employee log in?</h4>
+            <h4 className="font-medium">Select login method:</h4>
             <RadioGroup 
               value={loginMethod}
               onValueChange={(value) => setLoginMethod(value as "employeeId" | "email")}
               className="flex flex-col space-y-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="employeeId" id="employeeId" />
-                <Label htmlFor="employeeId">Login via Employee ID</Label>
+                <RadioGroupItem value="employeeId" id="reset-employeeId" />
+                <Label htmlFor="reset-employeeId">Login via Employee ID</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem 
                   value="email" 
-                  id="email" 
-                  disabled={!employee.email}
+                  id="reset-email" 
+                  disabled={!user.email}
                 />
                 <Label 
-                  htmlFor="email" 
-                  className={!employee.email ? "text-gray-400" : ""}
+                  htmlFor="reset-email" 
+                  className={!user.email ? "text-gray-400" : ""}
                 >
-                  Login via Email ID {!employee.email && "(Email not available)"}
+                  Login via Email ID {!user.email && "(Email not available)"}
                 </Label>
               </div>
             </RadioGroup>
@@ -167,9 +172,9 @@ export function SetLoginCredentialsDialog({
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">Set Password</Label>
+              <Label htmlFor="reset-password">New Password</Label>
               <Input
-                id="password"
+                id="reset-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -181,9 +186,9 @@ export function SetLoginCredentialsDialog({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="reset-confirmPassword">Confirm Password</Label>
               <Input
-                id="confirmPassword"
+                id="reset-confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -198,16 +203,17 @@ export function SetLoginCredentialsDialog({
           {/* Display login method specific instructions */}
           {loginMethod === "employeeId" ? (
             <div className="bg-blue-50 p-3 rounded-md flex items-start gap-2">
-              <span className="text-blue-500 mt-0.5">ℹ️</span>
+              <Lock className="h-4 w-4 text-blue-500 mt-0.5" />
               <p className="text-sm text-blue-700">
-                Password will be set for Employee ID login. You'll need to share the password with the employee offline.
+                {noAccount ? "Password will be set" : "Password will be reset"} for Employee ID login. 
+                You'll need to share the new password with the employee offline.
               </p>
             </div>
-          ) : employee.email && (
+          ) : user.email && (
             <div className="bg-blue-50 p-3 rounded-md flex items-start gap-2">
               <Mail className="h-4 w-4 text-blue-500 mt-0.5" />
               <p className="text-sm text-blue-700">
-                An email will be sent to {employee.email} with login instructions.
+                An email will be sent to {user.email} with {noAccount ? "login" : "password reset"} instructions.
               </p>
             </div>
           )}
@@ -216,8 +222,8 @@ export function SetLoginCredentialsDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>
-            Save Credentials
+          <Button onClick={handleResetPassword}>
+            {noAccount ? "Create Password" : "Reset Password"}
           </Button>
         </DialogFooter>
       </DialogContent>
