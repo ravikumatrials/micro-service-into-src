@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Mail, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface ResetPasswordDialogProps {
   open: boolean;
@@ -114,6 +115,7 @@ export function ResetPasswordDialog({
   if (!user) return null;
 
   const noAccount = user.hasAccount === false;
+  const hasCurrentLoginMethod = user.currentLoginMethod !== undefined;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -135,11 +137,16 @@ export function ResetPasswordDialog({
             <p className="font-medium">Email ID:</p>
             <p>{user.email || "–"}</p>
             
-            {user.currentLoginMethod && (
-              <>
-                <p className="font-medium">Current Login Method:</p>
-                <p className="capitalize">{user.currentLoginMethod === "employeeId" ? "Employee ID" : "Email"}</p>
-              </>
+            {/* Always display current login method section */}
+            <p className="font-medium">Current Login Method:</p>
+            {hasCurrentLoginMethod ? (
+              <Badge className="bg-purple-100 text-purple-800 inline-flex">
+                {user.currentLoginMethod === "employeeId" ? "Employee ID" : "Email ID"}
+              </Badge>
+            ) : (
+              <Badge className="bg-gray-100 text-gray-800 inline-flex">
+                Not Set
+              </Badge>
             )}
           </div>
           

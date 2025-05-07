@@ -38,7 +38,7 @@ import { CreateAccountModal } from "@/components/password-management/CreateAccou
 import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
 import { toast } from "sonner";
 
-// Updated mock data to include roles
+// Updated mock data to include login method
 const USERS = [
   { 
     employeeId: "EMP001", 
@@ -51,7 +51,8 @@ const USERS = [
     assignedBy: "Admin User", 
     assignmentDate: "2025-03-15",
     email: "john.smith@tanseeq.ae",
-    hasAccount: true
+    hasAccount: true,
+    loginMethod: "employeeId"
   },
   { 
     employeeId: "EMP003", 
@@ -64,7 +65,8 @@ const USERS = [
     assignedBy: "Admin User", 
     assignmentDate: "2025-02-20",
     email: "emily.davis@tanseeq.ae",
-    hasAccount: true
+    hasAccount: true,
+    loginMethod: "email"
   },
   { 
     employeeId: "EMP005", 
@@ -77,7 +79,8 @@ const USERS = [
     assignedBy: "Jane Doe", 
     assignmentDate: "2025-01-10",
     email: "michael.brown@tanseeq.ae",
-    hasAccount: false
+    hasAccount: false,
+    loginMethod: null
   },
   { 
     employeeId: "EMP007", 
@@ -90,7 +93,8 @@ const USERS = [
     assignedBy: "Admin User", 
     assignmentDate: "2025-04-05",
     email: "david.lee@tanseeq.ae",
-    hasAccount: false
+    hasAccount: false,
+    loginMethod: null
   },
 ];
 
@@ -413,6 +417,7 @@ const Users = () => {
                 <TableHead>Classification</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Login Method</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -446,6 +451,21 @@ const Users = () => {
                         {user.role || "Assign Role"}
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      {user.loginMethod ? (
+                        <Badge 
+                          className="bg-purple-100 text-purple-800"
+                        >
+                          {user.loginMethod === "employeeId" ? "Employee ID" : "Email ID"}
+                        </Badge>
+                      ) : (
+                        <Badge 
+                          className="bg-gray-100 text-gray-800"
+                        >
+                          Not Set
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <TooltipProvider>
@@ -461,7 +481,7 @@ const Users = () => {
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Reset Password</p>
+                              <p>{user.hasAccount ? "Reset Password" : "Set Password"}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -489,7 +509,7 @@ const Users = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-6 text-gray-500">
+                  <TableCell colSpan={9} className="text-center py-6 text-gray-500">
                     No users found with the specified criteria.
                   </TableCell>
                 </TableRow>
@@ -576,11 +596,14 @@ const Users = () => {
           user={accountUser}
         />
         
-        {/* Reset Password Dialog */}
+        {/* Reset Password Dialog - Pass login method */}
         <ResetPasswordDialog
           open={isResetPasswordOpen}
           onOpenChange={setIsResetPasswordOpen}
-          user={resetPasswordUser}
+          user={resetPasswordUser ? {
+            ...resetPasswordUser,
+            currentLoginMethod: resetPasswordUser.loginMethod as "employeeId" | "email" | undefined
+          } : null}
         />
       </div>
     </div>

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Mail } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface SetLoginCredentialsDialogProps {
   open: boolean;
@@ -112,6 +113,8 @@ export function SetLoginCredentialsDialog({
 
   if (!employee) return null;
 
+  const hasCurrentLoginMethod = employee.currentLoginMethod !== undefined;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -130,10 +133,13 @@ export function SetLoginCredentialsDialog({
             <p className="font-medium">Email ID:</p>
             <p>{employee.email || "–"}</p>
             
-            {employee.currentLoginMethod && (
+            {/* Always display current login method section */}
+            {hasCurrentLoginMethod && (
               <>
                 <p className="font-medium">Current Login Method:</p>
-                <p className="capitalize">{employee.currentLoginMethod === "employeeId" ? "Employee ID" : "Email"}</p>
+                <Badge className="bg-purple-100 text-purple-800 inline-flex">
+                  {employee.currentLoginMethod === "employeeId" ? "Employee ID" : "Email ID"}
+                </Badge>
               </>
             )}
           </div>
