@@ -24,6 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { calculateWorkingHours } from "@/utils/timeUtils";
 
 // Define interfaces for our data
 interface ReportFilters {
@@ -353,6 +354,7 @@ const Reports = () => {
                 <TableHead>Date</TableHead>
                 <TableHead>Check-In</TableHead>
                 <TableHead>Check-Out</TableHead>
+                <TableHead>Working Hours</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -370,6 +372,9 @@ const Reports = () => {
                   </TableCell>
                   <TableCell>
                     {row.checkOut} – <span className={row.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkOutMode}</span>
+                  </TableCell>
+                  <TableCell>
+                    {calculateWorkingHours(row.checkIn, row.checkOut)}
                   </TableCell>
                 </TableRow>
               ))}

@@ -13,9 +13,10 @@ export default function ProjectFilters({
   filters,
   setFilters,
   locations,
-  employees
 }: {
-  filters: any, setFilters: (v: any) => void, locations: string[], employees: {id:string, name:string}[]
+  filters: any, 
+  setFilters: (v: any) => void, 
+  locations: string[]
 }) {
   const [fromDateOpen, setFromDateOpen] = useState(false);
   const [toDateOpen, setToDateOpen] = useState(false);
@@ -38,17 +39,33 @@ export default function ProjectFilters({
   }, [filters.fromDate, filters.toDate, setFilters, toast]);
 
   return (
-    <div className="bg-card/80 rounded-md p-4 mb-2 flex flex-col gap-3 md:grid md:grid-cols-4 md:gap-4 md:items-end">
-      {/* Project Name */}
+    <div className="bg-card/80 rounded-md p-4 mb-2 flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-4 md:items-end">
+      {/* Entity */}
       <div>
-        <label className="block text-xs font-semibold text-gray-700 mb-1">Project Name</label>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">Entity</label>
+        <select
+          value={filters.entity || ""}
+          onChange={e => setFilters(f => ({ ...f, entity: e.target.value }))}
+          className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape text-base"
+        >
+          <option value="">All Entities</option>
+          <option value="Tanseeq Construction Ltd">Tanseeq Construction Ltd</option>
+          <option value="Tanseeq Engineering Co">Tanseeq Engineering Co</option>
+          <option value="Tanseeq Landscaping LLC">Tanseeq Landscaping LLC</option>
+        </select>
+      </div>
+
+      {/* Project ID & Name */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">Project ID & Name</label>
         <Input
-          placeholder="Search project..."
+          placeholder="Search by ID or name..."
           value={filters.name}
           onChange={e => setFilters(f => ({ ...f, name: e.target.value }))}
           className="text-base"
         />
       </div>
+      
       {/* Location Dropdown */}
       <div>
         <label className="block text-xs font-semibold text-gray-700 mb-1">Location</label>
@@ -63,23 +80,10 @@ export default function ProjectFilters({
           ))}
         </select>
       </div>
-      {/* Status Dropdown */}
-      <div>
-        <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
-        <select
-          value={filters.status}
-          onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-          className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape text-base"
-        >
-          <option value="All">All</option>
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </select>
-      </div>
       
       {/* FROM Date Picker */}
       <div>
-        <label className="block text-xs font-semibold text-gray-700 mb-1">From Date</label>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">Start Date</label>
         <Popover open={fromDateOpen} onOpenChange={setFromDateOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start text-left" type="button">
@@ -127,8 +131,8 @@ export default function ProjectFilters({
       </div>
 
       {/* TO Date Picker */}
-      <div className="md:col-start-1 md:col-span-2 lg:col-start-auto lg:col-span-1">
-        <label className="block text-xs font-semibold text-gray-700 mb-1">To Date</label>
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">End Date</label>
         <Popover open={toDateOpen} onOpenChange={setToDateOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start text-left" type="button">
@@ -174,6 +178,20 @@ export default function ProjectFilters({
             </div>
           </PopoverContent>
         </Popover>
+      </div>
+
+      {/* Status Dropdown */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
+        <select
+          value={filters.status}
+          onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+          className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape text-base"
+        >
+          <option value="All">All</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
       </div>
     </div>
   );

@@ -74,10 +74,11 @@ export default function ProjectTable({
                 
                 {/* Status */}
                 <td className="px-4 py-3">
-                  <span className={`inline-block px-2 py-0.5 rounded-full font-medium text-xs ${project.status === "Active"
+                  <span className={`inline-block px-2 py-0.5 rounded-full font-medium text-xs ${
+                    project.status === "Active"
                       ? "bg-proscape/10 text-proscape"
                       : "bg-gray-200 text-gray-500"
-                    }`}>
+                  }`}>
                     {project.status}
                   </span>
                 </td>

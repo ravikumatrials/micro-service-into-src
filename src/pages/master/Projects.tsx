@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Upload, Eye, Trash, Search } from "lucide-react";
 import ProjectFilters from "./ProjectFilters";
@@ -111,6 +112,7 @@ export default function ProjectsPage() {
   const [filters, setFilters] = useState({
     name: "",
     location: "",
+    entity: "",
     status: "All",
     fromDate: null,
     toDate: null
@@ -124,10 +126,14 @@ export default function ProjectsPage() {
 
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
-      if (filters.name && !p.name.toLowerCase().includes(filters.name.trim().toLowerCase())) 
+      if (filters.name && !p.name.toLowerCase().includes(filters.name.trim().toLowerCase()) && 
+          !p.projectId?.toLowerCase().includes(filters.name.trim().toLowerCase())) 
         return false;
       
-      if (filters.location && filters.location !== "All" && p.location !== filters.location) 
+      if (filters.entity && !p.entity?.toLowerCase().includes(filters.entity.trim().toLowerCase()))
+        return false;
+        
+      if (filters.location && filters.location !== "" && p.location !== filters.location) 
         return false;
       
       if (filters.status && filters.status !== "All" && p.status !== filters.status) 
@@ -223,7 +229,6 @@ export default function ProjectsPage() {
         filters={filters}
         setFilters={setFilters}
         locations={DUMMY_LOCATIONS}
-        employees={DUMMY_EMPLOYEES}
       />
       <div>
         <div className="hidden md:block">
