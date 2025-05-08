@@ -50,50 +50,6 @@ export const calculateWorkingHours = (checkInTime: string, checkOutTime: string)
 };
 
 /**
- * Converts working hours string format to total minutes
- * @param workingHoursString Formatted working hours string (e.g., "08h 15m")
- * @returns Total minutes as number
- */
-export const convertWorkingHoursToMinutes = (workingHoursString: string): number => {
-  if (workingHoursString === "N/A") return 0;
-  
-  try {
-    // Extract hours and minutes from string format "08h 15m"
-    const hoursMatch = workingHoursString.match(/(\d+)h/);
-    const minutesMatch = workingHoursString.match(/(\d+)m/);
-    
-    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-    
-    return hours * 60 + minutes;
-  } catch (error) {
-    return 0;
-  }
-};
-
-/**
- * Sums multiple working hours strings
- * @param workingHoursArray Array of working hours strings (e.g., ["02h 30m", "05h 45m"])
- * @returns Total working hours as formatted string
- */
-export const sumWorkingHours = (workingHoursArray: string[]): string => {
-  try {
-    // Convert all times to minutes and sum them
-    const totalMinutes = workingHoursArray.reduce((total, current) => {
-      return total + convertWorkingHoursToMinutes(current);
-    }, 0);
-    
-    // Convert back to hours and minutes
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    
-    return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
-  } catch (error) {
-    return "N/A";
-  }
-};
-
-/**
  * Checks if working hours exceed the standard 9-hour workday
  * @param workingHoursString Formatted working hours string (e.g., "08h 15m")
  * @returns Boolean indicating if hours exceed 9 hours
@@ -102,8 +58,12 @@ export const isOvertimeWorked = (workingHoursString: string): boolean => {
   if (workingHoursString === "N/A") return false;
   
   try {
-    const totalMinutes = convertWorkingHoursToMinutes(workingHoursString);
-    return totalMinutes >= 9 * 60; // 9 hours = 540 minutes
+    // Extract hours from string format "08h 15m"
+    const hoursMatch = workingHoursString.match(/(\d+)h/);
+    if (!hoursMatch) return false;
+    
+    const hours = parseInt(hoursMatch[1]);
+    return hours >= 9;
   } catch (error) {
     return false;
   }

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Download, FileText, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { Download, FileText, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -24,23 +24,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { 
-  calculateWorkingHours, 
-  sumWorkingHours, 
-  isOvertimeWorked 
-} from "@/utils/timeUtils";
+import { calculateWorkingHours, isOvertimeWorked } from "@/utils/timeUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { 
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 // Define interfaces for our data
 interface ReportFilters {
@@ -68,103 +53,6 @@ interface AttendanceRecord {
   checkOutMode: 'Face' | 'Manual';
 }
 
-// Extended mock data with multiple project entries per employee per day
-const extendedReportData: AttendanceRecord[] = [
-  {
-    id: 1,
-    employeeId: "EMP001",
-    name: "John Smith",
-    entity: "Tanseeq Construction",
-    classification: "Staff",
-    category: "Engineer",
-    project: "Main Building Construction",
-    date: "2025-05-07",
-    checkIn: "08:30 AM",
-    checkInMode: "Face",
-    checkOut: "11:45 AM", 
-    checkOutMode: "Face"
-  },
-  {
-    id: 2,
-    employeeId: "EMP001",
-    name: "John Smith",
-    entity: "Tanseeq Construction",
-    classification: "Staff",
-    category: "Engineer",
-    project: "Bridge Expansion",
-    date: "2025-05-07",
-    checkIn: "12:15 PM",
-    checkInMode: "Face",
-    checkOut: "05:30 PM", 
-    checkOutMode: "Face"
-  },
-  {
-    id: 3,
-    employeeId: "EMP002",
-    name: "Sarah Johnson",
-    entity: "Alpha Contractors",
-    classification: "Laborer",
-    category: "Mason",
-    project: "Bridge Expansion",
-    date: "2025-05-07",
-    checkIn: "09:15 AM",
-    checkInMode: "Face",
-    checkOut: "05:30 PM",
-    checkOutMode: "Manual"
-  },
-  {
-    id: 4,
-    employeeId: "EMP003",
-    name: "Mohammed Al Farsi",
-    entity: "Tanseeq Construction",
-    classification: "Staff",
-    category: "Supervisor", 
-    project: "Main Building Construction",
-    date: "2025-05-07",
-    checkIn: "07:45 AM",
-    checkInMode: "Face",
-    checkOut: "06:20 PM",
-    checkOutMode: "Face"
-  },
-  {
-    id: 5,
-    employeeId: "EMP004",
-    name: "Lisa Wong",
-    entity: "Beta Services Ltd",
-    classification: "Laborer",
-    category: "Carpenter",
-    project: "Interior Finishing",
-    date: "2025-05-07",
-    checkIn: "08:00 AM",
-    checkInMode: "Manual",
-    checkOut: "12:45 PM",
-    checkOutMode: "Manual"
-  },
-  {
-    id: 6,
-    employeeId: "EMP004",
-    name: "Lisa Wong",
-    entity: "Beta Services Ltd",
-    classification: "Laborer",
-    category: "Carpenter",
-    project: "Main Building Construction",
-    date: "2025-05-07",
-    checkIn: "01:15 PM",
-    checkInMode: "Face",
-    checkOut: "04:45 PM",
-    checkOutMode: "Manual"
-  }
-];
-
-interface GroupedRecord {
-  employeeId: string;
-  name: string;
-  date: string;
-  records: AttendanceRecord[];
-  totalWorkingHours: string;
-  isOvertime: boolean;
-}
-
 const Reports = () => {
   // Filter states
   const [filters, setFilters] = useState<ReportFilters>({
@@ -177,37 +65,65 @@ const Reports = () => {
     toDate: undefined
   });
 
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-
-  // Group and process data
-  const groupedData = extendedReportData.reduce<Record<string, GroupedRecord>>((acc, record) => {
-    const key = `${record.employeeId}-${record.date}`;
-    
-    if (!acc[key]) {
-      acc[key] = {
-        employeeId: record.employeeId,
-        name: record.name,
-        date: record.date,
-        records: [],
-        totalWorkingHours: "00h 00m",
-        isOvertime: false
-      };
+  // Mock report data
+  const reportData: AttendanceRecord[] = [
+    {
+      id: 1,
+      employeeId: "EMP001",
+      name: "John Smith",
+      entity: "Tanseeq Construction",
+      classification: "Staff",
+      category: "Engineer",
+      project: "Main Building Construction",
+      date: "2025-04-22",
+      checkIn: "08:30 AM",
+      checkInMode: "Face",
+      checkOut: "05:15 PM", 
+      checkOutMode: "Face"
+    },
+    {
+      id: 2,
+      employeeId: "EMP002",
+      name: "Sarah Johnson",
+      entity: "Alpha Contractors",
+      classification: "Laborer",
+      category: "Mason",
+      project: "Bridge Expansion",
+      date: "2025-04-22",
+      checkIn: "09:15 AM",
+      checkInMode: "Face",
+      checkOut: "05:30 PM",
+      checkOutMode: "Manual"
+    },
+    {
+      id: 3,
+      employeeId: "EMP003",
+      name: "Mohammed Al Farsi",
+      entity: "Tanseeq Construction",
+      classification: "Staff",
+      category: "Supervisor", 
+      project: "Main Building Construction",
+      date: "2025-04-22",
+      checkIn: "07:45 AM",
+      checkInMode: "Face",
+      checkOut: "06:20 PM",
+      checkOutMode: "Face"
+    },
+    {
+      id: 4,
+      employeeId: "EMP004",
+      name: "Lisa Wong",
+      entity: "Beta Services Ltd",
+      classification: "Laborer",
+      category: "Carpenter",
+      project: "Interior Finishing",
+      date: "2025-04-22",
+      checkIn: "08:00 AM",
+      checkInMode: "Manual",
+      checkOut: "04:45 PM",
+      checkOutMode: "Manual"
     }
-    
-    acc[key].records.push(record);
-    
-    return acc;
-  }, {});
-  
-  // Calculate total working hours for each group
-  Object.values(groupedData).forEach(group => {
-    const workingHours = group.records.map(record => 
-      calculateWorkingHours(record.checkIn, record.checkOut)
-    );
-    
-    group.totalWorkingHours = sumWorkingHours(workingHours);
-    group.isOvertime = isOvertimeWorked(group.totalWorkingHours);
-  });
+  ];
 
   const handleExport = () => {
     toast.success("Report exported successfully");
@@ -229,13 +145,6 @@ const Reports = () => {
       toDate: undefined
     });
     toast.info("Filters cleared");
-  };
-
-  const toggleGroup = (key: string) => {
-    setOpenGroups(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
   };
 
   return (
@@ -432,102 +341,62 @@ const Reports = () => {
           </div>
         </div>
 
-        {/* Reports Table - Grouped View */}
+        {/* Reports Table */}
         <div className="overflow-x-auto border rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10"></TableHead>
-                <TableHead>Date</TableHead>
                 <TableHead>Employee ID</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead>Entity</TableHead>
+                <TableHead>Classification</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Project</TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead>Check-In</TableHead>
                 <TableHead>Check-Out</TableHead>
                 <TableHead>Working Hours</TableHead>
-                <TableHead>Total Hours</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {Object.entries(groupedData).map(([key, group]) => {
-                const isOpen = openGroups[key] || false;
+              {reportData.map((row) => {
+                const workingHours = calculateWorkingHours(row.checkIn, row.checkOut);
+                const isOvertime = isOvertimeWorked(workingHours);
                 
                 return (
-                  <React.Fragment key={key}>
-                    {/* Group Header Row - Always visible */}
-                    <TableRow 
-                      className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => toggleGroup(key)}
-                    >
-                      <TableCell>
-                        {isOpen ? 
-                          <ChevronUp className="h-4 w-4 text-gray-500" /> : 
-                          <ChevronDown className="h-4 w-4 text-gray-500" />
-                        }
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {format(new Date(group.date), "dd/MM/yyyy")}
-                      </TableCell>
-                      <TableCell className="font-medium">{group.employeeId}</TableCell>
-                      <TableCell>{group.name}</TableCell>
-                      <TableCell colSpan={4}></TableCell>
-                      <TableCell className={cn(
-                        "font-bold", 
-                        group.isOvertime ? "text-red-600" : ""
-                      )}>
+                  <TableRow key={row.id}>
+                    <TableCell className="font-medium">{row.employeeId}</TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.entity}</TableCell>
+                    <TableCell>{row.classification}</TableCell>
+                    <TableCell>{row.category}</TableCell>
+                    <TableCell>{row.project}</TableCell>
+                    <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell>
+                    <TableCell>
+                      {row.checkIn} – <span className={row.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkInMode}</span>
+                    </TableCell>
+                    <TableCell>
+                      {row.checkOut} – <span className={row.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkOutMode}</span>
+                    </TableCell>
+                    <TableCell>
+                      {isOvertime ? (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span>{group.totalWorkingHours}</span>
+                              <span className="text-red-600 font-bold">
+                                {workingHours}
+                              </span>
                             </TooltipTrigger>
-                            {group.isOvertime && (
-                              <TooltipContent>
-                                <p>Exceeds standard working hours</p>
-                              </TooltipContent>
-                            )}
+                            <TooltipContent>
+                              <p>Exceeds standard working hours</p>
+                            </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                      </TableCell>
-                    </TableRow>
-                    
-                    {/* Collapsible Detail Rows */}
-                    {isOpen && group.records.map(record => {
-                      const workingHours = calculateWorkingHours(record.checkIn, record.checkOut);
-                      
-                      return (
-                        <TableRow key={record.id} className="bg-gray-50/50">
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell>{record.project}</TableCell>
-                          <TableCell>
-                            {record.checkIn} – <span className={record.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkInMode}</span>
-                          </TableCell>
-                          <TableCell>
-                            {record.checkOut} – <span className={record.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkOutMode}</span>
-                          </TableCell>
-                          <TableCell>{workingHours}</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    
-                    {/* Total Row - Only visible when expanded */}
-                    {isOpen && (
-                      <TableRow className="bg-gray-100 font-medium">
-                        <TableCell></TableCell>
-                        <TableCell colSpan={6} className="text-right">Total Working Hours:</TableCell>
-                        <TableCell className={cn(
-                          "font-bold", 
-                          group.isOvertime ? "text-red-600" : ""
-                        )}>
-                          {group.totalWorkingHours}
-                        </TableCell>
-                        <TableCell></TableCell>
-                      </TableRow>
-                    )}
-                  </React.Fragment>
+                      ) : (
+                        workingHours
+                      )}
+                    </TableCell>
+                  </TableRow>
                 );
               })}
             </TableBody>
