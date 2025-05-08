@@ -38,7 +38,7 @@ import { CreateAccountModal } from "@/components/password-management/CreateAccou
 import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
 import { toast } from "sonner";
 
-// Updated mock data to include login method
+// Updated mock data to include login method and ensuring all have roles assigned
 const USERS = [
   { 
     employeeId: "EMP001", 
@@ -139,10 +139,13 @@ const Users = () => {
   const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [resetPasswordUser, setResetPasswordUser] = useState<typeof USERS[0] | null>(null);
   
-  // Filtered users
+  // Filtered users - Only showing employees who have a role assigned
   const filteredUsers = useMemo(() => {
     return USERS.filter((user) => {
-      // Apply all filters
+      // First ensure the user has a role assigned
+      if (!user.role) return false;
+      
+      // Then apply other filters
       const matchesEmployeeId = user.employeeId.toLowerCase().includes(employeeIdFilter.toLowerCase());
       const matchesName = user.name.toLowerCase().includes(nameFilter.toLowerCase());
       const matchesEntity = entityFilter === "all" || user.entity === entityFilter;

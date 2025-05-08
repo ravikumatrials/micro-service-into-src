@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { X, Camera, UserCheck, Clock } from "lucide-react";
+import { X, Camera } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,13 +28,6 @@ const FaceEnrollmentModal = ({
   isUpdate
 }: FaceEnrollmentModalProps) => {
   const [isCapturing, setIsCapturing] = useState(false);
-  const [enrollmentInfo, setEnrollmentInfo] = useState<{
-    doneBy: string;
-    doneOn: string;
-  } | null>(isUpdate ? {
-    doneBy: "Admin User", // This would come from the user context in a real app
-    doneOn: new Date().toLocaleString()
-  } : null);
   
   const handleCapture = () => {
     setIsCapturing(true);
@@ -43,11 +36,14 @@ const FaceEnrollmentModal = ({
     setTimeout(() => {
       setIsCapturing(false);
       
-      // Update enrollment info with current user and timestamp
-      setEnrollmentInfo({
+      // Store enrollment info in a real app
+      const enrollmentInfo = {
         doneBy: "Admin User", // This would come from the user context in a real app
         doneOn: new Date().toLocaleString()
-      });
+      };
+      
+      // In a real app, this would be saved to the backend
+      console.log("Face enrollment completed:", enrollmentInfo);
       
       // Show success message
       toast.success(isUpdate 
@@ -91,25 +87,6 @@ const FaceEnrollmentModal = ({
               </>
             )}
           </div>
-          
-          {/* Enrollment Information */}
-          {enrollmentInfo && (
-            <div className="w-full bg-gray-50 p-3 rounded-md border border-gray-200">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Enrollment Information</h4>
-              <div className="space-y-2">
-                <div className="flex items-center text-sm">
-                  <UserCheck className="h-4 w-4 mr-2 text-gray-500" />
-                  <span className="text-gray-600 mr-1">Done by:</span> 
-                  <span className="font-medium">{enrollmentInfo.doneBy}</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                  <span className="text-gray-600 mr-1">Done on:</span> 
-                  <span className="font-medium">{enrollmentInfo.doneOn}</span>
-                </div>
-              </div>
-            </div>
-          )}
           
           <div className="flex space-x-2">
             <Button

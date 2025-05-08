@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Eye, User, Search, Filter, Check, X } from "lucide-react";
+import { Eye, User, Search, Filter, Check, X, Clock, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
@@ -265,6 +265,14 @@ const mockAttendanceRecords = [
     comment: ""
   },
 ];
+
+const mockEnrollmentInfo = {
+  "EMP001": { doneBy: "Admin User", doneOn: "May 2, 2025, 10:15 AM" },
+  "EMP002": { doneBy: "System Admin", doneOn: "Apr 28, 2025, 2:30 PM" },
+  "EMP004": { doneBy: "Jane Doe", doneOn: "May 5, 2025, 9:45 AM" },
+  "EMP005": { doneBy: "Admin User", doneOn: "Apr 15, 2025, 11:20 AM" },
+  "EMP007": { doneBy: "System Admin", doneOn: "May 1, 2025, 3:10 PM" }
+};
 
 const Employees = () => {
   const [employees, setEmployees] = useState(initialEmployees);
@@ -581,6 +589,26 @@ const Employees = () => {
                     
                     <div className="text-sm text-gray-600 font-medium">Email ID:</div>
                     <div className="text-sm break-all">{selectedEmployee.email}</div>
+                    
+                    {/* Face Enrollment Info - Only visible in View modal */}
+                    {selectedEmployee.faceEnrolled && mockEnrollmentInfo[selectedEmployee.employeeId] && (
+                      <>
+                        <div className="text-sm text-gray-600 font-medium col-span-2 pt-3">
+                          <h4 className="font-medium text-gray-700 mb-2">Face Enrollment Info</h4>
+                        </div>
+                        <div className="text-sm text-gray-600 font-medium flex items-center">
+                          <UserCheck className="h-4 w-4 mr-1 text-gray-500" />
+                          Enrolled by:
+                        </div>
+                        <div className="text-sm">{mockEnrollmentInfo[selectedEmployee.employeeId].doneBy}</div>
+                        
+                        <div className="text-sm text-gray-600 font-medium flex items-center">
+                          <Clock className="h-4 w-4 mr-1 text-gray-500" />
+                          Enrolled on:
+                        </div>
+                        <div className="text-sm">{mockEnrollmentInfo[selectedEmployee.employeeId].doneOn}</div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -666,7 +694,7 @@ const Employees = () => {
         />
       )}
       
-      {/* Face Enrollment Modal */}
+      {/* Face Enrollment Modal - Now without showing enrollment info in the dialog */}
       {selectedFaceEmployee && (
         <FaceEnrollmentModal
           isOpen={isFaceModalOpen}
