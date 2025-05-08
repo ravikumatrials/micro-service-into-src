@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import EmployeeActionsCell from "./EmployeeActionsCell";
 import FaceEnrollmentModal from "./FaceEnrollmentModal";
+import { calculateWorkingHours, isOvertimeWorked } from "@/utils/timeUtils";
 
 // Sample entities for dummy data
 const entities = [
@@ -219,10 +220,10 @@ const mockAttendanceRecords = [
     date: "22 Apr 2025", 
     checkInTime: "08:30 AM", 
     checkInMethod: "Face", 
-    checkOutTime: "05:00 PM", 
+    checkOutTime: "07:30 PM", 
     checkOutMethod: "Face", 
     project: "Highway Renovation",
-    totalHours: "8h 30m",
+    totalHours: "11h 00m",
     comment: ""
   },
   { 
@@ -626,48 +627,70 @@ const Employees = () => {
                         <TableHead>Project</TableHead>
                         <TableHead>Check-In Time</TableHead>
                         <TableHead>Check-Out Time</TableHead>
+                        <TableHead>Working Hours</TableHead>
                         <TableHead>Attendance Mode</TableHead>
                         <TableHead>Comments</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {getEmployeeAttendanceRecords(selectedEmployee.employeeId).map((record) => (
-                        <TableRow key={record.id}>
-                          <TableCell>{record.date}</TableCell>
-                          <TableCell className="font-medium">{record.project}</TableCell>
-                          <TableCell>{record.checkInTime}</TableCell>
-                          <TableCell>{record.checkOutTime}</TableCell>
-                          <TableCell>
-                            <Badge
-                              className={
-                                record.checkInMethod === "Face"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-blue-100 text-blue-800"
-                              }
-                            >
-                              {record.checkInMethod}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {record.comment ? (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-blue-500 cursor-help">
-                                      View Note
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className="max-w-xs">{record.comment}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            ) : (
-                              "-"
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {getEmployeeAttendanceRecords(selectedEmployee.employeeId).map((record) => {
+                        const workingHours = calculateWorkingHours(record.checkInTime, record.checkOutTime);
+                        const isOvertime = isOvertimeWorked(workingHours);
+
+                        return (
+                          <TableRow key={record.id}>
+                            <TableCell>{record.date}</TableCell>
+                            <TableCell className="font-medium">{record.project}</TableCell>
+                            <TableCell>{record.checkInTime}</TableCell>
+                            <TableCell>{record.checkOutTime}</TableCell>
+                            <TableCell>
+                              {isOvertime ? (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="text-red-600 font-bold">{workingHours}</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Exceeds standard working hours</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                workingHours
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={
+                                  record.checkInMethod === "Face"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-blue-100 text-blue-800"
+                                }
+                              >
+                                {record.checkInMethod}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {record.comment ? (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="text-blue-500 cursor-help">
+                                        View Note
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="max-w-xs">{record.comment}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                "-"
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </ScrollArea>

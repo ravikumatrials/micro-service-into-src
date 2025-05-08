@@ -24,7 +24,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { calculateWorkingHours } from "@/utils/timeUtils";
+import { calculateWorkingHours, isOvertimeWorked } from "@/utils/timeUtils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Define interfaces for our data
 interface ReportFilters {
@@ -358,26 +359,46 @@ const Reports = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reportData.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="font-medium">{row.employeeId}</TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.entity}</TableCell>
-                  <TableCell>{row.classification}</TableCell>
-                  <TableCell>{row.category}</TableCell>
-                  <TableCell>{row.project}</TableCell>
-                  <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell>
-                  <TableCell>
-                    {row.checkIn} – <span className={row.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkInMode}</span>
-                  </TableCell>
-                  <TableCell>
-                    {row.checkOut} – <span className={row.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkOutMode}</span>
-                  </TableCell>
-                  <TableCell>
-                    {calculateWorkingHours(row.checkIn, row.checkOut)}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {reportData.map((row) => {
+                const workingHours = calculateWorkingHours(row.checkIn, row.checkOut);
+                const isOvertime = isOvertimeWorked(workingHours);
+                
+                return (
+                  <TableRow key={row.id}>
+                    <TableCell className="font-medium">{row.employeeId}</TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.entity}</TableCell>
+                    <TableCell>{row.classification}</TableCell>
+                    <TableCell>{row.category}</TableCell>
+                    <TableCell>{row.project}</TableCell>
+                    <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell>
+                    <TableCell>
+                      {row.checkIn} – <span className={row.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkInMode}</span>
+                    </TableCell>
+                    <TableCell>
+                      {row.checkOut} – <span className={row.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkOutMode}</span>
+                    </TableCell>
+                    <TableCell>
+                      {isOvertime ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-red-600 font-bold">
+                                {workingHours}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Exceeds standard working hours</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        workingHours
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

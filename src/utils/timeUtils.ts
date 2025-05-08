@@ -48,3 +48,23 @@ export const calculateWorkingHours = (checkInTime: string, checkOutTime: string)
     return "N/A";
   }
 };
+
+/**
+ * Checks if working hours exceed the standard 9-hour workday
+ * @param workingHoursString Formatted working hours string (e.g., "08h 15m")
+ * @returns Boolean indicating if hours exceed 9 hours
+ */
+export const isOvertimeWorked = (workingHoursString: string): boolean => {
+  if (workingHoursString === "N/A") return false;
+  
+  try {
+    // Extract hours from string format "08h 15m"
+    const hoursMatch = workingHoursString.match(/(\d+)h/);
+    if (!hoursMatch) return false;
+    
+    const hours = parseInt(hoursMatch[1]);
+    return hours >= 9;
+  } catch (error) {
+    return false;
+  }
+};
