@@ -20,13 +20,13 @@ export function TopBar() {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-30">
+    <header className="bg-white border-b border-gray-200 z-30">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <div className="flex-shrink-0">
-                <h1 className="text-lg sm:text-xl font-bold text-proscape dark:text-proscape-light">
+                <h1 className="text-lg sm:text-xl font-bold text-proscape">
                   Tanseeq Investment
                 </h1>
               </div>
@@ -44,12 +44,12 @@ export function TopBar() {
                 </div>
               </button>
               {isProfileOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Your Profile</Link>
-                  <div className="border-t border-gray-200 dark:border-gray-700"></div>
+                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</Link>
+                  <div className="border-t border-gray-200"></div>
                   <button 
                     onClick={handleLogout}
-                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign out
