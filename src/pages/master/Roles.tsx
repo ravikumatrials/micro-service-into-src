@@ -30,7 +30,7 @@ const initialRoles = [
     name: "Super Admin", 
     description: "Has full access to all system functionalities", 
     webPermissions: ["Manual Attendance", "View Reports", "Manage Employees", "Manage Projects", "Manage Locations", "Export Reports"], 
-    mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History", "Manage Employees"],
+    mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History", "Face Enroll"],
     createdAt: "01/01/2023"
   },
   { 
@@ -44,7 +44,7 @@ const initialRoles = [
   },
 ];
 
-// Lists of all possible permissions separated by platform - removed "Attendance History" and "Manage Roles"
+// Lists of all possible permissions separated by platform - renamed "Manage Employees" to "Face Enroll" in mobilePermissions
 const webPermissions = [
   "Manual Attendance",
   "View Reports",
@@ -58,7 +58,7 @@ const mobilePermissions = [
   "Self Attendance",
   "Mark Attendance",
   "Attendance History",
-  "Manage Employees"
+  "Face Enroll"
 ];
 
 const Roles = () => {
