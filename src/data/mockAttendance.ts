@@ -1,4 +1,3 @@
-
 /**
  * Mock attendance data for reports 
  * Features:
@@ -8,7 +7,20 @@
  * - Multiple projects per employee
  * - Different attendance modes (Face/Manual)
  */
-export const MOCK_ATTENDANCE_DATA = [
+export const MOCK_ATTENDANCE_DATA: {
+  id: number;
+  employeeId: string;
+  name: string;
+  entity: string;
+  classification: string;
+  category: string;
+  project: string;
+  date: string;
+  checkIn: string;
+  checkInMode: "Face" | "Manual";
+  checkOut: string;
+  checkOutMode: "Face" | "Manual";
+}[] = [
   // Employee 1: John Smith - Multiple dates and projects
   {
     id: 1,
@@ -23,34 +35,6 @@ export const MOCK_ATTENDANCE_DATA = [
     checkInMode: "Face",
     checkOut: "05:45 PM", // Overtime
     checkOutMode: "Face"
-  },
-  {
-    id: 2,
-    employeeId: "EMP001",
-    name: "John Smith",
-    entity: "Tanseeq Construction",
-    classification: "Staff",
-    category: "Engineer",
-    project: "Bridge Expansion",
-    date: "2025-04-23",
-    checkIn: "08:15 AM",
-    checkInMode: "Face",
-    checkOut: "04:30 PM",
-    checkOutMode: "Face"
-  },
-  {
-    id: 3,
-    employeeId: "EMP001",
-    name: "John Smith",
-    entity: "Tanseeq Construction",
-    classification: "Staff", 
-    category: "Engineer",
-    project: "Main Building Construction",
-    date: "2025-04-24",
-    checkIn: "08:00 AM",
-    checkInMode: "Face",
-    checkOut: "06:00 PM", // Overtime
-    checkOutMode: "Manual"
   },
   
   // Employee 2: Sarah Johnson - Multiple dates and projects

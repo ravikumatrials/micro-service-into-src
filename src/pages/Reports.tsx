@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from "react";
-import { Download, FileText, Search } from "lucide-react";
+import { Download, FileText, Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -67,9 +66,9 @@ interface AttendanceRecord {
   project: string;
   date: string;
   checkIn: string;
-  checkInMode: 'Face' | 'Manual';
+  checkInMode: "Face" | "Manual";
   checkOut: string;
-  checkOutMode: 'Face' | 'Manual';
+  checkOutMode: "Face" | "Manual";
 }
 
 const Reports = () => {
