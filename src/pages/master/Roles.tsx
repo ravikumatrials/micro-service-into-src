@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash, X } from "lucide-react";
@@ -29,7 +30,7 @@ const initialRoles = [
     code: "SADM", 
     name: "Super Admin", 
     description: "Has full access to all system functionalities", 
-    webPermissions: ["Manual Attendance", "View Reports", "Manage Employees", "Manage Projects", "Manage Locations", "Export Reports"], 
+    webPermissions: ["Manual Attendance", "View Reports", "Manage Employees", "Manage Projects", "Manage Locations", "Export Reports", "Face Enroll"], 
     mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History", "Face Enroll"],
     createdAt: "01/01/2023"
   },
@@ -44,14 +45,15 @@ const initialRoles = [
   },
 ];
 
-// Lists of all possible permissions separated by platform - renamed "Manage Employees" to "Face Enroll" in mobilePermissions
+// Lists of all possible permissions separated by platform - added "Face Enroll" to webPermissions list
 const webPermissions = [
   "Manual Attendance",
   "View Reports",
   "Manage Employees",
   "Manage Projects",
   "Manage Locations",
-  "Export Reports"
+  "Export Reports",
+  "Face Enroll"
 ];
 
 const mobilePermissions = [
