@@ -68,3 +68,51 @@ export const isOvertimeWorked = (workingHoursString: string): boolean => {
     return false;
   }
 };
+
+/**
+ * Converts a working hours string to minutes
+ * @param workingHoursString Formatted working hours string (e.g., "08h 15m")
+ * @returns Total minutes
+ */
+export const hoursToMinutes = (workingHoursString: string): number => {
+  if (workingHoursString === "N/A") return 0;
+  
+  try {
+    const hoursMatch = workingHoursString.match(/(\d+)h/);
+    const minutesMatch = workingHoursString.match(/(\d+)m/);
+    
+    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+    
+    return hours * 60 + minutes;
+  } catch (error) {
+    return 0;
+  }
+};
+
+/**
+ * Converts minutes to working hours string format
+ * @param totalMinutes Total minutes
+ * @returns Formatted working hours string (e.g., "08h 15m")
+ */
+export const minutesToHours = (totalMinutes: number): string => {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  
+  return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
+};
+
+/**
+ * Sums multiple working hours strings
+ * @param hoursArray Array of working hours strings (e.g., ["08h 15m", "04h 30m"])
+ * @returns Formatted total working hours string
+ */
+export const sumWorkingHours = (hoursArray: string[]): string => {
+  // Convert all hour strings to minutes
+  const totalMinutes = hoursArray.reduce((sum, hourString) => {
+    return sum + hoursToMinutes(hourString);
+  }, 0);
+  
+  // Convert back to hours format
+  return minutesToHours(totalMinutes);
+};
