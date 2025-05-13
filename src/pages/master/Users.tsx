@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { Eye, Search, Building, User, Briefcase, ActivitySquare, Lock, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,7 @@ import {
 import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { updateEmployeeRole, availableRoles } from "@/utils/roleUtils";
 
 // Updated mock data to include login method and ensuring all have roles assigned
@@ -113,6 +112,7 @@ const STATUSES = getUniqueValues('status');
 const ROLES = getUniqueValues('role');
 
 const Users = () => {
+  const { toast } = useToast();
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<typeof USERS[0] | null>(null);
   
@@ -216,15 +216,15 @@ const Users = () => {
       
       if (updatedUser) {
         // Set up the credentials dialog with the updated user data
-        setCredentialsUser({
-          ...updatedUser,
-          currentLoginMethod: updatedUser.loginMethod as "employeeId" | "email" | undefined
-        });
-        
+        setCredentialsUser(updatedUser);
         setIsCredentialsDialogOpen(true);
       }
     } else {
-      toast.error("Failed to update role. User not found.");
+      toast({
+        title: "Error",
+        description: "Failed to update role. User not found.",
+        variant: "destructive"
+      });
       setIsRoleDialogOpen(false);
     }
   };
@@ -241,14 +241,20 @@ const Users = () => {
     // If dialog is closing, also close the role dialog and show success message
     if (!open) {
       setIsRoleDialogOpen(false);
-      toast.success(`Role ${roleDialogUser?.currentRole ? "updated" : "assigned"} successfully for ${roleDialogUser?.name}`);
+      toast({
+        title: "Success",
+        description: `Role ${roleDialogUser?.currentRole ? "updated" : "assigned"} successfully for ${roleDialogUser?.name}`,
+      });
     }
   };
 
   // Reset password success handler
   const handlePasswordReset = () => {
     if (resetPasswordUser) {
-      toast.success(`Password reset successfully for ${resetPasswordUser.name}`);
+      toast({
+        title: "Success",
+        description: `Password reset successfully for ${resetPasswordUser.name}`,
+      });
     }
   };
 
@@ -650,10 +656,7 @@ const Users = () => {
         <ResetPasswordDialog
           open={isResetPasswordOpen}
           onOpenChange={setIsResetPasswordOpen}
-          user={resetPasswordUser ? {
-            ...resetPasswordUser,
-            currentLoginMethod: resetPasswordUser.loginMethod as "employeeId" | "email" | undefined
-          } : null}
+          user={resetPasswordUser}
           onPasswordReset={handlePasswordReset}
         />
       </div>
