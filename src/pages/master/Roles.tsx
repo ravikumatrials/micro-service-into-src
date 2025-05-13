@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash, X } from "lucide-react";
@@ -483,7 +482,7 @@ const Roles = () => {
                             id={`edit-web-permission-${index}`}
                             checked={selectedRole.webPermissions.includes(permission)}
                             onCheckedChange={() => handleWebPermissionChange(permission)}
-                            disabled={selectedRole.code === "SADM" && ["Manage Roles", "System Settings"].includes(permission)}
+                            disabled={selectedRole.code === "SADM" && ["Manage Roles", "Role Mapping", "Manage Users", "Manage Employees", "System Settings"].includes(permission)}
                           />
                           <label htmlFor={`edit-web-permission-${index}`} className="ml-2 block text-sm text-gray-900">
                             {permission}
