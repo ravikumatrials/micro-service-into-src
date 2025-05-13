@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
+import { PermissionGuard } from "./components/auth/PermissionGuard";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
@@ -34,16 +35,53 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-            <Route path="/attendance" element={<Layout><Attendance /></Layout>} />
-            <Route path="/bulk-attendance" element={<Layout><BulkAttendance /></Layout>} />
+            
+            {/* Protected routes with permission guards */}
+            <Route path="/attendance" element={
+              <PermissionGuard requiredPermission="Manual Attendance">
+                <Layout><Attendance /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/bulk-attendance" element={
+              <PermissionGuard requiredPermission="Manual Attendance">
+                <Layout><BulkAttendance /></Layout>
+              </PermissionGuard>
+            } />
             <Route path="/attendance-history" element={<Layout><AttendanceHistory /></Layout>} />
-            <Route path="/role-mapping" element={<Layout><RoleMapping /></Layout>} />
-            <Route path="/reports" element={<Layout><Reports /></Layout>} />
+            <Route path="/role-mapping" element={
+              <PermissionGuard requiredPermission="Role Mapping">
+                <Layout><RoleMapping /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/reports" element={
+              <PermissionGuard requiredPermission="View Reports">
+                <Layout><Reports /></Layout>
+              </PermissionGuard>
+            } />
             <Route path="/profile" element={<Layout><Profile /></Layout>} />
-            <Route path="/master/employees" element={<Layout><Employees /></Layout>} />
-            <Route path="/master/roles" element={<Layout><Roles /></Layout>} />
-            <Route path="/master/projects" element={<Layout><Projects /></Layout>} />
-            <Route path="/master/users" element={<Layout><Users /></Layout>} />
+            
+            {/* Master routes with permission guards */}
+            <Route path="/master/employees" element={
+              <PermissionGuard requiredPermission="Manage Employees">
+                <Layout><Employees /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/master/roles" element={
+              <PermissionGuard requiredPermission="Manage Roles">
+                <Layout><Roles /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/master/projects" element={
+              <PermissionGuard requiredPermission="Manage Projects">
+                <Layout><Projects /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/master/users" element={
+              <PermissionGuard requiredPermission="Manage Users">
+                <Layout><Users /></Layout>
+              </PermissionGuard>
+            } />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

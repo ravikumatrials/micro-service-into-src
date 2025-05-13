@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Navigate } from "react-router-dom";
 import { 
   Home, 
   Settings, 
@@ -19,6 +19,7 @@ type SubMenuItem = {
   name: string;
   path: string;
   icon?: React.ReactNode;
+  requiredPermission?: string; // Added requiredPermission property
 };
 
 type MenuItem = {
@@ -27,6 +28,24 @@ type MenuItem = {
   icon: React.ReactNode;
   subMenus?: SubMenuItem[];
   hidden?: boolean;
+  requiredPermission?: string; // Added requiredPermission property
+};
+
+// Mock function to get current user permissions - in a real app, this would come from an auth context
+const getUserPermissions = () => {
+  // For testing, return Super Admin permissions
+  return [
+    "Manual Attendance", 
+    "View Reports", 
+    "Manage Employees", 
+    "Manage Projects", 
+    "Manage Locations", 
+    "Export Reports", 
+    "Face Enroll", 
+    "Manage Roles", 
+    "Role Mapping", 
+    "Manage Users"
+  ];
 };
 
 const menuItems: MenuItem[] = [
@@ -42,35 +61,42 @@ const menuItems: MenuItem[] = [
     subMenus: [
       {
         name: "Employees",
-        path: "/master/employees"
+        path: "/master/employees",
+        requiredPermission: "Manage Employees"
       },
       {
         name: "Projects",
-        path: "/master/projects"
+        path: "/master/projects",
+        requiredPermission: "Manage Projects"
       },
       {
         name: "Roles",
-        path: "/master/roles"
+        path: "/master/roles",
+        requiredPermission: "Manage Roles"
       },
       {
         name: "Role Mapping",
-        path: "/role-mapping"
+        path: "/role-mapping",
+        requiredPermission: "Role Mapping"
       },
       {
         name: "Users",
-        path: "/master/users"
+        path: "/master/users",
+        requiredPermission: "Manage Users"
       }
     ]
   },
   {
     name: "Manual Attendance",
     path: "/attendance",
-    icon: <Calendar className="h-5 w-5" />
+    icon: <Calendar className="h-5 w-5" />,
+    requiredPermission: "Manual Attendance"
   },
   {
     name: "Bulk Attendance",
     path: "/bulk-attendance",
-    icon: <CheckCircle className="h-5 w-5" />
+    icon: <CheckCircle className="h-5 w-5" />,
+    requiredPermission: "Manual Attendance"
   },
   {
     name: "Attendance History",
@@ -81,7 +107,8 @@ const menuItems: MenuItem[] = [
   {
     name: "Reports",
     path: "/reports",
-    icon: <FileText className="h-5 w-5" />
+    icon: <FileText className="h-5 w-5" />,
+    requiredPermission: "View Reports"
   },
   {
     name: "Profile",
@@ -94,6 +121,7 @@ export function Sidebar() {
   const location = useLocation();
   const [expanded, setExpanded] = useState<string | null>("Master");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const userPermissions = getUserPermissions();
 
   const toggleSubmenu = (menuName: string) => {
     setExpanded(expanded === menuName ? null : menuName);
@@ -103,8 +131,22 @@ export function Sidebar() {
     setIsCollapsed(!isCollapsed);
   };
 
-  // Filter visible menu items
-  const visibleMenuItems = menuItems.filter(item => !item.hidden);
+  // Filter menu items based on permissions
+  const filteredMenuItems = menuItems
+    .filter(item => !item.hidden)
+    .filter(item => !item.requiredPermission || userPermissions.includes(item.requiredPermission))
+    .map(item => {
+      if (item.subMenus) {
+        return {
+          ...item,
+          subMenus: item.subMenus.filter(
+            subItem => !subItem.requiredPermission || userPermissions.includes(subItem.requiredPermission)
+          )
+        };
+      }
+      return item;
+    })
+    .filter(item => !item.subMenus || item.subMenus.length > 0); // Hide parent menus with no visible children
 
   return (
     <div className="relative">
@@ -141,7 +183,7 @@ export function Sidebar() {
         <div className="py-4">
           <nav>
             <ul className="space-y-1">
-              {visibleMenuItems.map((item) => (
+              {filteredMenuItems.map((item) => (
                 <li key={item.name}>
                   {item.subMenus ? (
                     <div>

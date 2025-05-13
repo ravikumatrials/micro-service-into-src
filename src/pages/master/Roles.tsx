@@ -29,7 +29,7 @@ const initialRoles = [
     code: "SADM", 
     name: "Super Admin", 
     description: "Has full access to all system functionalities", 
-    webPermissions: ["Manual Attendance", "View Reports", "Manage Employees", "Manage Projects", "Manage Locations", "Export Reports", "Face Enroll"], 
+    webPermissions: ["Manual Attendance", "View Reports", "Manage Employees", "Manage Projects", "Manage Locations", "Export Reports", "Face Enroll", "Manage Roles", "Role Mapping", "Manage Users"], 
     mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History", "Face Enroll"],
     createdAt: "01/01/2023"
   },
@@ -44,7 +44,7 @@ const initialRoles = [
   },
 ];
 
-// Lists of all possible permissions separated by platform - added "Face Enroll" to webPermissions list
+// Lists of all possible permissions separated by platform - added new permissions
 const webPermissions = [
   "Manual Attendance",
   "View Reports",
@@ -52,7 +52,10 @@ const webPermissions = [
   "Manage Projects",
   "Manage Locations",
   "Export Reports",
-  "Face Enroll"
+  "Face Enroll",
+  "Manage Roles",
+  "Role Mapping",
+  "Manage Users"
 ];
 
 const mobilePermissions = [
