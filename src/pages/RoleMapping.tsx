@@ -42,6 +42,17 @@ const mockRoles = [
   { id: 4, name: "Report Admin" },
 ];
 
+// Function to auto-assign roles based on classification
+const autoAssignRoleBasedOnClassification = (employee) => {
+  if (!employee.currentRole) {
+    if (employee.classification === "Laborer") {
+      return "Labour"; // Automatically assign Labour role
+    }
+    // For Staff classification, do not auto-assign any role
+  }
+  return employee.currentRole; // Keep existing role if any
+};
+
 const RoleMapping = () => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,6 +76,24 @@ const RoleMapping = () => {
   const [bulkRoleToAssign, setBulkRoleToAssign] = useState<string>("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
+  
+  // Auto-assign roles for employees without roles when component mounts
+  useEffect(() => {
+    // Process employees when the component loads
+    mockEmployees.forEach(employee => {
+      // If no role is assigned yet, check if we should auto-assign one
+      if (!employee.currentRole) {
+        const autoAssignedRole = autoAssignRoleBasedOnClassification(employee);
+        
+        if (autoAssignedRole && autoAssignedRole !== employee.currentRole) {
+          // In a real app, this would be an API call
+          employee.currentRole = autoAssignedRole;
+          
+          console.log(`Auto-assigned role '${autoAssignedRole}' to ${employee.name} based on classification '${employee.classification}'`);
+        }
+      }
+    });
+  }, []);
 
   // Extract unique values for filters
   const entities = Array.from(new Set(mockEmployees.map(emp => emp.entity)));
@@ -219,6 +248,15 @@ const RoleMapping = () => {
     setBulkRoleToAssign("");
     setConfirmDialogOpen(false);
     setOverwriteDialogOpen(false);
+  };
+
+  // Function to handle the credentials dialog close and update UI
+  const handleCredentialsDialogClose = (open: boolean) => {
+    setCredentialsDialogOpen(open);
+    // If dialog is closing, also close the role assign dialog
+    if (!open) {
+      setDialogOpen(false);
+    }
   };
 
   return (
@@ -390,7 +428,7 @@ const RoleMapping = () => {
         )}
       </Card>
 
-      {/* Regular Role Assign Dialog */}
+      {/* Regular Role Assign Dialog - Modified to work with sequential flow */}
       <RoleAssignDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -400,10 +438,10 @@ const RoleMapping = () => {
         onRemoveRole={handleRemoveRole}
       />
 
-      {/* Set Login Credentials Dialog - For single employee */}
+      {/* Set Login Credentials Dialog - For single employee, now part of the sequential flow */}
       <SetLoginCredentialsDialog
         open={credentialsDialogOpen}
-        onOpenChange={setCredentialsDialogOpen}
+        onOpenChange={handleCredentialsDialogClose}
         employee={employeeForCredentials}
       />
 

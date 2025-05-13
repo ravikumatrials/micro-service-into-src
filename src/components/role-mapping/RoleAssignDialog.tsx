@@ -41,9 +41,15 @@ export function RoleAssignDialog({
   onRemoveRole,
 }: RoleAssignDialogProps) {
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>("");
 
-  const handleAssign = (role: string) => {
-    onAssignRole(role);
+  const handleAssign = () => {
+    if (!selectedRole) {
+      toast.error("Please select a role");
+      return;
+    }
+    
+    onAssignRole(selectedRole);
     onOpenChange(false);
     toast.success(`Role successfully ${employee?.currentRole ? 'updated' : 'assigned'} for ${employee?.name}`);
   };
@@ -90,7 +96,10 @@ export function RoleAssignDialog({
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Select Role</label>
-              <Select defaultValue={employee.currentRole} onValueChange={handleAssign}>
+              <Select 
+                defaultValue={employee.currentRole} 
+                onValueChange={(value) => setSelectedRole(value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a role" />
                 </SelectTrigger>
@@ -104,18 +113,26 @@ export function RoleAssignDialog({
               </Select>
             </div>
             
-            {employee.currentRole && onRemoveRole && (
-              <div className="pt-2">
+            <div className="pt-2 flex justify-between">
+              {employee.currentRole && onRemoveRole && (
                 <Button 
                   variant="destructive" 
                   onClick={handleRemoveClick}
-                  className="w-full flex items-center justify-center"
+                  className="flex items-center justify-center"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Remove Role
                 </Button>
-              </div>
-            )}
+              )}
+              
+              <Button 
+                variant="default" 
+                onClick={handleAssign}
+                className={employee.currentRole && onRemoveRole ? "" : "w-full"}
+              >
+                {employee.currentRole ? "Update Role" : "Assign Role"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
