@@ -1,48 +1,47 @@
 
-import * as React from "react"
-
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 type ToastProps = React.HTMLAttributes<HTMLDivElement> & {
-  title?: string
-  description?: React.ReactNode
-  action?: React.ReactNode
-  variant?: "default" | "destructive"
-}
+  title?: string;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+  variant?: "default" | "destructive";
+};
 
 const ToastContext = React.createContext<{
-  toast: (props: ToastProps) => void
-  dismissToast: (toastId: string) => void
-  dismissAllToasts: () => void
-  toasts: Array<ToastProps & { id: string }> // Add toasts to the context type
+  toast: (props: ToastProps) => void;
+  dismissToast: (toastId: string) => void;
+  dismissAllToasts: () => void;
+  toasts: Array<ToastProps & { id: string }>;
 }>({
   toast: () => {},
   dismissToast: () => {},
   dismissAllToasts: () => {},
-  toasts: [] // Provide default empty array
-})
+  toasts: []
+});
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const [toasts, setToasts] = React.useState<
     Array<ToastProps & { id: string }>
-  >([])
+  >([]);
 
   const toast = React.useCallback((props: ToastProps) => {
-    const id = Math.random().toString(36).slice(2, 9)
-    setToasts((prev) => [...prev, { ...props, id }])
+    const id = Math.random().toString(36).slice(2, 9);
+    setToasts((prev) => [...prev, { ...props, id }]);
 
     setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id))
-    }, 5000)
-  }, [])
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 5000);
+  }, []);
 
   const dismissToast = React.useCallback((toastId: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== toastId))
-  }, [])
+    setToasts((prev) => prev.filter((toast) => toast.id !== toastId));
+  }, []);
 
   const dismissAllToasts = React.useCallback(() => {
-    setToasts([])
-  }, [])
+    setToasts([]);
+  }, []);
 
   return (
     <ToastContext.Provider
@@ -74,32 +73,32 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         ))}
       </div>
     </ToastContext.Provider>
-  )
-}
+  );
+};
 
 export const useToast = () => {
-  const context = React.useContext(ToastContext)
+  const context = React.useContext(ToastContext);
   if (!context) {
-    throw new Error("useToast must be used within a ToastProvider")
+    throw new Error("useToast must be used within a ToastProvider");
   }
-  return context
-}
+  return context;
+};
 
 export const toast = {
   default: (props: Omit<ToastProps, "variant">) => {
-    const { toast } = useToast()
-    toast({ ...props, variant: "default" })
+    const { toast } = useToast();
+    toast({ ...props, variant: "default" });
   },
   destructive: (props: Omit<ToastProps, "variant">) => {
-    const { toast } = useToast()
-    toast({ ...props, variant: "destructive" })
+    const { toast } = useToast();
+    toast({ ...props, variant: "destructive" });
   },
   success: (message: string) => {
-    const { toast } = useToast()
-    toast({ title: "Success", description: message, variant: "default" })
+    const { toast } = useToast();
+    toast({ title: "Success", description: message, variant: "default" });
   },
   error: (message: string) => {
-    const { toast } = useToast()
-    toast({ title: "Error", description: message, variant: "destructive" })
+    const { toast } = useToast();
+    toast({ title: "Error", description: message, variant: "destructive" });
   }
-}
+};

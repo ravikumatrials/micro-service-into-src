@@ -10,7 +10,8 @@ import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCre
 import { BulkLoginCredentialsDialog } from "@/components/role-mapping/BulkLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
+import { autoAssignRoleByClassification } from "@/utils/roleUtils";
 import {
   Select,
   SelectContent,
@@ -42,17 +43,6 @@ const mockRoles = [
   { id: 4, name: "Report Admin" },
 ];
 
-// Function to auto-assign roles based on classification
-const autoAssignRoleBasedOnClassification = (employee) => {
-  if (!employee.currentRole) {
-    if (employee.classification === "Laborer") {
-      return "Labour"; // Automatically assign Labour role
-    }
-    // For Staff classification, do not auto-assign any role
-  }
-  return employee.currentRole; // Keep existing role if any
-};
-
 const RoleMapping = () => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
@@ -83,7 +73,7 @@ const RoleMapping = () => {
     mockEmployees.forEach(employee => {
       // If no role is assigned yet, check if we should auto-assign one
       if (!employee.currentRole) {
-        const autoAssignedRole = autoAssignRoleBasedOnClassification(employee);
+        const autoAssignedRole = autoAssignRoleByClassification(employee);
         
         if (autoAssignedRole && autoAssignedRole !== employee.currentRole) {
           // In a real app, this would be an API call
@@ -128,6 +118,9 @@ const RoleMapping = () => {
     // Always open credentials dialog after role assignment
     setEmployeeForCredentials(selectedEmployee);
     setCredentialsDialogOpen(true);
+    
+    // Notably, success toast is now moved to after credentials are set
+    // This is handled in the credentials dialog
   };
 
   // Handle role removal

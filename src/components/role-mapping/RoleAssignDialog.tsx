@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
@@ -51,7 +51,6 @@ export function RoleAssignDialog({
     
     onAssignRole(selectedRole);
     onOpenChange(false);
-    toast.success(`Role successfully ${employee?.currentRole ? 'updated' : 'assigned'} for ${employee?.name}`);
   };
 
   const handleRemoveClick = () => {
