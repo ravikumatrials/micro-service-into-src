@@ -27,7 +27,7 @@ interface RoleAssignDialogProps {
     employeeId: string;
     currentRole?: string;
   } | null;
-  roles: { name: string }[];
+  roles: { name: string; id?: number }[];
   onAssignRole: (role: string) => void;
   onRemoveRole?: () => void;
 }
@@ -43,6 +43,17 @@ export function RoleAssignDialog({
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("");
 
+  // Initialize selectedRole when dialog opens
+  const handleOpenChange = (open: boolean) => {
+    if (open && employee?.currentRole) {
+      setSelectedRole(employee.currentRole);
+    } else if (!open) {
+      // Clear selection when dialog closes
+      setTimeout(() => setSelectedRole(""), 300);
+    }
+    onOpenChange(open);
+  };
+
   const handleAssign = () => {
     if (!selectedRole) {
       toast.error("Please select a role");
@@ -50,7 +61,7 @@ export function RoleAssignDialog({
     }
     
     onAssignRole(selectedRole);
-    onOpenChange(false);
+    // Note: Dialog will be kept open by parent component until credentials are set
   };
 
   const handleRemoveClick = () => {
@@ -82,7 +93,7 @@ export function RoleAssignDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
@@ -96,7 +107,7 @@ export function RoleAssignDialog({
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Select Role</label>
               <Select 
-                defaultValue={employee.currentRole} 
+                value={selectedRole || employee.currentRole || ""} 
                 onValueChange={(value) => setSelectedRole(value)}
               >
                 <SelectTrigger>

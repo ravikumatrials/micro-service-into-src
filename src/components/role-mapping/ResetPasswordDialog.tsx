@@ -8,12 +8,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Eye, EyeOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ResetPasswordDialogProps {
@@ -24,43 +23,33 @@ interface ResetPasswordDialogProps {
     employeeId: string;
     email?: string;
     currentLoginMethod?: "employeeId" | "email";
-    hasAccount?: boolean;
   } | null;
+  onPasswordReset?: () => void;
 }
 
 export function ResetPasswordDialog({
   open,
   onOpenChange,
   user,
+  onPasswordReset,
 }: ResetPasswordDialogProps) {
-  const [loginMethod, setLoginMethod] = useState<"employeeId" | "email">("employeeId");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{
     password?: string;
     confirmPassword?: string;
   }>({});
 
-  // When the dialog opens, set the default login method based on user data
+  // Reset form when dialog opens
   useEffect(() => {
-    if (user && open) {
-      // If user has a current login method, use that as default
-      if (user.currentLoginMethod) {
-        setLoginMethod(user.currentLoginMethod);
-      } else if (user.email) {
-        // If no current method but email exists, default to email
-        setLoginMethod("email");
-      } else {
-        // Default to employee ID if no email
-        setLoginMethod("employeeId");
-      }
-      
-      // Reset form fields
+    if (open) {
       setPassword("");
       setConfirmPassword("");
       setErrors({});
     }
-  }, [user, open]);
+  }, [open]);
 
   const validateForm = () => {
     const newErrors: {
@@ -86,21 +75,21 @@ export function ResetPasswordDialog({
     if (!validateForm() || !user) return;
     
     // In a real app, this would call an API to reset the password
-    if (loginMethod === "employeeId") {
-      // Reset password for employee ID login (would be API call in real app)
-      console.log("Resetting password for:", user.employeeId, password);
+    console.log(`Resetting password for ${user.name} (${user.employeeId})`);
+    
+    if (user.currentLoginMethod === "employeeId") {
+      // Update password for employeeId login
+      console.log("Updating password for employee ID login");
       
-      // Show success toast
-      toast.success("Password reset. Please share it offline with the employee.");
-    } else {
-      // Reset password for email login (would be API call in real app)
-      console.log("Resetting password for email:", user.email, password);
+      // In a real app, this would update the password in the database
+      toast.success(`Password reset successfully for ${user.name}`);
+    } else if (user.currentLoginMethod === "email" && user.email) {
+      // Update password for email login and send notification
+      console.log("Updating password for email login");
+      console.log(`Sending password reset email to: ${user.email}`);
       
-      // In a real app, this would trigger a reset email
-      console.log("Sending reset email to:", user.email);
-      
-      // Show success toast
-      toast.success("Password reset and notification email sent to the employee.");
+      // In a real app, this would send an email
+      toast.success(`Password reset email sent to ${user.email}`);
     }
     
     // Reset form
@@ -110,20 +99,20 @@ export function ResetPasswordDialog({
     
     // Close dialog
     onOpenChange(false);
+    
+    // Call onPasswordReset callback if provided
+    if (onPasswordReset) {
+      onPasswordReset();
+    }
   };
 
   if (!user) return null;
-
-  const noAccount = user.hasAccount === false;
-  const hasCurrentLoginMethod = user.currentLoginMethod !== undefined;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {noAccount ? "Set Password" : "Reset Password"}
-          </DialogTitle>
+          <DialogTitle>Reset Password</DialogTitle>
           <DialogDescription>
             {user.name} ({user.employeeId})
           </DialogDescription>
@@ -137,70 +126,54 @@ export function ResetPasswordDialog({
             <p className="font-medium">Email ID:</p>
             <p>{user.email || "–"}</p>
             
-            {/* Always display current login method section */}
-            <p className="font-medium">Current Login Method:</p>
-            {hasCurrentLoginMethod ? (
-              <Badge className="bg-purple-100 text-purple-800 inline-flex">
-                {user.currentLoginMethod === "employeeId" ? "Employee ID" : "Email ID"}
-              </Badge>
-            ) : (
-              <Badge className="bg-gray-100 text-gray-800 inline-flex">
-                Not Set
-              </Badge>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <h4 className="font-medium">Select login method:</h4>
-            <RadioGroup 
-              value={loginMethod}
-              onValueChange={(value) => setLoginMethod(value as "employeeId" | "email")}
-              className="flex flex-col space-y-2"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="employeeId" id="reset-employeeId" />
-                <Label htmlFor="reset-employeeId">Login via Employee ID</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  value="email" 
-                  id="reset-email" 
-                  disabled={!user.email}
-                />
-                <Label 
-                  htmlFor="reset-email" 
-                  className={!user.email ? "text-gray-400" : ""}
-                >
-                  Login via Email ID {!user.email && "(Email not available)"}
-                </Label>
-              </div>
-            </RadioGroup>
+            <p className="font-medium">Login Method:</p>
+            <Badge className="bg-purple-100 text-purple-800 inline-flex">
+              {user.currentLoginMethod === "employeeId" ? "Employee ID" : "Email ID"}
+            </Badge>
           </div>
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="reset-password">New Password</Label>
-              <Input
-                id="reset-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={errors.password ? "border-red-500" : ""}
-              />
+              <Label htmlFor="password">New Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={errors.password ? "border-red-500" : ""}
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-2.5 text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-sm text-red-500">{errors.password}</p>
               )}
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="reset-confirmPassword">Confirm Password</Label>
-              <Input
-                id="reset-confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={errors.confirmPassword ? "border-red-500" : ""}
-              />
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={errors.confirmPassword ? "border-red-500" : ""}
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-2.5 text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {errors.confirmPassword && (
                 <p className="text-sm text-red-500">{errors.confirmPassword}</p>
               )}
@@ -208,19 +181,18 @@ export function ResetPasswordDialog({
           </div>
           
           {/* Display login method specific instructions */}
-          {loginMethod === "employeeId" ? (
+          {user.currentLoginMethod === "employeeId" ? (
             <div className="bg-blue-50 p-3 rounded-md flex items-start gap-2">
-              <Lock className="h-4 w-4 text-blue-500 mt-0.5" />
+              <span className="text-blue-500 mt-0.5">ℹ️</span>
               <p className="text-sm text-blue-700">
-                {noAccount ? "Password will be set" : "Password will be reset"} for Employee ID login. 
-                You'll need to share the new password with the employee offline.
+                Password will be reset for Employee ID login. You'll need to share the new password with the employee offline.
               </p>
             </div>
           ) : user.email && (
             <div className="bg-blue-50 p-3 rounded-md flex items-start gap-2">
               <Mail className="h-4 w-4 text-blue-500 mt-0.5" />
               <p className="text-sm text-blue-700">
-                An email will be sent to {user.email} with {noAccount ? "login" : "password reset"} instructions.
+                An email will be sent to {user.email} with instructions to set a new password.
               </p>
             </div>
           )}
@@ -230,7 +202,7 @@ export function ResetPasswordDialog({
             Cancel
           </Button>
           <Button onClick={handleResetPassword}>
-            {noAccount ? "Create Password" : "Reset Password"}
+            Reset Password
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -45,3 +45,63 @@ export const logRoleChange = (
   
   return auditLog;
 };
+
+// Function to handle role updates in both Role Mapping and Users screens
+export const updateEmployeeRole = (
+  employees: any[],
+  employeeId: string, 
+  newRole: string,
+  performedBy: string = "Admin User"
+) => {
+  let updated = false;
+  
+  // Find and update the employee in the employees array
+  employees.forEach(emp => {
+    if (emp.employeeId === employeeId) {
+      const oldRole = emp.currentRole || emp.role;
+      
+      // Update the role property (for Users menu)
+      if (emp.role !== undefined) {
+        emp.role = newRole;
+      }
+      
+      // Update the currentRole property (for Role Mapping menu)
+      if (emp.currentRole !== undefined) {
+        emp.currentRole = newRole;
+      }
+      
+      // Log the role change for auditing
+      logRoleChange(employeeId, oldRole, newRole, oldRole ? "update" : "assign", performedBy);
+      
+      updated = true;
+    }
+  });
+  
+  return updated;
+};
+
+// Function to find if an employee already exists in a given array
+export const findEmployeeById = (employees: any[], employeeId: string) => {
+  return employees.find(emp => 
+    emp.employeeId === employeeId || 
+    emp.employeeId === employeeId
+  );
+};
+
+// Generate a shared employee object that works in both Role Mapping and Users screens
+export const createSharedEmployeeObject = (employee: any) => {
+  return {
+    id: employee.id || Math.floor(Math.random() * 10000), // Generate ID if not exists
+    employeeId: employee.employeeId,
+    name: employee.name,
+    entity: employee.entity,
+    category: employee.category,
+    classification: employee.classification,
+    status: employee.status || "Active",
+    role: employee.role || employee.currentRole, // Handle both naming conventions
+    currentRole: employee.role || employee.currentRole, // Handle both naming conventions
+    email: employee.email,
+    hasAccount: employee.hasAccount !== undefined ? employee.hasAccount : false,
+    loginMethod: employee.loginMethod || null
+  };
+};

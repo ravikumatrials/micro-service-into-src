@@ -25,12 +25,14 @@ interface SetLoginCredentialsDialogProps {
     email?: string;
     currentLoginMethod?: "employeeId" | "email";
   } | null;
+  afterSave?: () => void; // Optional callback after successful save
 }
 
 export function SetLoginCredentialsDialog({
   open,
   onOpenChange,
   employee,
+  afterSave,
 }: SetLoginCredentialsDialogProps) {
   const [loginMethod, setLoginMethod] = useState<"employeeId" | "email">("employeeId");
   const [password, setPassword] = useState("");
@@ -111,6 +113,11 @@ export function SetLoginCredentialsDialog({
     
     // Close dialog
     onOpenChange(false);
+    
+    // Call afterSave callback if provided
+    if (afterSave) {
+      afterSave();
+    }
   };
 
   if (!employee) return null;

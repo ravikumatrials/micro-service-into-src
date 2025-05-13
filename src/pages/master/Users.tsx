@@ -1,5 +1,6 @@
+
 import { useState, useMemo } from 'react';
-import { Eye, Search, Building, User, Briefcase, ActivitySquare, Lock } from "lucide-react";
+import { Eye, Search, Building, User, Briefcase, ActivitySquare, Lock, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -34,9 +35,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
-import { CreateAccountModal } from "@/components/password-management/CreateAccountModal";
+import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
 import { toast } from "sonner";
+import { updateEmployeeRole, availableRoles } from "@/utils/roleUtils";
 
 // Updated mock data to include login method and ensuring all have roles assigned
 const USERS = [
@@ -131,9 +133,9 @@ const Users = () => {
     currentRole?: string;
   } | null>(null);
   
-  // Account creation dialog
-  const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
-  const [accountUser, setAccountUser] = useState<typeof USERS[0] | null>(null);
+  // Login credentials dialog
+  const [isCredentialsDialogOpen, setIsCredentialsDialogOpen] = useState(false);
+  const [credentialsUser, setCredentialsUser] = useState<typeof USERS[0] | null>(null);
   
   // Reset password dialog
   const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
@@ -191,8 +193,8 @@ const Users = () => {
     setIsViewModalOpen(true);
   };
 
-  // Handle assigning a role
-  const handleAssignRole = (user: typeof USERS[0]) => {
+  // Handle changing a role
+  const handleChangeRole = (user: typeof USERS[0]) => {
     setRoleDialogUser({
       name: user.name,
       employeeId: user.employeeId,
@@ -203,14 +205,27 @@ const Users = () => {
 
   // Handle role assigned
   const handleRoleAssigned = (role: string) => {
-    // Simulate updating role in database
-    toast.success(`Role assigned successfully to ${roleDialogUser?.name}`);
+    if (!roleDialogUser) return;
     
-    // After role assignment, prompt for account creation if user doesn't have an account
-    const user = USERS.find(u => u.employeeId === roleDialogUser?.employeeId);
-    if (user && !user.hasAccount) {
-      setAccountUser(user);
-      setIsCreateAccountOpen(true);
+    // Update the role in the USERS array
+    const success = updateEmployeeRole(USERS, roleDialogUser.employeeId, role);
+    
+    if (success) {
+      // Find the updated user to pass to the credentials dialog
+      const updatedUser = USERS.find(u => u.employeeId === roleDialogUser.employeeId);
+      
+      if (updatedUser) {
+        // Set up the credentials dialog with the updated user data
+        setCredentialsUser({
+          ...updatedUser,
+          currentLoginMethod: updatedUser.loginMethod as "employeeId" | "email" | undefined
+        });
+        
+        setIsCredentialsDialogOpen(true);
+      }
+    } else {
+      toast.error("Failed to update role. User not found.");
+      setIsRoleDialogOpen(false);
     }
   };
   
@@ -218,6 +233,23 @@ const Users = () => {
   const handleResetPassword = (user: typeof USERS[0]) => {
     setResetPasswordUser(user);
     setIsResetPasswordOpen(true);
+  };
+
+  // Handle credentials dialog close
+  const handleCredentialsDialogClose = (open: boolean) => {
+    setIsCredentialsDialogOpen(open);
+    // If dialog is closing, also close the role dialog and show success message
+    if (!open) {
+      setIsRoleDialogOpen(false);
+      toast.success(`Role ${roleDialogUser?.currentRole ? "updated" : "assigned"} successfully for ${roleDialogUser?.name}`);
+    }
+  };
+
+  // Reset password success handler
+  const handlePasswordReset = () => {
+    if (resetPasswordUser) {
+      toast.success(`Password reset successfully for ${resetPasswordUser.name}`);
+    }
   };
 
   return (
@@ -449,9 +481,9 @@ const Users = () => {
                     <TableCell>
                       <Badge 
                         className="bg-blue-100 text-blue-800 cursor-pointer"
-                        onClick={() => handleAssignRole(user)}
+                        onClick={() => handleChangeRole(user)}
                       >
-                        {user.role || "Assign Role"}
+                        {user.role}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -471,6 +503,26 @@ const Users = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {/* Change Role Button */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                onClick={() => handleChangeRole(user)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
+                                <UserCog className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Change Role</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        {/* Reset Password Button */}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -489,6 +541,7 @@ const Users = () => {
                           </Tooltip>
                         </TooltipProvider>
                         
+                        {/* View Details Button */}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -577,29 +630,23 @@ const Users = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Role Assignment Dialog */}
+        {/* Role Change Dialog */}
         <RoleAssignDialog
           open={isRoleDialogOpen}
           onOpenChange={setIsRoleDialogOpen}
           employee={roleDialogUser}
-          roles={[
-            { name: "Admin" },
-            { name: "Supervisor" },
-            { name: "Clerk" },
-            { name: "Manager" },
-            { name: "Super Admin" }
-          ]}
+          roles={availableRoles}
           onAssignRole={handleRoleAssigned}
         />
         
-        {/* Account Creation Modal */}
-        <CreateAccountModal
-          open={isCreateAccountOpen}
-          onOpenChange={setIsCreateAccountOpen}
-          user={accountUser}
+        {/* Set/Update Login Credentials Dialog */}
+        <SetLoginCredentialsDialog
+          open={isCredentialsDialogOpen}
+          onOpenChange={handleCredentialsDialogClose}
+          employee={credentialsUser}
         />
         
-        {/* Reset Password Dialog - Pass login method */}
+        {/* Reset Password Dialog */}
         <ResetPasswordDialog
           open={isResetPasswordOpen}
           onOpenChange={setIsResetPasswordOpen}
@@ -607,6 +654,7 @@ const Users = () => {
             ...resetPasswordUser,
             currentLoginMethod: resetPasswordUser.loginMethod as "employeeId" | "email" | undefined
           } : null}
+          onPasswordReset={handlePasswordReset}
         />
       </div>
     </div>
