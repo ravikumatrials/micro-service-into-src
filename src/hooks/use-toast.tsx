@@ -14,10 +14,12 @@ const ToastContext = React.createContext<{
   toast: (props: ToastProps) => void
   dismissToast: (toastId: string) => void
   dismissAllToasts: () => void
+  toasts: Array<ToastProps & { id: string }> // Add toasts to the context type
 }>({
   toast: () => {},
   dismissToast: () => {},
   dismissAllToasts: () => {},
+  toasts: [] // Provide default empty array
 })
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
@@ -44,7 +46,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ToastContext.Provider
-      value={{ toast, dismissToast, dismissAllToasts }}
+      value={{ toast, dismissToast, dismissAllToasts, toasts }}
     >
       {children}
       <div className="fixed bottom-0 right-0 z-50 p-4 space-y-2">
