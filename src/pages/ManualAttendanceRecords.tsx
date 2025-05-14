@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 
 const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
@@ -35,13 +36,25 @@ const ManualAttendanceRecords = () => {
     console.log("Selected date:", selectedDate);
   };
 
+  // Handle date change
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      toast({
+        title: "Date selected",
+        description: `Attendance date set to ${format(date, "PPP")}`,
+      });
+    }
+  };
+
   return (
     <div className="space-y-5 px-1 pt-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Manual Attendance Records</h1>
         
-        {/* Date Picker */}
-        <div>
+        {/* Date Picker with improved labeling */}
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Select Attendance Date:</span>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -63,7 +76,7 @@ const ManualAttendanceRecords = () => {
               <Calendar
                 mode="single"
                 selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
+                onSelect={handleDateChange}
                 initialFocus
               />
             </PopoverContent>
