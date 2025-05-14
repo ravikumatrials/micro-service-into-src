@@ -21,7 +21,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { calculateWorkingHours, isOvertimeWorked, sumWorkingHours } from "@/utils/timeUtils";
@@ -48,6 +48,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 import { MOCK_ATTENDANCE_DATA } from "@/data/mockAttendance";
 
 // Define interfaces for our data
@@ -60,6 +61,7 @@ interface ReportFilters {
   fromDate: Date | undefined;
   toDate: Date | undefined;
   attendanceMode: string;
+  showExceptionsOnly: boolean;  // New filter for exceptions only
 }
 
 interface AttendanceRecord {
@@ -131,7 +133,8 @@ const Reports = () => {
     project: "all",
     fromDate: undefined,
     toDate: undefined,
-    attendanceMode: "all"
+    attendanceMode: "all",
+    showExceptionsOnly: false  // Default to showing all records
   });
   
   const { toast } = useToast();
@@ -154,6 +157,11 @@ const Reports = () => {
   // Filter data based on current filters
   const filteredData = useMemo(() => {
     return reportData.filter(record => {
+      // Filter exception records (missing check-outs)
+      if (filters.showExceptionsOnly && !(record.checkIn && !record.checkOut)) {
+        return false;
+      }
+      
       // Filter by employeeIdName (ID or name)
       if (filters.employeeIdName && 
           !record.employeeId.toLowerCase().includes(filters.employeeIdName.toLowerCase()) && 
@@ -269,12 +277,21 @@ const Reports = () => {
       project: "all",
       fromDate: undefined, 
       toDate: undefined,
-      attendanceMode: "all"
+      attendanceMode: "all",
+      showExceptionsOnly: false  // Reset exceptions filter too
     });
     toast({
       title: "Info",
       description: "Filters cleared",
     });
+  };
+
+  // Toggle exceptions only filter
+  const toggleExceptionsOnly = () => {
+    setFilters(prev => ({
+      ...prev,
+      showExceptionsOnly: !prev.showExceptionsOnly
+    }));
   };
 
   // Count exception records (missing check-outs)
@@ -471,7 +488,7 @@ const Reports = () => {
               </div>
             </div>
             
-            {/* Date Range Filter (Third Row) */}
+            {/* Date Range Filter and Exceptions Filter (Third Row) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -526,14 +543,34 @@ const Reports = () => {
                 </div>
               </div>
             
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-2 items-end">
-                <Button variant="outline" onClick={clearFilters}>
-                  Clear Filters
-                </Button>
-                <Button onClick={handleFilterApply}>
-                  Apply Filters
-                </Button>
+              {/* Action Buttons and Show Exceptions Only toggle */}
+              <div className="flex justify-between">
+                <div className="flex items-end">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="exceptions-only"
+                      checked={filters.showExceptionsOnly}
+                      onCheckedChange={toggleExceptionsOnly}
+                    />
+                    <label 
+                      htmlFor="exceptions-only" 
+                      className="text-sm font-medium cursor-pointer flex items-center"
+                    >
+                      {filters.showExceptionsOnly && (
+                        <AlertTriangle className="h-4 w-4 text-amber-500 mr-1" />
+                      )}
+                      Show Exceptions Only
+                    </label>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 items-end">
+                  <Button variant="outline" onClick={clearFilters}>
+                    Clear Filters
+                  </Button>
+                  <Button onClick={handleFilterApply}>
+                    Apply Filters
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -644,6 +681,7 @@ const Reports = () => {
           <div className="space-y-4">
             {Object.entries(filteredGroupedData).length > 0 ? (
               Object.entries(filteredGroupedData).map(([key, records]) => {
+                // ... keep existing code (summary view code)
                 const [employeeId, name] = key.split("-");
                 // Calculate total working hours for this employee
                 const totalHours = sumWorkingHours(records.map(r => 
