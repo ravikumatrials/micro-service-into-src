@@ -34,16 +34,16 @@ const ManualAttendanceTable: React.FC<ManualAttendanceTableProps> = ({
   records
 }) => {
   return (
-    <div className="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+    <div className="overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="bg-gray-50 hover:bg-gray-50">
-            <TableHead className="font-semibold">Employee ID</TableHead>
-            <TableHead className="font-semibold">Employee Name</TableHead>
-            <TableHead className="font-semibold">Classification</TableHead>
-            <TableHead className="font-semibold">Category</TableHead>
-            <TableHead className="font-semibold">Check-In (Project)</TableHead>
-            <TableHead className="font-semibold">Check-Out (Project)</TableHead>
+          <TableRow>
+            <TableHead>Employee ID</TableHead>
+            <TableHead>Employee Name</TableHead>
+            <TableHead>Classification</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Check-In (Project)</TableHead>
+            <TableHead>Check-Out (Project)</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -56,14 +56,14 @@ const ManualAttendanceTable: React.FC<ManualAttendanceTableProps> = ({
                 <TableCell>{record.category}</TableCell>
                 <TableCell>
                   <div>
-                    <div className="font-medium">{record.checkInTime}</div>
+                    <div>{record.checkInTime}</div>
                     <div className="text-xs text-gray-500">{record.checkInProject}</div>
                   </div>
                 </TableCell>
                 <TableCell>
                   {record.checkOutTime ? (
                     <div>
-                      <div className="font-medium">{record.checkOutTime}</div>
+                      <div>{record.checkOutTime}</div>
                       <div className="text-xs text-gray-500">{record.checkOutProject || "Same as check-in"}</div>
                     </div>
                   ) : (
