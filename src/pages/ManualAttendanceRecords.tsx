@@ -20,6 +20,7 @@ const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
   const [activeTab, setActiveTab] = useState("records");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [dateSelected, setDateSelected] = useState<boolean>(false);
   
   // Apply the filter function to get filtered records
   const filteredRecords = filterRecords(filters);
@@ -40,6 +41,7 @@ const ManualAttendanceRecords = () => {
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date);
+      setDateSelected(true); // Mark that date has been selected
       toast({
         title: "Date selected",
         description: `Attendance date set to ${format(date, "PPP")}`,
@@ -54,14 +56,14 @@ const ManualAttendanceRecords = () => {
         
         {/* Date Picker with improved labeling */}
         <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">Select Attendance Date:</span>
+          <span className="text-sm font-medium text-gray-700">Attendance Date:</span>
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className={cn(
                   "w-[240px] justify-start text-left font-normal",
-                  !selectedDate && "text-muted-foreground"
+                  !dateSelected && "border-orange-300 bg-orange-50 text-orange-800"
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -70,6 +72,7 @@ const ManualAttendanceRecords = () => {
                 ) : (
                   <span>Select Date</span>
                 )}
+                {!dateSelected && <span className="ml-auto text-xs font-medium text-orange-600">(Required)</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
@@ -78,6 +81,7 @@ const ManualAttendanceRecords = () => {
                 selected={selectedDate}
                 onSelect={handleDateChange}
                 initialFocus
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -100,6 +104,7 @@ const ManualAttendanceRecords = () => {
         filters={filters}
         projects={mockProjects}
         selectedDate={selectedDate}
+        dateSelected={dateSelected}
       />
     </div>
   );

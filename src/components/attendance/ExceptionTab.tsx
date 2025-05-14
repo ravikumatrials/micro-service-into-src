@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { Edit, AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Edit, AlertCircle, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { format } from "date-fns";
+import { isSameDay } from "@/lib/utils";
 
 interface Employee {
   id: number;
@@ -23,135 +25,164 @@ interface Employee {
   status: "Active" | "Inactive";
   entity?: string;
   exceptionReason?: string;
+  exceptionResolved?: boolean;
+  exceptionResolvedDate?: Date; // Added to track when exception was resolved
 }
 
 interface ExceptionTabProps {
   searchQuery: string;
   selectedProject: string;
-  selectedLocation?: string; // Making this optional
+  selectedLocation?: string;
   selectedClassification: string;
   selectedCategory: string;
   selectedStatus: string;
   selectedEntity: string;
   projects: { id: number; name: string; location?: string; coordinates?: { geofenceData: string } }[];
   locations: { id: number; name: string }[];
-  selectedDate?: Date; // Make this optional for backwards compatibility
+  selectedDate: Date;
+  dateSelected?: boolean;
 }
 
 const ExceptionTab = ({
   searchQuery,
   selectedProject,
-  selectedLocation = "all", // Providing default value
+  selectedLocation = "all",
   selectedClassification,
   selectedCategory,
   selectedStatus,
   selectedEntity,
   projects,
   locations,
-  selectedDate = new Date() // Default to today if not provided
+  selectedDate,
+  dateSelected = false
 }: ExceptionTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [pendingExceptions, setPendingExceptions] = useState<Employee[]>([]);
 
-  // Mock employees with pending checkouts
-  const mockPendingCheckouts: Employee[] = [
-    {
-      id: 8,
-      employeeId: "10008",
-      name: "Thomas Harris",
-      role: "Construction Worker",
-      project: "Main Building Construction",
-      projectId: 1,
-      location: "Site A",
-      locationId: 1,
-      checkInTime: "08:15 AM",
-      imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
-      classification: "Laborer",
-      category: "Carpenter",
-      status: "Active",
-      exceptionReason: "No checkout recorded for yesterday"
-    },
-    {
-      id: 9,
-      employeeId: "10009",
-      name: "Jennifer White",
-      role: "Electrician",
-      project: "Bridge Expansion Project",
-      projectId: 2,
-      location: "Site B",
-      locationId: 2,
-      checkInTime: "09:00 AM",
-      imageUrl: "https://randomuser.me/api/portraits/women/5.jpg",
-      classification: "Staff",
-      category: "Electrician",
-      status: "Inactive",
-      exceptionReason: "No checkout recorded for yesterday"
-    },
-    // Additional employees with exceptions
-    {
-      id: 14,
-      employeeId: "10014",
-      name: "Fatima Al-Qahtani",
-      role: "Project Engineer",
-      project: "Marina Towers",
-      projectId: 5,
-      checkInTime: "07:30 AM",
-      imageUrl: "https://randomuser.me/api/portraits/women/8.jpg",
-      classification: "Staff",
-      category: "Mason",
-      status: "Active",
-      entity: "Tanseeq Engineering Co",
-      exceptionReason: "No checkout recorded for yesterday"
-    },
-    {
-      id: 15,
-      employeeId: "10015",
-      name: "Carlos Rodriguez",
-      role: "Foreman",
-      project: "Dubai Mall Expansion",
-      projectId: 4,
-      checkInTime: "06:45 AM",
-      imageUrl: "https://randomuser.me/api/portraits/men/9.jpg",
-      classification: "Laborer",
-      category: "Carpenter",
-      status: "Active",
-      entity: "Tanseeq Construction Ltd",
-      exceptionReason: "No checkout recorded for yesterday"
-    },
-    {
-      id: 16,
-      employeeId: "10016",
-      name: "Aisha Mohammed",
-      role: "Safety Manager",
-      project: "Highway Renovation",
-      projectId: 3,
-      checkInTime: "08:05 AM",
-      imageUrl: "https://randomuser.me/api/portraits/women/9.jpg",
-      classification: "Staff",
-      category: "Plumber",
-      status: "Active",
-      entity: "Tanseeq Engineering Co",
-      exceptionReason: "GPS not detected during check-in"
-    },
-    {
-      id: 17,
-      employeeId: "10017",
-      name: "John Peterson",
-      role: "Electrician",
-      project: "Marina Towers",
-      projectId: 5,
-      checkInTime: "07:50 AM",
-      imageUrl: "https://randomuser.me/api/portraits/men/10.jpg",
-      classification: "Laborer",
-      category: "Electrician",
-      status: "Active",
-      entity: "Tanseeq Landscaping LLC",
-      exceptionReason: "Manually checked in outside of geofence"
+  // Effect to refresh exception data when date changes
+  useEffect(() => {
+    if (dateSelected) {
+      // In a real app, this would fetch data for the specific date from an API
+      fetchPendingExceptions();
     }
-  ];
+  }, [selectedDate, dateSelected]);
+  
+  // Mock function to fetch employees with pending exceptions for the selected date
+  const fetchPendingExceptions = () => {
+    // Mock employees with pending checkouts
+    const mockPendingCheckouts: Employee[] = [
+      {
+        id: 8,
+        employeeId: "10008",
+        name: "Thomas Harris",
+        role: "Construction Worker",
+        project: "Main Building Construction",
+        projectId: 1,
+        location: "Site A",
+        locationId: 1,
+        checkInTime: "08:15 AM",
+        imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
+        classification: "Laborer",
+        category: "Carpenter",
+        status: "Active",
+        exceptionReason: "No checkout recorded for yesterday"
+      },
+      {
+        id: 9,
+        employeeId: "10009",
+        name: "Jennifer White",
+        role: "Electrician",
+        project: "Bridge Expansion Project",
+        projectId: 2,
+        location: "Site B",
+        locationId: 2,
+        checkInTime: "09:00 AM",
+        imageUrl: "https://randomuser.me/api/portraits/women/5.jpg",
+        classification: "Staff",
+        category: "Electrician",
+        status: "Inactive",
+        exceptionReason: "No checkout recorded for yesterday"
+      },
+      // Additional employees with exceptions
+      {
+        id: 14,
+        employeeId: "10014",
+        name: "Fatima Al-Qahtani",
+        role: "Project Engineer",
+        project: "Marina Towers",
+        projectId: 5,
+        checkInTime: "07:30 AM",
+        imageUrl: "https://randomuser.me/api/portraits/women/8.jpg",
+        classification: "Staff",
+        category: "Mason",
+        status: "Active",
+        entity: "Tanseeq Engineering Co",
+        exceptionReason: "No checkout recorded for yesterday"
+      },
+      {
+        id: 15,
+        employeeId: "10015",
+        name: "Carlos Rodriguez",
+        role: "Foreman",
+        project: "Dubai Mall Expansion",
+        projectId: 4,
+        checkInTime: "06:45 AM",
+        imageUrl: "https://randomuser.me/api/portraits/men/9.jpg",
+        classification: "Laborer",
+        category: "Carpenter",
+        status: "Active",
+        entity: "Tanseeq Construction Ltd",
+        exceptionReason: "No checkout recorded for yesterday"
+      },
+      {
+        id: 16,
+        employeeId: "10016",
+        name: "Aisha Mohammed",
+        role: "Safety Manager",
+        project: "Highway Renovation",
+        projectId: 3,
+        checkInTime: "08:05 AM",
+        imageUrl: "https://randomuser.me/api/portraits/women/9.jpg",
+        classification: "Staff",
+        category: "Plumber",
+        status: "Active",
+        entity: "Tanseeq Engineering Co",
+        exceptionReason: "GPS not detected during check-in"
+      },
+      {
+        id: 17,
+        employeeId: "10017",
+        name: "John Peterson",
+        role: "Electrician",
+        project: "Marina Towers",
+        projectId: 5,
+        checkInTime: "07:50 AM",
+        imageUrl: "https://randomuser.me/api/portraits/men/10.jpg",
+        classification: "Laborer",
+        category: "Electrician",
+        status: "Active",
+        entity: "Tanseeq Landscaping LLC",
+        exceptionReason: "Manually checked in outside of geofence"
+      }
+    ];
+    
+    // Update exception status based on the selected date
+    setPendingExceptions(mockPendingCheckouts.map(employee => {
+      // Check if exception has already been resolved for this date
+      const isResolved = employee.exceptionResolvedDate ? 
+        isSameDay(employee.exceptionResolvedDate, selectedDate) : false;
+        
+      return {
+        ...employee,
+        exceptionResolved: isResolved,
+        exceptionResolvedDate: isResolved ? employee.exceptionResolvedDate : undefined
+      };
+    }));
+  };
 
   // Filter employees based on search query and filters
-  const filteredPendingCheckouts = mockPendingCheckouts.filter(employee => {
+  const filteredPendingCheckouts = pendingExceptions.filter(employee => {
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.employeeId.includes(searchQuery);
     const matchesProject = selectedProject === "all" || employee.projectId.toString() === selectedProject;
@@ -181,6 +212,22 @@ const ExceptionTab = ({
   };
 
   const handleManualCheckOut = (employee: Employee) => {
+    if (!dateSelected) {
+      toast.error("Date selection required", {
+        description: "Please select an attendance date before resolving exceptions."
+      });
+      return;
+    }
+    
+    // Check if exception has already been resolved for this date
+    if (employee.exceptionResolved && employee.exceptionResolvedDate && 
+        isSameDay(employee.exceptionResolvedDate, selectedDate)) {
+      toast.error("Exception already resolved", {
+        description: `${employee.name}'s exception has already been resolved for ${format(selectedDate, "PPP")}.`
+      });
+      return;
+    }
+    
     setSelectedEmployee(employee);
     setOpenManualDialog(true);
   };
@@ -195,14 +242,34 @@ const ExceptionTab = ({
     const selectedProjectName = projects.find(p => p.id.toString() === projectId)?.name;
     
     toast.success(`${selectedEmployee?.name} exception has been resolved`, {
-      description: `Project: ${selectedProjectName}, Time: ${time}, Reason: ${reason.substring(0, 30)}${reason.length > 30 ? '...' : ''}`
+      description: `Project: ${selectedProjectName}, Time: ${time}, Date: ${format(selectedDate, "PPP")}`
     });
+    
+    // Update state to reflect the exception resolution
+    if (selectedEmployee) {
+      setPendingExceptions(current => 
+        current.map(emp => 
+          emp.id === selectedEmployee.id 
+            ? { ...emp, exceptionResolved: true, exceptionResolvedDate: selectedDate }
+            : emp
+        )
+      );
+    }
     
     setSelectedEmployee(null);
   };
 
   return (
     <div className="space-y-4">
+      {!dateSelected && (
+        <Alert className="bg-orange-50 border border-orange-200 mb-4">
+          <Calendar className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            Please select an attendance date before resolving exceptions
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -217,10 +284,16 @@ const ExceptionTab = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredPendingCheckouts.length === 0 ? (
+            {!dateSelected ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-10 text-orange-500">
+                  Please select an attendance date to view exceptions
+                </TableCell>
+              </TableRow>
+            ) : filteredPendingCheckouts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-10 text-gray-500">
-                  No pending checkouts found matching your filters
+                  No pending exceptions found matching your filters for {format(selectedDate, "PPP")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -246,6 +319,7 @@ const ExceptionTab = ({
                         variant="outline"
                         size="sm"
                         className="flex items-center space-x-1 text-xs"
+                        disabled={employee.exceptionResolved}
                       >
                         <Edit className="h-3 w-3" />
                         <span>Mark Attendance</span>
