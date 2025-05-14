@@ -10,7 +10,7 @@ import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCre
 import { BulkLoginCredentialsDialog } from "@/components/role-mapping/BulkLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { autoAssignRoleByClassification } from "@/utils/roleUtils";
 import {
   Select,
@@ -45,6 +45,7 @@ const mockRoles = [
 
 const RoleMapping = () => {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
@@ -359,7 +360,10 @@ const RoleMapping = () => {
                   className="w-full mt-2"
                   onClick={() => handleAssignRole(employee)}
                 >
-                  {employee.currentRole ? "Update Role" : "Assign Role"}
+                  {employee.classification === "Laborer" ? 
+                    (employee.currentRole ? "Update Role" : "Assign Role") :
+                    (employee.currentRole ? "Update Role" : "Assign Role")
+                  }
                 </Button>
               </div>
             ))}
@@ -411,7 +415,10 @@ const RoleMapping = () => {
                       variant="outline"
                       onClick={() => handleAssignRole(employee)}
                     >
-                      {employee.currentRole ? "Update Role" : "Assign Role"}
+                      {employee.classification === "Laborer" ? 
+                        "Update Role" : 
+                        (employee.currentRole ? "Update Role" : "Assign Role")
+                      }
                     </Button>
                   </TableCell>
                 </TableRow>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Download, FileText, Search, ChevronDown } from "lucide-react";
+import { Download, FileText, Search, ChevronDown, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -21,7 +21,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { calculateWorkingHours, isOvertimeWorked, sumWorkingHours } from "@/utils/timeUtils";
@@ -42,6 +42,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MOCK_ATTENDANCE_DATA } from "@/data/mockAttendance";
 
 // Define interfaces for our data
@@ -69,7 +75,51 @@ interface AttendanceRecord {
   checkInMode: "Face" | "Manual";
   checkOut: string;
   checkOutMode: "Face" | "Manual";
+  location?: string; // Added location field
 }
+
+// Function to export exception report
+const exportExceptionReport = (data: AttendanceRecord[]) => {
+  // Filter records with missing check-outs
+  const exceptionRecords = data.filter(record => record.checkIn && !record.checkOut);
+  
+  if (exceptionRecords.length === 0) {
+    return false; // No records to export
+  }
+  
+  // Format data for CSV
+  const csvHeader = "Employee ID,Name,Project,Location,Check-In Date,Check-In Time,Check-Out Date,Check-Out Time\n";
+  const csvRows = exceptionRecords.map(record => {
+    const checkInDate = format(new Date(record.date), "yyyy-MM-dd");
+    const checkInTime = record.checkIn;
+    
+    return [
+      record.employeeId,
+      record.name,
+      record.project,
+      record.location || "N/A", // Use N/A if location is not available
+      checkInDate,
+      checkInTime,
+      "", // Empty Check-Out Date
+      ""  // Empty Check-Out Time
+    ].join(",");
+  });
+  
+  const csvContent = csvHeader + csvRows.join("\n");
+  
+  // Create a blob and download the file
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `exception_report_${format(new Date(), "yyyy-MM-dd")}.csv`);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  return true; // Export successful
+};
 
 const Reports = () => {
   // Filter states
@@ -83,6 +133,8 @@ const Reports = () => {
     toDate: undefined,
     attendanceMode: "all"
   });
+  
+  const { toast } = useToast();
   
   // Report data from mock data
   const reportData = MOCK_ATTENDANCE_DATA;
@@ -177,11 +229,34 @@ const Reports = () => {
   const [viewType, setViewType] = useState<"detailed" | "summary">("detailed");
 
   const handleExport = () => {
-    toast.success("Report exported successfully");
+    toast({
+      title: "Success",
+      description: "Report exported successfully",
+    });
+  };
+
+  const handleExportExceptionReport = () => {
+    const result = exportExceptionReport(filteredData);
+    
+    if (result) {
+      toast({
+        title: "Success",
+        description: "Exception report exported successfully",
+      });
+    } else {
+      toast({
+        title: "No Data",
+        description: "No exception records found to export",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFilterApply = () => {
-    toast.info("Filters applied");
+    toast({
+      title: "Info",
+      description: "Filters applied",
+    });
     // In a real app, this would trigger data fetching with the applied filters
   };
   
@@ -196,8 +271,16 @@ const Reports = () => {
       toDate: undefined,
       attendanceMode: "all"
     });
-    toast.info("Filters cleared");
+    toast({
+      title: "Info",
+      description: "Filters cleared",
+    });
   };
+
+  // Count exception records (missing check-outs)
+  const exceptionCount = useMemo(() => {
+    return filteredData.filter(record => record.checkIn && !record.checkOut).length;
+  }, [filteredData]);
 
   return (
     <div className="space-y-6">
@@ -216,19 +299,34 @@ const Reports = () => {
               <SelectItem value="summary">Summary View</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            onClick={handleExport}
-            className="bg-proscape hover:bg-proscape/90"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Export Report
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className="bg-proscape hover:bg-proscape/90"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Export Options
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleExport}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export Full Report
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportExceptionReport}>
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Export Exception Report {exceptionCount > 0 && `(${exceptionCount})`}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       <Card className="p-6 space-y-6">
         {/* Filters Section */}
         <div className="space-y-4 bg-white rounded-lg border border-gray-200">
+          {/* ... keep existing code (filters section) */}
           <div className="p-4">
             <h3 className="text-lg font-medium mb-4">Filters</h3>
             
@@ -441,6 +539,25 @@ const Reports = () => {
           </div>
         </div>
 
+        {/* Exception Count Indicator */}
+        {exceptionCount > 0 && (
+          <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-center">
+              <AlertTriangle className="h-5 w-5 text-amber-500 mr-2" />
+              <span>Found <strong>{exceptionCount}</strong> records with missing check-outs</span>
+            </div>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="border-amber-300 text-amber-700 hover:bg-amber-100"
+              onClick={handleExportExceptionReport}
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Export Exception Report
+            </Button>
+          </div>
+        )}
+
         {/* Reports Section */}
         {viewType === "detailed" ? (
           // Detailed View - Shows all records in table format
@@ -465,9 +582,10 @@ const Reports = () => {
                   filteredData.map((row) => {
                     const workingHours = calculateWorkingHours(row.checkIn, row.checkOut);
                     const isOvertime = isOvertimeWorked(workingHours);
+                    const isMissingCheckOut = row.checkIn && !row.checkOut;
                     
                     return (
-                      <TableRow key={row.id}>
+                      <TableRow key={row.id} className={isMissingCheckOut ? "bg-amber-50" : ""}>
                         <TableCell className="font-medium">{row.employeeId}</TableCell>
                         <TableCell>{row.name}</TableCell>
                         <TableCell>{row.entity}</TableCell>
@@ -479,10 +597,21 @@ const Reports = () => {
                           {row.checkIn} – <span className={row.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkInMode}</span>
                         </TableCell>
                         <TableCell>
-                          {row.checkOut} – <span className={row.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkOutMode}</span>
+                          {row.checkOut ? (
+                            <>
+                              {row.checkOut} – <span className={row.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkOutMode}</span>
+                            </>
+                          ) : (
+                            <span className="text-red-600 text-sm font-medium flex items-center">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Missing
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>
-                          {isOvertime ? (
+                          {isMissingCheckOut ? (
+                            <span className="text-amber-600 text-sm">Incomplete</span>
+                          ) : isOvertime ? (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -521,16 +650,23 @@ const Reports = () => {
                   calculateWorkingHours(r.checkIn, r.checkOut)
                 ));
                 const isEmployeeTotalOvertime = isOvertimeWorked(totalHours);
+                const hasMissingCheckOuts = records.some(r => r.checkIn && !r.checkOut);
                 
                 return (
-                  <Card key={key} className="overflow-hidden">
+                  <Card key={key} className={`overflow-hidden ${hasMissingCheckOuts ? 'border-amber-300' : ''}`}>
                     <Collapsible>
-                      <div className="flex items-center justify-between p-4 bg-gray-50 border-b">
+                      <div className={`flex items-center justify-between p-4 ${hasMissingCheckOuts ? 'bg-amber-50' : 'bg-gray-50'} border-b`}>
                         <div className="flex items-center space-x-4">
                           <div>
                             <h3 className="font-semibold">{name}</h3>
                             <p className="text-sm text-gray-500">ID: {employeeId}</p>
                           </div>
+                          {hasMissingCheckOuts && (
+                            <span className="text-amber-600 text-xs font-medium flex items-center">
+                              <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                              Missing check-outs
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
@@ -564,9 +700,10 @@ const Reports = () => {
                             {records.map((record) => {
                               const workingHours = calculateWorkingHours(record.checkIn, record.checkOut);
                               const isOvertime = isOvertimeWorked(workingHours);
+                              const isMissingCheckOut = record.checkIn && !record.checkOut;
                               
                               return (
-                                <TableRow key={record.id}>
+                                <TableRow key={record.id} className={isMissingCheckOut ? "bg-amber-50" : ""}>
                                   <TableCell>{record.entity}</TableCell>
                                   <TableCell>{record.project}</TableCell>
                                   <TableCell>{format(new Date(record.date), "dd/MM/yyyy")}</TableCell>
@@ -574,10 +711,21 @@ const Reports = () => {
                                     {record.checkIn} – <span className={record.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkInMode}</span>
                                   </TableCell>
                                   <TableCell>
-                                    {record.checkOut} – <span className={record.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkOutMode}</span>
+                                    {record.checkOut ? (
+                                      <>
+                                        {record.checkOut} – <span className={record.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkOutMode}</span>
+                                      </>
+                                    ) : (
+                                      <span className="text-red-600 text-sm font-medium flex items-center">
+                                        <AlertTriangle className="h-3 w-3 mr-1" />
+                                        Missing
+                                      </span>
+                                    )}
                                   </TableCell>
                                   <TableCell>
-                                    {isOvertime ? (
+                                    {isMissingCheckOut ? (
+                                      <span className="text-amber-600 text-sm">Incomplete</span>
+                                    ) : isOvertime ? (
                                       <TooltipProvider>
                                         <Tooltip>
                                           <TooltipTrigger asChild>
