@@ -1,8 +1,17 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash, X } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableHead, 
+  TableRow, 
+  TableCell 
+} from "@/components/ui/table";
 
 // Updated mock data with separate web and mobile permissions
 const initialRoles = [
@@ -209,8 +218,8 @@ const Roles = () => {
         </button>
       </div>
 
-      <Card className="p-0 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
+      <Card className="p-4 overflow-hidden">
+        <div className="pb-4 border-b border-gray-200">
           <div className="relative max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -226,25 +235,25 @@ const Roles = () => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th scope="col" className="px-4 py-3">Role Code</th>
-                <th scope="col" className="px-4 py-3">Role Name</th>
-                <th scope="col" className="px-4 py-3">Description</th>
-                <th scope="col" className="px-4 py-3">Permissions</th>
-                <th scope="col" className="px-4 py-3">Created Date</th>
-                <th scope="col" className="px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Role Code</TableHead>
+                <TableHead>Role Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Permissions</TableHead>
+                <TableHead>Created Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredRoles.length > 0 ? (
                 filteredRoles.map(role => (
-                  <tr key={role.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{role.code}</td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{role.name}</td>
-                    <td className="px-4 py-3">{role.description}</td>
-                    <td className="px-4 py-3">
+                  <TableRow key={role.id}>
+                    <TableCell className="font-medium">{role.code}</TableCell>
+                    <TableCell className="font-medium text-gray-900">{role.name}</TableCell>
+                    <TableCell>{role.description}</TableCell>
+                    <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {getCombinedPermissionsDisplay(role)}
                         {(role.webPermissions.length + role.mobilePermissions.length) > 2 && (
@@ -253,10 +262,10 @@ const Roles = () => {
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td className="px-4 py-3">{role.createdAt}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
+                    </TableCell>
+                    <TableCell>{role.createdAt}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex space-x-2 justify-end">
                         <button 
                           onClick={() => handleEditRole(role)}
                           className="text-blue-500 hover:text-blue-700"
@@ -273,18 +282,18 @@ const Roles = () => {
                           <Trash className={`h-4 w-4 ${role.code === "SADM" ? "opacity-50 cursor-not-allowed" : ""}`} />
                         </button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-400">
                     No roles found matching the search criteria
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </Card>
 
