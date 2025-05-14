@@ -84,21 +84,60 @@ export const useToast = () => {
   return context;
 };
 
+// Define the toast object with proper types - separate from the hook
+// This allows toast to be imported without the hook
 export const toast = {
-  default: (props: Omit<ToastProps, "variant">) => {
-    const { toast } = useToast();
-    toast({ ...props, variant: "default" });
+  // Basic toast creation method
+  create: (props: ToastProps) => {
+    try {
+      const context = React.useContext(ToastContext);
+      if (!context) {
+        console.error("Toast context not available");
+        return;
+      }
+      context.toast(props);
+    } catch (e) {
+      console.error("Error showing toast", e);
+    }
   },
-  destructive: (props: Omit<ToastProps, "variant">) => {
-    const { toast } = useToast();
-    toast({ ...props, variant: "destructive" });
+  
+  // Helper methods with predefined formats
+  default: (message: string) => {
+    try {
+      const context = React.useContext(ToastContext);
+      if (!context) {
+        console.error("Toast context not available");
+        return;
+      }
+      context.toast({ title: "Notification", description: message, variant: "default" });
+    } catch (e) {
+      console.error("Error showing toast", e);
+    }
   },
-  success: (message: string) => {
-    const { toast } = useToast();
-    toast({ title: "Success", description: message, variant: "default" });
-  },
+  
   error: (message: string) => {
-    const { toast } = useToast();
-    toast({ title: "Error", description: message, variant: "destructive" });
+    try {
+      const context = React.useContext(ToastContext);
+      if (!context) {
+        console.error("Toast context not available");
+        return;
+      }
+      context.toast({ title: "Error", description: message, variant: "destructive" });
+    } catch (e) {
+      console.error("Error showing toast", e);
+    }
+  },
+  
+  success: (message: string) => {
+    try {
+      const context = React.useContext(ToastContext);
+      if (!context) {
+        console.error("Toast context not available");
+        return;
+      }
+      context.toast({ title: "Success", description: message, variant: "default" });
+    } catch (e) {
+      console.error("Error showing toast", e);
+    }
   }
 };

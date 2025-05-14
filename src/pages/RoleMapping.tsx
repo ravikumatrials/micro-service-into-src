@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCre
 import { BulkLoginCredentialsDialog } from "@/components/role-mapping/BulkLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { autoAssignRoleByClassification } from "@/utils/roleUtils";
 import {
   Select,
@@ -54,30 +53,23 @@ const RoleMapping = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   
-  // Add state for login credentials modal
   const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
   const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
   
-  // Add state for bulk credentials modal
   const [bulkCredentialsDialogOpen, setBulkCredentialsDialogOpen] = useState(false);
   const [employeesForBulkCredentials, setEmployeesForBulkCredentials] = useState([]);
   
-  // Bulk selection state
   const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
   const [bulkRoleToAssign, setBulkRoleToAssign] = useState<string>("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
   
-  // Auto-assign roles for employees without roles when component mounts
   useEffect(() => {
-    // Process employees when the component loads
     mockEmployees.forEach(employee => {
-      // If no role is assigned yet, check if we should auto-assign one
       if (!employee.currentRole) {
         const autoAssignedRole = autoAssignRoleByClassification(employee);
         
         if (autoAssignedRole && autoAssignedRole !== employee.currentRole) {
-          // In a real app, this would be an API call
           employee.currentRole = autoAssignedRole;
           
           console.log(`Auto-assigned role '${autoAssignedRole}' to ${employee.name} based on classification '${employee.classification}'`);
@@ -86,7 +78,6 @@ const RoleMapping = () => {
     });
   }, []);
 
-  // Extract unique values for filters
   const entities = Array.from(new Set(mockEmployees.map(emp => emp.entity)));
   const classifications = Array.from(new Set(mockEmployees.map(emp => emp.classification)));
   const categories = Array.from(new Set(mockEmployees.map(emp => emp.category)));
@@ -109,41 +100,32 @@ const RoleMapping = () => {
   };
 
   const handleRoleAssigned = (role: string) => {
-    // In a real app, this would update the backend
     mockEmployees.forEach(emp => {
       if (emp.id === selectedEmployee?.id) {
         emp.currentRole = role;
       }
     });
     
-    // Always open credentials dialog after role assignment
     setEmployeeForCredentials(selectedEmployee);
     setCredentialsDialogOpen(true);
-    
-    // Notably, success toast is now moved to after credentials are set
-    // This is handled in the credentials dialog
   };
 
-  // Handle role removal
   const handleRemoveRole = () => {
     if (!selectedEmployee) return;
 
-    // In a real app, this would update the backend
     mockEmployees.forEach(emp => {
       if (emp.id === selectedEmployee.id) {
         emp.currentRole = undefined;
       }
     });
     
-    // Create audit log
     const auditLog = {
       employeeId: selectedEmployee.employeeId,
       removedRole: selectedEmployee.currentRole,
-      removedBy: "Admin User", // This would come from authentication in a real app
+      removedBy: "Admin User",
       timestamp: new Date().toISOString(),
     };
     
-    // In a real app, this would be sent to a backend API to store in the audit logs
     console.log("Role removal audit log:", auditLog);
   };
 
@@ -155,7 +137,6 @@ const RoleMapping = () => {
     setCategoryFilter("all");
   };
 
-  // Handle checkbox selection
   const handleSelectEmployee = (employeeId: number, checked: boolean) => {
     if (checked) {
       setSelectedEmployees([...selectedEmployees, employeeId]);
@@ -164,7 +145,6 @@ const RoleMapping = () => {
     }
   };
 
-  // Handle "Select All" checkbox
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       const allEmployeeIds = filteredEmployees.map(emp => emp.id);
@@ -174,80 +154,62 @@ const RoleMapping = () => {
     }
   };
 
-  // Check if all currently visible employees are selected
   const areAllSelected = filteredEmployees.length > 0 && 
     filteredEmployees.every(emp => selectedEmployees.includes(emp.id));
 
-  // Handle bulk role assignment
   const handleBulkAssign = () => {
     if (!bulkRoleToAssign) {
       toast.error("Please select a role to assign");
       return;
     }
 
-    // Check if any selected employees already have roles
     const hasExistingRoles = selectedEmployees.some(id => {
       const emp = mockEmployees.find(e => e.id === id);
       return emp && emp.currentRole !== undefined;
     });
 
     if (hasExistingRoles) {
-      // Show overwrite confirmation dialog
       setOverwriteDialogOpen(true);
     } else {
-      // Show regular confirmation dialog
       setConfirmDialogOpen(true);
     }
   };
 
-  // Confirm bulk assignment
   const confirmBulkAssignment = () => {
-    // In a real app, this would update the backend
     mockEmployees.forEach(emp => {
       if (selectedEmployees.includes(emp.id)) {
         emp.currentRole = bulkRoleToAssign;
       }
     });
 
-    // Show success toast
     toast.success(`Role assigned to ${selectedEmployees.length} employees successfully.`);
 
-    // Prepare for bulk credentials setup
     const selectedEmployeesData = mockEmployees.filter(emp => 
       selectedEmployees.includes(emp.id)
     );
 
-    // For 5 or more employees, open the bulk credentials dialog
     if (selectedEmployees.length >= 5) {
       setEmployeesForBulkCredentials(selectedEmployeesData);
       setBulkCredentialsDialogOpen(true);
-    } 
-    // For a single employee, use the existing credentials dialog
-    else if (selectedEmployees.length === 1) {
-      // Find the employee to set credentials for
+    } else if (selectedEmployees.length === 1) {
       const employeeToSetup = mockEmployees.find(emp => emp.id === selectedEmployees[0]);
       if (employeeToSetup) {
         setEmployeeForCredentials(employeeToSetup);
         setCredentialsDialogOpen(true);
       }
-    }
-    // For 2-4 employees, we'll still use the bulk dialog for consistency
-    else if (selectedEmployees.length > 1) {
+    } else if (selectedEmployees.length > 1) {
       setEmployeesForBulkCredentials(selectedEmployeesData);
       setBulkCredentialsDialogOpen(true);
     }
 
-    // Reset selection state
     setSelectedEmployees([]);
     setBulkRoleToAssign("");
     setConfirmDialogOpen(false);
     setOverwriteDialogOpen(false);
   };
 
-  // Function to handle the credentials dialog close and update UI
   const handleCredentialsDialogClose = (open: boolean) => {
     setCredentialsDialogOpen(open);
-    // If dialog is closing, also close the role assign dialog
     if (!open) {
       setDialogOpen(false);
     }
@@ -279,7 +241,6 @@ const RoleMapping = () => {
         </Card>
       </div>
 
-      {/* Bulk Action Bar - Shown when employees are selected */}
       {selectedEmployees.length > 0 && (
         <Card className="p-4 bg-blue-50 border-blue-200 sticky top-0 z-10">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -428,7 +389,6 @@ const RoleMapping = () => {
         )}
       </Card>
 
-      {/* Regular Role Assign Dialog - Modified to work with sequential flow */}
       <RoleAssignDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -438,21 +398,18 @@ const RoleMapping = () => {
         onRemoveRole={handleRemoveRole}
       />
 
-      {/* Set Login Credentials Dialog - For single employee, now part of the sequential flow */}
       <SetLoginCredentialsDialog
         open={credentialsDialogOpen}
         onOpenChange={handleCredentialsDialogClose}
         employee={employeeForCredentials}
       />
 
-      {/* Bulk Login Credentials Dialog - For multiple employees */}
       <BulkLoginCredentialsDialog
         open={bulkCredentialsDialogOpen}
         onOpenChange={setBulkCredentialsDialogOpen}
         employees={employeesForBulkCredentials}
       />
 
-      {/* Standard confirmation dialog */}
       <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -468,7 +425,6 @@ const RoleMapping = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Overwrite confirmation dialog */}
       <AlertDialog open={overwriteDialogOpen} onOpenChange={setOverwriteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
