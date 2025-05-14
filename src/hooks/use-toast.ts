@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import {
   ToastActionElement,
@@ -155,6 +156,32 @@ function toast({ ...props }: Toast) {
   }
 }
 
+// Extend the toast function with convenience methods
+const extendedToast = Object.assign(
+  toast,
+  {
+    error: (message: string) => {
+      return toast({ 
+        variant: "destructive", 
+        title: "Error", 
+        description: message 
+      });
+    },
+    success: (message: string) => {
+      return toast({ 
+        title: "Success", 
+        description: message 
+      });
+    },
+    default: (message: string) => {
+      return toast({ 
+        title: "Notification", 
+        description: message 
+      });
+    }
+  }
+);
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -170,9 +197,9 @@ function useToast() {
 
   return {
     ...state,
-    toast,
+    toast: extendedToast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 
-export { useToast, toast }
+export { useToast, extendedToast as toast }

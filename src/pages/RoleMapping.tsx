@@ -9,7 +9,7 @@ import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCre
 import { BulkLoginCredentialsDialog } from "@/components/role-mapping/BulkLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast, useToast } from "@/components/ui/use-toast";
 import { autoAssignRoleByClassification } from "@/utils/roleUtils";
 import {
   Select,
