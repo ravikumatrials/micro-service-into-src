@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCre
 import { BulkLoginCredentialsDialog } from "@/components/role-mapping/BulkLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
-import { toast, useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { autoAssignRoleByClassification } from "@/utils/roleUtils";
 import {
   Select,
@@ -28,23 +29,28 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 
+// Mock users to simulate Users submenu
+const mockUsers = [
+  { id: 1, name: "Sarah Johnson", employeeId: "EMP002", role: "Supervisor", email: "sarah.johnson@example.com", loginMethod: "Email/Password" },
+];
+
 const mockEmployees = [
   { id: 1, name: "John Smith", employeeId: "EMP001", location: "Site A", project: "Project X", entity: "Tanseeq Investment", category: "Carpenter", classification: "Laborer", currentRole: "Labour", email: "john.smith@example.com" },
-  { id: 2, name: "Sarah Johnson", employeeId: "EMP002", location: "Site B", project: "Project Y", entity: "Tanseeq Landscaping LLC", category: "Manager", classification: "Staff", currentRole: "Supervisor", email: "sarah.johnson@example.com" },
-  { id: 3, name: "Robert Williams", employeeId: "EMP003", location: "Site A", project: "Project X", entity: "Gulf Builders International", category: "Electrician", classification: "Laborer", currentRole: undefined, email: "robert.williams@example.com" },
+  { id: 2, name: "Sarah Johnson", employeeId: "EMP002", location: "Site B", project: "Project Y", entity: "Tanseeq Landscaping LLC", category: "Manager", classification: "Staff", currentRole: "Staff", email: "sarah.johnson@example.com" },
+  { id: 3, name: "Robert Williams", employeeId: "EMP003", location: "Site A", project: "Project X", entity: "Gulf Builders International", category: "Electrician", classification: "Laborer", currentRole: "Labour", email: "robert.williams@example.com" },
   { id: 4, name: "Emily Davis", employeeId: "EMP004", location: "Site C", project: "Project Z", entity: "Al Maha Projects", category: "Plumber", classification: "Laborer", currentRole: "Labour", email: "emily.davis@example.com" },
+  { id: 5, name: "Michael Brown", employeeId: "EMP005", location: "Site B", project: "Project Y", entity: "Tanseeq Landscaping LLC", category: "Supervisor", classification: "Staff", currentRole: "Staff", email: "michael.brown@example.com" },
 ];
 
 const mockRoles = [
   { id: 1, name: "Labour" },
-  { id: 2, name: "Supervisor" },
+  { id: 2, name: "Staff" },
   { id: 3, name: "Super Admin" },
   { id: 4, name: "Report Admin" },
 ];
 
 const RoleMapping = () => {
   const isMobile = useIsMobile();
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
@@ -63,6 +69,9 @@ const RoleMapping = () => {
   const [bulkRoleToAssign, setBulkRoleToAssign] = useState<string>("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
+  
+  // User state to simulate the Users submenu
+  const [users, setUsers] = useState(mockUsers);
   
   useEffect(() => {
     mockEmployees.forEach(employee => {
@@ -103,6 +112,57 @@ const RoleMapping = () => {
     mockEmployees.forEach(emp => {
       if (emp.id === selectedEmployee?.id) {
         emp.currentRole = role;
+        
+        // If the role is not Labour, add the employee to Users list
+        if (role !== "Labour") {
+          const existingUserIndex = users.findIndex(user => user.employeeId === emp.employeeId);
+          
+          if (existingUserIndex === -1) {
+            // Add to users if not already there
+            const newUser = {
+              id: emp.id,
+              name: emp.name,
+              employeeId: emp.employeeId,
+              role: role,
+              email: emp.email,
+              loginMethod: null // Will be set in credentials dialog
+            };
+            
+            setUsers(prev => [...prev, newUser]);
+            
+            toast({
+              title: "User Added",
+              description: `${emp.name} has been added to the Users list with role: ${role}`,
+            });
+          } else {
+            // Update existing user
+            const updatedUsers = [...users];
+            updatedUsers[existingUserIndex] = {
+              ...updatedUsers[existingUserIndex],
+              role: role
+            };
+            setUsers(updatedUsers);
+            
+            toast({
+              title: "User Updated",
+              description: `${emp.name}'s role has been updated to: ${role}`,
+            });
+          }
+        } else {
+          // If role is Labour, check if they exist in users list and remove if needed
+          const existingUserIndex = users.findIndex(user => user.employeeId === emp.employeeId);
+          
+          if (existingUserIndex !== -1) {
+            // Remove from users if role is set to Labour
+            const updatedUsers = users.filter(user => user.employeeId !== emp.employeeId);
+            setUsers(updatedUsers);
+            
+            toast({
+              title: "User Removed",
+              description: `${emp.name} has been removed from the Users list as they now have a Labour role`,
+            });
+          }
+        }
       }
     });
     
@@ -115,7 +175,18 @@ const RoleMapping = () => {
 
     mockEmployees.forEach(emp => {
       if (emp.id === selectedEmployee.id) {
+        const prevRole = emp.currentRole;
         emp.currentRole = undefined;
+        
+        // If they were in the users list, remove them
+        if (prevRole !== "Labour") {
+          setUsers(prev => prev.filter(user => user.employeeId !== emp.employeeId));
+          
+          toast({
+            title: "User Removed",
+            description: `${emp.name} has been removed from the Users list as their role was removed`,
+          });
+        }
       }
     });
     
@@ -178,11 +249,44 @@ const RoleMapping = () => {
   const confirmBulkAssignment = () => {
     mockEmployees.forEach(emp => {
       if (selectedEmployees.includes(emp.id)) {
+        const prevRole = emp.currentRole;
         emp.currentRole = bulkRoleToAssign;
+        
+        // If role is not Labour, add to users
+        if (bulkRoleToAssign !== "Labour") {
+          const existingUserIndex = users.findIndex(user => user.employeeId === emp.employeeId);
+          
+          if (existingUserIndex === -1) {
+            // Add to users if not there
+            setUsers(prev => [...prev, {
+              id: emp.id,
+              name: emp.name,
+              employeeId: emp.employeeId,
+              role: bulkRoleToAssign,
+              email: emp.email,
+              loginMethod: null
+            }]);
+          } else {
+            // Update role if already in users
+            const updatedUsers = [...users];
+            updatedUsers[existingUserIndex] = {
+              ...updatedUsers[existingUserIndex],
+              role: bulkRoleToAssign
+            };
+            setUsers(updatedUsers);
+          }
+        } 
+        // If previous role wasn't Labour, but new role is Labour, remove from Users
+        else if (prevRole && prevRole !== "Labour") {
+          setUsers(prev => prev.filter(user => user.employeeId !== emp.employeeId));
+        }
       }
     });
 
-    toast.success(`Role assigned to ${selectedEmployees.length} employees successfully.`);
+    toast({
+      title: "Success",
+      description: `Role assigned to ${selectedEmployees.length} employees successfully.`,
+    });
 
     const selectedEmployeesData = mockEmployees.filter(emp => 
       selectedEmployees.includes(emp.id)
@@ -212,6 +316,17 @@ const RoleMapping = () => {
     setCredentialsDialogOpen(open);
     if (!open) {
       setDialogOpen(false);
+    }
+  };
+
+  // Helper function to determine the button label based on role and classification
+  const getActionButtonLabel = (employee: any) => {
+    if (employee.currentRole === "Staff") {
+      return "Update Role";
+    } else if (employee.currentRole === "Labour") {
+      return "Assign Role";
+    } else {
+      return employee.currentRole ? "Update Role" : "Assign Role";
     }
   };
 
@@ -321,10 +436,7 @@ const RoleMapping = () => {
                   className="w-full mt-2"
                   onClick={() => handleAssignRole(employee)}
                 >
-                  {employee.classification === "Laborer" ? 
-                    (employee.currentRole ? "Update Role" : "Assign Role") :
-                    (employee.currentRole ? "Update Role" : "Assign Role")
-                  }
+                  {getActionButtonLabel(employee)}
                 </Button>
               </div>
             ))}
@@ -376,10 +488,7 @@ const RoleMapping = () => {
                       variant="outline"
                       onClick={() => handleAssignRole(employee)}
                     >
-                      {employee.classification === "Laborer" ? 
-                        "Update Role" : 
-                        (employee.currentRole ? "Update Role" : "Assign Role")
-                      }
+                      {getActionButtonLabel(employee)}
                     </Button>
                   </TableCell>
                 </TableRow>

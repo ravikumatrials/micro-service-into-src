@@ -21,7 +21,7 @@ interface ManualAttendanceTabsProps {
   filters: AttendanceFilters;
   projects: { id: number; name: string; coordinates?: { geofenceData: string }; location?: string }[];
   selectedDate: Date;
-  setSelectedDate: React.Dispatch<React.SetStateAction<Date>>;
+  setSelectedDate: (date: Date | undefined) => void;
   dateSelected: boolean;
   setDateSelected: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -40,17 +40,9 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
   // Empty array for locations since we're not using them anymore
   const emptyLocations: { id: number; name: string }[] = [];
 
-  // Handle date change
-  const handleDateChange = (date: Date | undefined) => {
-    if (date) {
-      setSelectedDate(date);
-      setDateSelected(true);
-    }
-  };
-
   return (
     <div className="space-y-4">
-      {/* Date Picker Component */}
+      {/* Date Picker Component - Now defaults to today's date */}
       <div className="flex justify-end items-center gap-2 mb-4">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">Attendance Date:</span>
@@ -58,10 +50,7 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className={cn(
-                  "w-[240px] justify-start text-left font-normal",
-                  !dateSelected && "border-orange-300 bg-orange-50 text-orange-800"
-                )}
+                className="w-[240px] justify-start text-left font-normal"
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {selectedDate ? (
@@ -69,16 +58,17 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
                 ) : (
                   <span>Select Date</span>
                 )}
-                {!dateSelected && <span className="ml-auto text-xs font-medium text-orange-600">(Required)</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
               <Calendar
                 mode="single"
                 selected={selectedDate}
-                onSelect={handleDateChange}
+                onSelect={setSelectedDate}
                 initialFocus
                 className="pointer-events-auto"
+                // Optional: Disable future dates
+                // disabled={(date) => date > new Date()}
               />
             </PopoverContent>
           </Popover>

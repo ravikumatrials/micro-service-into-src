@@ -10,8 +10,8 @@ import { toast } from "@/hooks/use-toast";
 const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
   const [activeTab, setActiveTab] = useState("records");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [dateSelected, setDateSelected] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Default to today's date
+  const [dateSelected, setDateSelected] = useState<boolean>(true); // Default to true since we're auto-selecting today
   
   // Apply the filter function to get filtered records
   const filteredRecords = filterRecords(filters);
@@ -27,19 +27,23 @@ const ManualAttendanceRecords = () => {
     console.log("Applying filters:", filters);
     console.log("Selected date:", selectedDate);
     
-    if (!dateSelected) {
-      toast({
-        title: "Date selection required",
-        description: "Please select an attendance date before applying filters",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     toast({
       title: "Filters applied",
       description: `Showing attendance data for ${format(selectedDate, "PPP")}`,
     });
+  };
+
+  // Handle date change
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      setDateSelected(true);
+      
+      toast({
+        title: "Date selected",
+        description: `Attendance date set to ${format(date, "PPP")}`,
+      });
+    }
   };
 
   return (
@@ -64,7 +68,7 @@ const ManualAttendanceRecords = () => {
         filters={filters}
         projects={mockProjects}
         selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
+        setSelectedDate={handleDateChange}
         dateSelected={dateSelected}
         setDateSelected={setDateSelected}
       />
