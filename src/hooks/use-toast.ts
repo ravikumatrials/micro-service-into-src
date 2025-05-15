@@ -1,5 +1,6 @@
 
-import { toast as sonnerToast } from 'sonner';
+import { toast as sonnerToast, type ExternalToast } from 'sonner';
+import * as React from "react";
 
 type ToastProps = {
   title: string;
@@ -12,8 +13,8 @@ type ToastProps = {
 // A wrapper that normalizes the toast API
 export const toast = {
   // Default toast
-  default: (...args: Parameters<typeof sonnerToast>): void => {
-    return sonnerToast(...args);
+  default: (message: React.ReactNode, data?: ExternalToast): void => {
+    sonnerToast(message, data);
   },
   // Success toast
   success: (message: string | ToastProps): void => {
@@ -65,6 +66,7 @@ export const toast = {
   },
 };
 
+// Export a simple version of useToast for compatibility with components expecting the toast function
 export const useToast = () => {
   return { toast };
 };
