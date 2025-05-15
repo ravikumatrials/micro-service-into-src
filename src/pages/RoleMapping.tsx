@@ -10,8 +10,8 @@ import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCre
 import { BulkLoginCredentialsDialog } from "@/components/role-mapping/BulkLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
-import { autoAssignRoleByClassification } from "@/utils/roleUtils";
+import { toast } from "@/hooks/use-toast";
+import { autoAssignRoleByClassification, isRoleMappingVisibleRole, roleMappingVisibleRoles } from "@/utils/roleUtils";
 import {
   Select,
   SelectContent,
@@ -73,7 +73,11 @@ const RoleMapping = () => {
   // User state to simulate the Users submenu
   const [users, setUsers] = useState(mockUsers);
   
+  // Filtered employee list to only include employees with Staff or Labour roles
+  const [filteredMockEmployees, setFilteredMockEmployees] = useState(mockEmployees);
+
   useEffect(() => {
+    // Auto-assign roles based on classification
     mockEmployees.forEach(employee => {
       if (!employee.currentRole) {
         const autoAssignedRole = autoAssignRoleByClassification(employee);
@@ -85,13 +89,17 @@ const RoleMapping = () => {
         }
       }
     });
+
+    // Filter employees to only include those with Staff or Labour roles or no role
+    const filtered = mockEmployees.filter(emp => isRoleMappingVisibleRole(emp.currentRole));
+    setFilteredMockEmployees(filtered);
   }, []);
 
-  const entities = Array.from(new Set(mockEmployees.map(emp => emp.entity)));
-  const classifications = Array.from(new Set(mockEmployees.map(emp => emp.classification)));
-  const categories = Array.from(new Set(mockEmployees.map(emp => emp.category)));
+  const entities = Array.from(new Set(filteredMockEmployees.map(emp => emp.entity)));
+  const classifications = Array.from(new Set(filteredMockEmployees.map(emp => emp.classification)));
+  const categories = Array.from(new Set(filteredMockEmployees.map(emp => emp.category)));
 
-  const filteredEmployees = mockEmployees.filter(employee => {
+  const filteredEmployees = filteredMockEmployees.filter(employee => {
     const matchesSearch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
@@ -109,62 +117,68 @@ const RoleMapping = () => {
   };
 
   const handleRoleAssigned = (role: string) => {
-    mockEmployees.forEach(emp => {
-      if (emp.id === selectedEmployee?.id) {
-        emp.currentRole = role;
+    if (!selectedEmployee) return;
+    
+    const employeeIndex = mockEmployees.findIndex(emp => emp.id === selectedEmployee.id);
+    if (employeeIndex !== -1) {
+      const prevRole = mockEmployees[employeeIndex].currentRole;
+      mockEmployees[employeeIndex].currentRole = role;
+      
+      // If the role is not Staff or Labour, move the employee to Users list
+      if (!roleMappingVisibleRoles.includes(role)) {
+        const existingUserIndex = users.findIndex(user => user.employeeId === selectedEmployee.employeeId);
         
-        // If the role is not Labour, add the employee to Users list
-        if (role !== "Labour") {
-          const existingUserIndex = users.findIndex(user => user.employeeId === emp.employeeId);
+        if (existingUserIndex === -1) {
+          // Add to users if not already there
+          const newUser = {
+            id: selectedEmployee.id,
+            name: selectedEmployee.name,
+            employeeId: selectedEmployee.employeeId,
+            role: role,
+            email: selectedEmployee.email,
+            entity: selectedEmployee.entity,
+            category: selectedEmployee.category,
+            classification: selectedEmployee.classification,
+            status: "Active",
+            loginMethod: null // Will be set in credentials dialog
+          };
           
-          if (existingUserIndex === -1) {
-            // Add to users if not already there
-            const newUser = {
-              id: emp.id,
-              name: emp.name,
-              employeeId: emp.employeeId,
-              role: role,
-              email: emp.email,
-              loginMethod: null // Will be set in credentials dialog
-            };
-            
-            setUsers(prev => [...prev, newUser]);
-            
-            toast({
-              title: "User Added",
-              description: `${emp.name} has been added to the Users list with role: ${role}`,
-            });
-          } else {
-            // Update existing user
-            const updatedUsers = [...users];
-            updatedUsers[existingUserIndex] = {
-              ...updatedUsers[existingUserIndex],
-              role: role
-            };
-            setUsers(updatedUsers);
-            
-            toast({
-              title: "User Updated",
-              description: `${emp.name}'s role has been updated to: ${role}`,
-            });
-          }
+          setUsers(prev => [...prev, newUser]);
+          
+          toast({
+            title: "User Added",
+            description: `${selectedEmployee.name} has been added to the Users list with role: ${role}`,
+          });
+
+          // Remove from role mapping view
+          setFilteredMockEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id));
         } else {
-          // If role is Labour, check if they exist in users list and remove if needed
-          const existingUserIndex = users.findIndex(user => user.employeeId === emp.employeeId);
+          // Update existing user
+          const updatedUsers = [...users];
+          updatedUsers[existingUserIndex] = {
+            ...updatedUsers[existingUserIndex],
+            role: role
+          };
+          setUsers(updatedUsers);
           
-          if (existingUserIndex !== -1) {
-            // Remove from users if role is set to Labour
-            const updatedUsers = users.filter(user => user.employeeId !== emp.employeeId);
-            setUsers(updatedUsers);
-            
-            toast({
-              title: "User Removed",
-              description: `${emp.name} has been removed from the Users list as they now have a Labour role`,
-            });
+          toast({
+            title: "User Updated",
+            description: `${selectedEmployee.name}'s role has been updated to: ${role}`,
+          });
+
+          // Remove from role mapping view
+          setFilteredMockEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id));
+        }
+      } else {
+        // If the previous role was not Staff/Labour but the new one is, check if they exist in users list and update filtered employees
+        if (prevRole && !roleMappingVisibleRoles.includes(prevRole)) {
+          // Add back to filtered employees
+          if (!filteredMockEmployees.some(emp => emp.id === selectedEmployee.id)) {
+            setFilteredMockEmployees(prev => [...prev, mockEmployees[employeeIndex]]);
           }
         }
       }
-    });
+    }
     
     setEmployeeForCredentials(selectedEmployee);
     setCredentialsDialogOpen(true);
@@ -179,8 +193,13 @@ const RoleMapping = () => {
         emp.currentRole = undefined;
         
         // If they were in the users list, remove them
-        if (prevRole !== "Labour") {
+        if (prevRole && !roleMappingVisibleRoles.includes(prevRole)) {
           setUsers(prev => prev.filter(user => user.employeeId !== emp.employeeId));
+          
+          // Add back to filtered employees if they were removed
+          if (!filteredMockEmployees.some(filteredEmp => filteredEmp.id === emp.id)) {
+            setFilteredMockEmployees(prev => [...prev, emp]);
+          }
           
           toast({
             title: "User Removed",
@@ -230,7 +249,11 @@ const RoleMapping = () => {
 
   const handleBulkAssign = () => {
     if (!bulkRoleToAssign) {
-      toast.error("Please select a role to assign");
+      toast({ 
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a role to assign"
+      });
       return;
     }
 
@@ -247,13 +270,19 @@ const RoleMapping = () => {
   };
 
   const confirmBulkAssignment = () => {
+    // Get selected employees before processing
+    const selectedEmployeesData = mockEmployees.filter(emp => selectedEmployees.includes(emp.id));
+    const movedEmployees = [];
+    
     mockEmployees.forEach(emp => {
       if (selectedEmployees.includes(emp.id)) {
         const prevRole = emp.currentRole;
         emp.currentRole = bulkRoleToAssign;
         
-        // If role is not Labour, add to users
-        if (bulkRoleToAssign !== "Labour") {
+        // If role is not Staff or Labour, add to users and track for removal
+        if (!roleMappingVisibleRoles.includes(bulkRoleToAssign)) {
+          movedEmployees.push(emp.id);
+          
           const existingUserIndex = users.findIndex(user => user.employeeId === emp.employeeId);
           
           if (existingUserIndex === -1) {
@@ -262,6 +291,10 @@ const RoleMapping = () => {
               id: emp.id,
               name: emp.name,
               employeeId: emp.employeeId,
+              entity: emp.entity,
+              category: emp.category,
+              classification: emp.classification,
+              status: "Active",
               role: bulkRoleToAssign,
               email: emp.email,
               loginMethod: null
@@ -276,32 +309,37 @@ const RoleMapping = () => {
             setUsers(updatedUsers);
           }
         } 
-        // If previous role wasn't Labour, but new role is Labour, remove from Users
-        else if (prevRole && prevRole !== "Labour") {
-          setUsers(prev => prev.filter(user => user.employeeId !== emp.employeeId));
+        // If previous role wasn't Staff/Labour but new role is, add back to filtered list
+        else if (prevRole && !roleMappingVisibleRoles.includes(prevRole)) {
+          // The employee should remain in the filtered list as they now have Staff/Labour role
+          if (!filteredMockEmployees.some(filteredEmp => filteredEmp.id === emp.id)) {
+            setFilteredMockEmployees(prev => [...prev, emp]);
+          }
         }
       }
     });
+
+    // Remove employees from filteredMockEmployees who were moved to Users
+    if (movedEmployees.length > 0) {
+      setFilteredMockEmployees(prev => prev.filter(emp => !movedEmployees.includes(emp.id)));
+    }
 
     toast({
       title: "Success",
       description: `Role assigned to ${selectedEmployees.length} employees successfully.`,
     });
 
-    const selectedEmployeesData = mockEmployees.filter(emp => 
-      selectedEmployees.includes(emp.id)
-    );
-
-    if (selectedEmployees.length >= 5) {
+    // Set up credentials dialog as needed
+    if (selectedEmployeesData.length >= 5) {
       setEmployeesForBulkCredentials(selectedEmployeesData);
       setBulkCredentialsDialogOpen(true);
-    } else if (selectedEmployees.length === 1) {
-      const employeeToSetup = mockEmployees.find(emp => emp.id === selectedEmployees[0]);
+    } else if (selectedEmployeesData.length === 1) {
+      const employeeToSetup = selectedEmployeesData[0];
       if (employeeToSetup) {
         setEmployeeForCredentials(employeeToSetup);
         setCredentialsDialogOpen(true);
       }
-    } else if (selectedEmployees.length > 1) {
+    } else if (selectedEmployeesData.length > 1) {
       setEmployeesForBulkCredentials(selectedEmployeesData);
       setBulkCredentialsDialogOpen(true);
     }
@@ -319,14 +357,14 @@ const RoleMapping = () => {
     }
   };
 
-  // Helper function to determine the button label based on role and classification
+  // Helper function to determine the button label based on role
   const getActionButtonLabel = (employee: any) => {
     if (employee.currentRole === "Staff") {
       return "Update Role";
     } else if (employee.currentRole === "Labour") {
       return "Assign Role";
     } else {
-      return employee.currentRole ? "Update Role" : "Assign Role";
+      return "Assign Role";
     }
   };
 
@@ -347,7 +385,7 @@ const RoleMapping = () => {
             setClassificationFilter={setClassificationFilter}
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
-            roles={mockRoles}
+            roles={mockRoles.filter(role => roleMappingVisibleRoles.includes(role.name))}
             entities={entities}
             classifications={classifications}
             categories={categories}

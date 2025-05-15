@@ -7,6 +7,14 @@ export const availableRoles = [
   { id: 4, name: "Report Admin", isSystemDefined: false }
 ];
 
+// Define the roles that should be visible in Role Mapping view
+export const roleMappingVisibleRoles = ["Staff", "Labour"];
+
+// Check if a role should be visible in Role Mapping view
+export const isRoleMappingVisibleRole = (role?: string): boolean => {
+  return !role || roleMappingVisibleRoles.includes(role);
+};
+
 // Auto-assign a role based on classification
 export const autoAssignRoleByClassification = (employee: {
   classification?: string;
