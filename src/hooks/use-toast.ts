@@ -4,20 +4,36 @@ import * as React from "react";
 
 type ToastProps = {
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   variant?: 'default' | 'destructive';
   duration?: number;
   action?: React.ReactNode;
 };
 
-// A wrapper that normalizes the toast API
-export const toast = {
-  // Default toast
-  default: (message: React.ReactNode, data?: ExternalToast): void => {
+// Create a function that can be called directly or through methods
+const createToastFunction = () => {
+  // Base function that handles direct calls
+  const toastFunction = (props: string | ToastProps): void => {
+    if (typeof props === 'string') {
+      sonnerToast(props);
+    } else {
+      sonnerToast(
+        props.title,
+        {
+          description: props.description,
+          duration: props.duration,
+          action: props.action,
+        }
+      );
+    }
+  };
+
+  // Add methods to the function
+  toastFunction.default = (message: React.ReactNode, data?: ExternalToast): void => {
     sonnerToast(message, data);
-  },
-  // Success toast
-  success: (message: string | ToastProps): void => {
+  };
+
+  toastFunction.success = (message: string | ToastProps): void => {
     if (typeof message === 'string') {
       sonnerToast.success(message);
     } else {
@@ -27,9 +43,9 @@ export const toast = {
         action: message.action,
       });
     }
-  },
-  // Error toast
-  error: (message: string | ToastProps): void => {
+  };
+
+  toastFunction.error = (message: string | ToastProps): void => {
     if (typeof message === 'string') {
       sonnerToast.error(message);
     } else {
@@ -39,9 +55,9 @@ export const toast = {
         action: message.action,
       });
     }
-  },
-  // Info toast
-  info: (message: string | ToastProps): void => {
+  };
+
+  toastFunction.info = (message: string | ToastProps): void => {
     if (typeof message === 'string') {
       sonnerToast.info(message);
     } else {
@@ -51,9 +67,9 @@ export const toast = {
         action: message.action,
       });
     }
-  },
-  // Warning toast
-  warning: (message: string | ToastProps): void => {
+  };
+
+  toastFunction.warning = (message: string | ToastProps): void => {
     if (typeof message === 'string') {
       sonnerToast.warning(message);
     } else {
@@ -63,10 +79,20 @@ export const toast = {
         action: message.action,
       });
     }
-  },
+  };
+
+  return toastFunction;
 };
 
-// Export a simple version of useToast for compatibility with components expecting the toast function
+// Export the toast function with methods
+export const toast = createToastFunction();
+
+// For backwards compatibility with components using the original shadcn structure
 export const useToast = () => {
-  return { toast };
+  // Simulate the same interface that was used before
+  return {
+    toast,
+    // Empty array for compatibility with components expecting toasts
+    toasts: [],
+  };
 };
