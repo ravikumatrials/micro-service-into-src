@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Edit, AlertCircle, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -195,18 +196,18 @@ const ExceptionTab = ({
            matchesClassification && matchesCategory && matchesStatus && matchesEntity;
   });
 
-  // Helper function to get entity name from entity ID
+  // Helper function to get entity name from entity ID - Fix the TypeScript error
   const getEntityName = (entityId: string) => {
     if (entityId === "all") return "";
     
     // These would typically come from your entities array prop
-    const entityMap = {
+    const entityMap: Record<string, string> = {
       "1": "Tanseeq Landscaping LLC",
       "2": "Tanseeq Construction Ltd",
       "3": "Tanseeq Engineering Co"
     };
     
-    return entityMap[entityId as keyof entityMap] || "";
+    return entityMap[entityId] || "";
   };
 
   const handleManualCheckOut = (employee: Employee) => {    
