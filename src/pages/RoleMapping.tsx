@@ -360,9 +360,9 @@ const RoleMapping = () => {
   // Helper function to determine the button label based on role
   const getActionButtonLabel = (employee: any) => {
     if (employee.currentRole === "Staff") {
-      return "Update Role";
-    } else if (employee.currentRole === "Labour") {
       return "Assign Role";
+    } else if (employee.currentRole === "Labour") {
+      return "Update Role";
     } else {
       return "Assign Role";
     }

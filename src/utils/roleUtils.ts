@@ -4,7 +4,8 @@ export const availableRoles = [
   { id: 1, name: "Labour", isSystemDefined: true },
   { id: 2, name: "Supervisor", isSystemDefined: false },
   { id: 3, name: "Super Admin", isSystemDefined: false },
-  { id: 4, name: "Report Admin", isSystemDefined: false }
+  { id: 4, name: "Report Admin", isSystemDefined: false },
+  { id: 5, name: "Staff", isSystemDefined: true }
 ];
 
 // Define the roles that should be visible in Role Mapping view
@@ -25,8 +26,10 @@ export const autoAssignRoleByClassification = (employee: {
     // Logic for auto-assignment
     if (employee.classification === "Laborer") {
       return "Labour"; // Automatically assign Labour role
+    } else if (employee.classification === "Staff") {
+      return "Staff"; // Automatically assign Staff role
     }
-    // For Staff classification, do not auto-assign any role (return undefined)
+    // For other classifications, do not auto-assign any role (return undefined)
   }
   return employee.currentRole; // Keep existing role if any
 };
