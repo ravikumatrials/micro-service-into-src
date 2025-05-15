@@ -1,10 +1,10 @@
 
 // Define available roles
 export const availableRoles = [
-  { id: 1, name: "Labour" },
-  { id: 2, name: "Supervisor" },
-  { id: 3, name: "Super Admin" },
-  { id: 4, name: "Report Admin" }
+  { id: 1, name: "Labour", isSystemDefined: true },
+  { id: 2, name: "Supervisor", isSystemDefined: false },
+  { id: 3, name: "Super Admin", isSystemDefined: false },
+  { id: 4, name: "Report Admin", isSystemDefined: false }
 ];
 
 // Auto-assign a role based on classification
@@ -78,6 +78,17 @@ export const updateEmployeeRole = (
   });
   
   return updated;
+};
+
+// Function to check if a role is valid based on permissions
+export const isValidRole = (roleName: string, permissions: string[]) => {
+  // Labour role is exempt from permission validation
+  if (roleName === "Labour") {
+    return true;
+  }
+  
+  // All other roles must have at least one permission
+  return permissions.length > 0;
 };
 
 // Function to find if an employee already exists in a given array

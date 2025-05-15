@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Plus, Search, Edit, Trash, X } from "lucide-react";
+import { Plus, Search, Edit, Trash, X, Info } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
@@ -12,6 +12,13 @@ import {
   TableRow, 
   TableCell 
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { toast } from "@/components/ui/use-toast";
 
 // Updated mock data with separate web and mobile permissions
 const initialRoles = [
@@ -22,7 +29,8 @@ const initialRoles = [
     description: "Regular construction worker with basic permissions", 
     webPermissions: [], 
     mobilePermissions: ["Self Attendance"],
-    createdAt: "01/01/2023"
+    createdAt: "01/01/2023",
+    isSystemDefined: true
   },
   { 
     id: 2, 
@@ -31,7 +39,8 @@ const initialRoles = [
     description: "Manages workers and can mark their attendance", 
     webPermissions: ["View Reports"], 
     mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History"],
-    createdAt: "01/01/2023"
+    createdAt: "01/01/2023",
+    isSystemDefined: false
   },
   { 
     id: 3, 
@@ -40,7 +49,8 @@ const initialRoles = [
     description: "Has full access to all system functionalities", 
     webPermissions: ["Manual Attendance", "View Reports", "Manage Employees", "Manage Projects", "Manage Locations", "Export Reports", "Face Enroll", "Manage Roles", "Role Mapping", "Manage Users"], 
     mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History", "Face Enroll"],
-    createdAt: "01/01/2023"
+    createdAt: "01/01/2023",
+    isSystemDefined: false
   },
   { 
     id: 4, 
@@ -49,7 +59,8 @@ const initialRoles = [
     description: "Can view and export all reports", 
     webPermissions: ["View Reports", "Export Reports"], 
     mobilePermissions: ["Attendance History"],
-    createdAt: "01/01/2023"
+    createdAt: "01/01/2023",
+    isSystemDefined: false
   },
 ];
 
@@ -88,6 +99,7 @@ const Roles = () => {
     mobilePermissions: []
   });
   const [activeTab, setActiveTab] = useState("web");
+  const [validationError, setValidationError] = useState("");
 
   // Filter roles based on search term
   const filteredRoles = roles.filter((role) => 
@@ -140,7 +152,28 @@ const Roles = () => {
     }
   };
 
+  const validatePermissions = (role) => {
+    // Labour role is exempt from permission validation
+    if (role.name === "Labour" || role.code === "LAB") {
+      return true;
+    }
+    
+    // All other roles must have at least one permission (web or mobile)
+    return role.webPermissions.length > 0 || role.mobilePermissions.length > 0;
+  };
+
   const handleCreateRole = () => {
+    // Validate permissions for non-Labour roles
+    if (!validatePermissions(newRole)) {
+      setValidationError("All roles (except Labour) must have at least one permission.");
+      toast({
+        title: "Validation Error",
+        description: "All roles (except Labour) must have at least one permission.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Generate a new ID that's one higher than the current max ID
     const maxId = Math.max(...roles.map(r => r.id));
     const newId = maxId + 1;
@@ -152,11 +185,13 @@ const Roles = () => {
       description: newRole.description,
       webPermissions: newRole.webPermissions,
       mobilePermissions: newRole.mobilePermissions,
-      createdAt: new Date().toLocaleDateString("en-US")
+      createdAt: new Date().toLocaleDateString("en-US"),
+      isSystemDefined: false
     };
     
     setRoles([...roles, roleToAdd]);
     setIsCreateModalOpen(false);
+    setValidationError("");
     
     // Reset form
     setNewRole({
@@ -166,14 +201,40 @@ const Roles = () => {
       webPermissions: [],
       mobilePermissions: []
     });
+    
+    toast({
+      title: "Success",
+      description: "Role created successfully.",
+    });
   };
 
   const handleEditRole = (role) => {
+    // Don't allow editing Labour role
+    if (role.name === "Labour" || role.code === "LAB") {
+      toast({
+        title: "Cannot Edit System Role",
+        description: "The Labour role is system-defined and cannot be edited.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setSelectedRole({...role});
     setIsEditModalOpen(true);
   };
 
   const saveEditedRole = () => {
+    // Validate permissions again before saving
+    if (!validatePermissions(selectedRole)) {
+      setValidationError("All roles (except Labour) must have at least one permission.");
+      toast({
+        title: "Validation Error",
+        description: "All roles (except Labour) must have at least one permission.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const updatedRoles = roles.map(role => 
       role.id === selectedRole.id ? selectedRole : role
     );
@@ -181,12 +242,34 @@ const Roles = () => {
     setRoles(updatedRoles);
     setIsEditModalOpen(false);
     setSelectedRole(null);
+    setValidationError("");
+    
+    toast({
+      title: "Success",
+      description: "Role updated successfully.",
+    });
   };
 
   const deleteRole = (roleId) => {
+    const roleToDelete = roles.find(role => role.id === roleId);
+    
+    // Don't allow deleting Labour role
+    if (roleToDelete && (roleToDelete.name === "Labour" || roleToDelete.code === "LAB")) {
+      toast({
+        title: "Cannot Delete System Role",
+        description: "The Labour role is system-defined and cannot be deleted.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (window.confirm("Are you sure you want to delete this role? This action cannot be undone.")) {
       const updatedRoles = roles.filter(role => role.id !== roleId);
       setRoles(updatedRoles);
+      toast({
+        title: "Success",
+        description: "Role deleted successfully.",
+      });
     }
   };
 
@@ -195,14 +278,43 @@ const Roles = () => {
     const combinedPermissions = [...role.webPermissions, ...role.mobilePermissions];
     const uniquePermissions = Array.from(new Set(combinedPermissions));
     
-    return uniquePermissions.slice(0, 2).map((permission, index) => (
-      <span 
-        key={index} 
-        className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded mr-1 mb-1"
-      >
-        {permission}
-      </span>
-    ));
+    if (role.name === "Labour" || role.code === "LAB") {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center text-gray-500">
+                <span className="text-xs italic mr-1">System-defined role</span>
+                <Info className="h-4 w-4" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <p>The Labour role is system-defined and does not require permissions.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    
+    return uniquePermissions.length > 0 ? (
+      <>
+        {uniquePermissions.slice(0, 2).map((permission, index) => (
+          <span 
+            key={index} 
+            className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded mr-1 mb-1"
+          >
+            {permission}
+          </span>
+        ))}
+        {uniquePermissions.length > 2 && (
+          <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+            +{uniquePermissions.length - 2} more
+          </span>
+        )}
+      </>
+    ) : (
+      <span className="text-gray-500 text-sm">No permissions</span>
+    );
   };
 
   return (
@@ -250,17 +362,17 @@ const Roles = () => {
               {filteredRoles.length > 0 ? (
                 filteredRoles.map(role => (
                   <TableRow key={role.id}>
-                    <TableCell className="font-medium">{role.code}</TableCell>
+                    <TableCell className="font-medium">
+                      {role.code}
+                      {role.isSystemDefined && (
+                        <span className="ml-2 text-xs text-gray-500">(System)</span>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium text-gray-900">{role.name}</TableCell>
                     <TableCell>{role.description}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {getCombinedPermissionsDisplay(role)}
-                        {(role.webPermissions.length + role.mobilePermissions.length) > 2 && (
-                          <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
-                            +{(role.webPermissions.length + role.mobilePermissions.length) - 2} more
-                          </span>
-                        )}
                       </div>
                     </TableCell>
                     <TableCell>{role.createdAt}</TableCell>
@@ -268,18 +380,29 @@ const Roles = () => {
                       <div className="flex space-x-2 justify-end">
                         <button 
                           onClick={() => handleEditRole(role)}
-                          className="text-blue-500 hover:text-blue-700"
-                          title="Edit Role"
+                          className={`text-blue-500 hover:text-blue-700 ${
+                            role.name === "Labour" ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                          title={role.name === "Labour" ? "System role cannot be edited" : "Edit Role"}
+                          disabled={role.name === "Labour"}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button 
                           onClick={() => deleteRole(role.id)}
-                          className="text-red-500 hover:text-red-700"
-                          title="Delete Role"
-                          disabled={role.code === "SADM"} // Prevent deleting Super Admin
+                          className={`text-red-500 hover:text-red-700 ${
+                            role.name === "Labour" || role.code === "SADM" ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                          title={
+                            role.name === "Labour" 
+                              ? "System role cannot be deleted" 
+                              : role.code === "SADM" 
+                                ? "Super Admin role cannot be deleted" 
+                                : "Delete Role"
+                          }
+                          disabled={role.name === "Labour" || role.code === "SADM"}
                         >
-                          <Trash className={`h-4 w-4 ${role.code === "SADM" ? "opacity-50 cursor-not-allowed" : ""}`} />
+                          <Trash className="h-4 w-4" />
                         </button>
                       </div>
                     </TableCell>
@@ -304,7 +427,10 @@ const Roles = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-gray-900">Add New Role</h2>
               <button 
-                onClick={() => setIsCreateModalOpen(false)}
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setValidationError("");
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="h-6 w-6" />
@@ -356,55 +482,89 @@ const Roles = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Permissions
-                </label>
-                <Tabs defaultValue="web" className="w-full" onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="web">Web Permissions</TabsTrigger>
-                    <TabsTrigger value="mobile">Mobile Permissions</TabsTrigger>
-                  </TabsList>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Permissions {newRole.name !== "Labour" && <span className="text-red-500">*</span>}
+                  </label>
                   
-                  <TabsContent value="web" className="mt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {webPermissions.map((permission, index) => (
-                        <div key={index} className="flex items-center">
-                          <Checkbox
-                            id={`web-permission-${index}`}
-                            checked={newRole.webPermissions.includes(permission)}
-                            onCheckedChange={() => handleWebPermissionChange(permission)}
-                          />
-                          <label htmlFor={`web-permission-${index}`} className="ml-2 block text-sm text-gray-900">
-                            {permission}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="mobile" className="mt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {mobilePermissions.map((permission, index) => (
-                        <div key={index} className="flex items-center">
-                          <Checkbox
-                            id={`mobile-permission-${index}`}
-                            checked={newRole.mobilePermissions.includes(permission)}
-                            onCheckedChange={() => handleMobilePermissionChange(permission)}
-                          />
-                          <label htmlFor={`mobile-permission-${index}`} className="ml-2 block text-sm text-gray-900">
-                            {permission}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                  {newRole.name === "Labour" && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center text-amber-500">
+                            <span className="text-xs italic mr-1">Special role exemption</span>
+                            <Info className="h-4 w-4" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>The Labour role is system-defined and does not require permissions.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+                
+                {newRole.name === "Labour" ? (
+                  <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                    <p className="text-gray-600 text-sm italic">
+                      The Labour role is system-defined and does not require permissions.
+                    </p>
+                  </div>
+                ) : (
+                  <Tabs defaultValue="web" className="w-full" onValueChange={setActiveTab}>
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                      <TabsTrigger value="web">Web Permissions</TabsTrigger>
+                      <TabsTrigger value="mobile">Mobile Permissions</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="web" className="mt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {webPermissions.map((permission, index) => (
+                          <div key={index} className="flex items-center">
+                            <Checkbox
+                              id={`web-permission-${index}`}
+                              checked={newRole.webPermissions.includes(permission)}
+                              onCheckedChange={() => handleWebPermissionChange(permission)}
+                            />
+                            <label htmlFor={`web-permission-${index}`} className="ml-2 block text-sm text-gray-900">
+                              {permission}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="mobile" className="mt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {mobilePermissions.map((permission, index) => (
+                          <div key={index} className="flex items-center">
+                            <Checkbox
+                              id={`mobile-permission-${index}`}
+                              checked={newRole.mobilePermissions.includes(permission)}
+                              onCheckedChange={() => handleMobilePermissionChange(permission)}
+                            />
+                            <label htmlFor={`mobile-permission-${index}`} className="ml-2 block text-sm text-gray-900">
+                              {permission}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                )}
+                
+                {validationError && !newRole.name.includes("Labour") && (
+                  <p className="mt-2 text-sm text-red-500">{validationError}</p>
+                )}
               </div>
             </div>
             
             <div className="mt-8 flex justify-end space-x-4">
               <button
-                onClick={() => setIsCreateModalOpen(false)}
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setValidationError("");
+                }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
@@ -428,7 +588,10 @@ const Roles = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-gray-900">Edit Role</h2>
               <button 
-                onClick={() => setIsEditModalOpen(false)}
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setValidationError("");
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="h-6 w-6" />
@@ -477,9 +640,12 @@ const Roles = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Permissions
-                </label>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Permissions {selectedRole.name !== "Labour" && <span className="text-red-500">*</span>}
+                  </label>
+                </div>
+                
                 <Tabs defaultValue="web" className="w-full" onValueChange={setActiveTab}>
                   <TabsList className="grid w-full grid-cols-2 mb-4">
                     <TabsTrigger value="web">Web Permissions</TabsTrigger>
@@ -528,12 +694,19 @@ const Roles = () => {
                     Note: Some permissions cannot be removed from the Super Admin role
                   </p>
                 )}
+                
+                {validationError && !selectedRole.name.includes("Labour") && (
+                  <p className="mt-2 text-sm text-red-500">{validationError}</p>
+                )}
               </div>
             </div>
             
             <div className="mt-8 flex justify-end space-x-4">
               <button
-                onClick={() => setIsEditModalOpen(false)}
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setValidationError("");
+                }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
