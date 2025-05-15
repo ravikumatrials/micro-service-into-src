@@ -12,7 +12,7 @@ type ToastProps = {
 // A wrapper that normalizes the toast API
 export const toast = {
   // Default toast
-  (...args: Parameters<typeof sonnerToast>): void {
+  default: (...args: Parameters<typeof sonnerToast>): void => {
     return sonnerToast(...args);
   },
   // Success toast
