@@ -56,7 +56,11 @@ export function RoleAssignDialog({
 
   const handleAssign = () => {
     if (!selectedRole) {
-      toast.error("Please select a role");
+      toast({
+        title: "Error",
+        description: "Please select a role",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -85,11 +89,35 @@ export function RoleAssignDialog({
       
       console.log("Role removal audit log:", auditLog);
       
-      toast.success(`Role successfully removed from ${employee?.name}`);
+      toast({
+        title: "Success",
+        description: `Role successfully removed from ${employee?.name}`
+      });
     }
   };
 
   if (!employee) return null;
+
+  // Determine the dialog title and button text based on the current role
+  const getDialogTitle = () => {
+    if (employee.currentRole === "Staff") {
+      return "Assign Role";
+    } else if (employee.currentRole === "Labour") {
+      return "Update Role";
+    } else {
+      return employee.currentRole ? "Update Role" : "Assign Role";
+    }
+  };
+
+  const getButtonText = () => {
+    if (employee.currentRole === "Staff") {
+      return "Assign Role";
+    } else if (employee.currentRole === "Labour") {
+      return "Update Role";
+    } else {
+      return employee.currentRole ? "Update Role" : "Assign Role";
+    }
+  };
 
   return (
     <>
@@ -97,7 +125,7 @@ export function RoleAssignDialog({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {employee.currentRole ? "Update Role" : "Assign Role"}
+              {getDialogTitle()}
             </DialogTitle>
             <DialogDescription>
               {employee.name} ({employee.employeeId})
@@ -140,7 +168,7 @@ export function RoleAssignDialog({
                 onClick={handleAssign}
                 className={employee.currentRole && onRemoveRole ? "" : "w-full"}
               >
-                {employee.currentRole ? "Update Role" : "Assign Role"}
+                {getButtonText()}
               </Button>
             </div>
           </div>
