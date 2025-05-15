@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Search, Building, UserCheck } from "lucide-react";
+import { Upload, Search, Building, UserCheck, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
@@ -10,10 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import CheckInTab from "@/components/attendance/CheckInTab";
 import CheckOutTab from "@/components/attendance/CheckOutTab";
 import ExceptionTab from "@/components/attendance/ExceptionTab";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 const Attendance = () => {
   const [tab, setTab] = useState("checkin");
-  const currentDate = new Date();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
   
@@ -25,7 +29,7 @@ const Attendance = () => {
   
   // Add a state for the selected date to pass to tab components
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [dateSelected, setDateSelected] = useState<boolean>(true); // Default to true since we start with current date
+  const [dateSelected, setDateSelected] = useState<boolean>(false); // Default to false to require explicit selection
 
   // Mock projects with location data
   const projects = [
@@ -72,6 +76,17 @@ const Attendance = () => {
     setSelectedEntity("all");
   };
 
+  // Handle date change
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      setDateSelected(true);
+      toast(`Attendance date set to ${format(date, "PPP")}`, {
+        description: "Employee list will update to reflect this date's attendance status."
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -87,10 +102,38 @@ const Attendance = () => {
       </div>
 
       <Card className="p-0 overflow-hidden shadow-md border-0">
-        {/* Current date display - static and prominent */}
+        {/* Date Picker - replacing static date display */}
         <div className="bg-proscape/5 p-3 border-b border-gray-200 flex items-center justify-center">
-          <div className="text-lg font-medium text-gray-700">
-            {format(currentDate, "MMMM d, yyyy")}
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700">Attendance Date:</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[240px] justify-start text-left font-normal",
+                    !dateSelected && "border-orange-300 bg-orange-50 text-orange-800"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {selectedDate ? (
+                    format(selectedDate, "MMMM d, yyyy")
+                  ) : (
+                    <span>Select Date</span>
+                  )}
+                  {!dateSelected && <span className="ml-auto text-xs font-medium text-orange-600">(Required)</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateChange}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         
@@ -237,16 +280,26 @@ const Attendance = () => {
             </TabsList>
           </div>
 
+          {/* Warning alert if date not selected */}
+          {!dateSelected && (
+            <Alert className="bg-orange-50 border border-orange-200 m-4">
+              <Calendar className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-orange-800">
+                Please select an attendance date before marking attendance
+              </AlertDescription>
+            </Alert>
+          )}
+
           <TabsContent value="checkin" className="p-4">
             <CheckInTab 
               searchQuery={searchQuery} 
               selectedProject={selectedProject} 
-              selectedStatus={selectedStatus}
-              projects={projects}
-              locations={[]}
               selectedClassification={selectedClassification}
               selectedCategory={selectedCategory}
+              selectedStatus={selectedStatus}
               selectedEntity={selectedEntity}
+              projects={projects}
+              locations={[]}
               selectedDate={selectedDate}
               dateSelected={dateSelected}
             />
@@ -256,13 +309,12 @@ const Attendance = () => {
             <CheckOutTab 
               searchQuery={searchQuery} 
               selectedProject={selectedProject} 
-              selectedLocation=""
-              projects={projects}
-              locations={[]}
               selectedClassification={selectedClassification}
               selectedCategory={selectedCategory}
               selectedStatus={selectedStatus}
               selectedEntity={selectedEntity}
+              projects={projects}
+              locations={[]}
               selectedDate={selectedDate}
               dateSelected={dateSelected}
             />
@@ -272,13 +324,12 @@ const Attendance = () => {
             <ExceptionTab 
               searchQuery={searchQuery} 
               selectedProject={selectedProject} 
-              selectedLocation=""
-              projects={projects}
-              locations={[]}
               selectedClassification={selectedClassification}
               selectedCategory={selectedCategory}
               selectedStatus={selectedStatus}
               selectedEntity={selectedEntity}
+              projects={projects}
+              locations={[]}
               selectedDate={selectedDate}
               dateSelected={dateSelected}
             />

@@ -6,6 +6,13 @@ import CheckInTab from "./CheckInTab";
 import CheckOutTab from "./CheckOutTab";
 import ExceptionTab from "./ExceptionTab";
 import { AttendanceFilters } from "./AttendanceFilterUtils";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 
 interface ManualAttendanceTabsProps {
   activeTab: string;
@@ -14,7 +21,9 @@ interface ManualAttendanceTabsProps {
   filters: AttendanceFilters;
   projects: { id: number; name: string; coordinates?: { geofenceData: string }; location?: string }[];
   selectedDate: Date;
-  dateSelected: boolean; // New prop to indicate if date has been explicitly selected
+  setSelectedDate: React.Dispatch<React.SetStateAction<Date>>;
+  dateSelected: boolean;
+  setDateSelected: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
@@ -24,69 +33,117 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
   filters,
   projects,
   selectedDate,
-  dateSelected // Add this prop
+  setSelectedDate,
+  dateSelected,
+  setDateSelected
 }) => {
   // Empty array for locations since we're not using them anymore
   const emptyLocations: { id: number; name: string }[] = [];
 
+  // Handle date change
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      setDateSelected(true);
+    }
+  };
+
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid grid-cols-4 w-full mb-4">
-        <TabsTrigger value="records">Attendance Records</TabsTrigger>
-        <TabsTrigger value="check-in">Check In</TabsTrigger>
-        <TabsTrigger value="check-out">Check Out</TabsTrigger>
-        <TabsTrigger value="exceptions">Exceptions</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="records" className="mt-0">
-        <ManualAttendanceTable records={filteredRecords} />
-      </TabsContent>
-      
-      <TabsContent value="check-in" className="mt-0">
-        <CheckInTab 
-          searchQuery={filters.name || filters.employeeId}
-          selectedProject={filters.project}
-          selectedClassification={filters.classification}
-          selectedCategory={filters.category}
-          selectedStatus={filters.status}
-          selectedEntity={filters.entity}
-          projects={projects}
-          locations={emptyLocations}
-          selectedDate={selectedDate}
-          dateSelected={dateSelected} // Pass the new prop
-        />
-      </TabsContent>
-      
-      <TabsContent value="check-out" className="mt-0">
-        <CheckOutTab 
-          searchQuery={filters.name || filters.employeeId}
-          selectedProject={filters.project}
-          selectedClassification={filters.classification}
-          selectedCategory={filters.category}
-          selectedStatus={filters.status}
-          selectedEntity={filters.entity}
-          projects={projects}
-          locations={emptyLocations}
-          selectedDate={selectedDate}
-          dateSelected={dateSelected} // Pass the new prop
-        />
-      </TabsContent>
-      
-      <TabsContent value="exceptions" className="mt-0">
-        <ExceptionTab 
-          searchQuery={filters.name || filters.employeeId}
-          selectedProject={filters.project}
-          selectedClassification={filters.classification}
-          selectedCategory={filters.category}
-          selectedStatus={filters.status}
-          selectedEntity={filters.entity}
-          projects={projects}
-          locations={emptyLocations}
-          selectedDate={selectedDate}
-          dateSelected={dateSelected} // Pass the new prop
-        />
-      </TabsContent>
-    </Tabs>
+    <div className="space-y-4">
+      {/* Date Picker Component */}
+      <div className="flex justify-end items-center gap-2 mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Attendance Date:</span>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-[240px] justify-start text-left font-normal",
+                  !dateSelected && "border-orange-300 bg-orange-50 text-orange-800"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedDate ? (
+                  format(selectedDate, "PPP")
+                ) : (
+                  <span>Select Date</span>
+                )}
+                {!dateSelected && <span className="ml-auto text-xs font-medium text-orange-600">(Required)</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateChange}
+                initialFocus
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-4 w-full mb-4">
+          <TabsTrigger value="records">Attendance Records</TabsTrigger>
+          <TabsTrigger value="check-in">Check In</TabsTrigger>
+          <TabsTrigger value="check-out">Check Out</TabsTrigger>
+          <TabsTrigger value="exceptions">Exceptions</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="records" className="mt-0">
+          <ManualAttendanceTable records={filteredRecords} />
+        </TabsContent>
+        
+        <TabsContent value="check-in" className="mt-0">
+          <CheckInTab 
+            searchQuery={filters.name || filters.employeeId}
+            selectedProject={filters.project}
+            selectedClassification={filters.classification}
+            selectedCategory={filters.category}
+            selectedStatus={filters.status}
+            selectedEntity={filters.entity}
+            projects={projects}
+            locations={emptyLocations}
+            selectedDate={selectedDate}
+            dateSelected={dateSelected}
+          />
+        </TabsContent>
+        
+        <TabsContent value="check-out" className="mt-0">
+          <CheckOutTab 
+            searchQuery={filters.name || filters.employeeId}
+            selectedProject={filters.project}
+            selectedClassification={filters.classification}
+            selectedCategory={filters.category}
+            selectedStatus={filters.status}
+            selectedEntity={filters.entity}
+            projects={projects}
+            locations={emptyLocations}
+            selectedDate={selectedDate}
+            dateSelected={dateSelected}
+          />
+        </TabsContent>
+        
+        <TabsContent value="exceptions" className="mt-0">
+          <ExceptionTab 
+            searchQuery={filters.name || filters.employeeId}
+            selectedProject={filters.project}
+            selectedClassification={filters.classification}
+            selectedCategory={filters.category}
+            selectedStatus={filters.status}
+            selectedEntity={filters.entity}
+            projects={projects}
+            locations={emptyLocations}
+            selectedDate={selectedDate}
+            dateSelected={dateSelected}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
