@@ -25,7 +25,10 @@ import { Badge } from "@/components/ui/badge";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(() => {
+    // Try to retrieve last sync time from localStorage on component mount
+    return localStorage.getItem('lastSyncTime');
+  });
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dashboardData, setDashboardData] = useState({
     totalEmployees: 6000,
@@ -34,6 +37,7 @@ const Dashboard = () => {
     faceEnrolled: 0,
     pendingCheckouts: 0
   });
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Update dashboard data when date changes
   useEffect(() => {
@@ -89,6 +93,36 @@ const Dashboard = () => {
     }
   ];
 
+  // Handle the sync operation
+  const handleSync = () => {
+    setIsSyncing(true);
+    toast.info("Syncing data...", { duration: 2000 });
+    
+    // Simulate sync operation
+    setTimeout(() => {
+      // Format current date and time for display
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+      const formattedTime = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      const syncTimestamp = `${formattedDate} ${formattedTime}`;
+      
+      // Update state and localStorage
+      setLastSyncTime(syncTimestamp);
+      localStorage.setItem('lastSyncTime', syncTimestamp);
+      
+      setIsSyncing(false);
+      toast.success("Data synchronized successfully!");
+    }, 2000);
+  };
+  
   // Quick actions - keeping the existing ones
   const quickActions = [
     { 
@@ -117,27 +151,8 @@ const Dashboard = () => {
     },
     { 
       label: "Sync Data", 
-      icon: <RefreshCw className="h-5 w-5" />,
-      onClick: () => {
-        toast.info("Syncing data...", { duration: 2000 });
-        setTimeout(() => {
-          // Format current date and time for display
-          const now = new Date();
-          const formattedDate = now.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-          });
-          const formattedTime = now.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          });
-          const syncTimestamp = `${formattedDate} ${formattedTime}`;
-          setLastSyncTime(syncTimestamp);
-          toast.success("Data synchronized successfully!");
-        }, 2000);
-      },
+      icon: <RefreshCw className={`h-5 w-5 ${isSyncing ? "animate-spin" : ""}`} />,
+      onClick: handleSync,
       description: "Initiates data sync with central database"
     }
   ];
@@ -222,7 +237,7 @@ const Dashboard = () => {
         {/* Quick Actions Section */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h2 className="text-sm font-medium text-gray-500 mb-3">QUICK ACTIONS</h2>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {quickActions.map((action, index) => (
               <div key={index} className="flex flex-col">
                 <Button
@@ -230,15 +245,16 @@ const Dashboard = () => {
                   className="flex flex-col items-center gap-2 p-4 h-auto border-gray-200 hover:bg-proscape/5 hover:border-proscape hover:shadow-sm transition-all"
                   onClick={action.onClick}
                   title={action.description}
+                  disabled={action.label === "Sync Data" && isSyncing}
                 >
                   <div className="w-10 h-10 rounded-full bg-proscape/10 flex items-center justify-center text-proscape">
                     {action.icon}
                   </div>
                   <span className="font-medium text-sm">{action.label}</span>
                 </Button>
-                {action.label === "Sync Data" && lastSyncTime && (
-                  <div className="text-xs text-gray-500 mt-1 text-center">
-                    Last Synced: {lastSyncTime}
+                {action.label === "Sync Data" && (
+                  <div className="text-xs text-gray-500 mt-2 text-center">
+                    {lastSyncTime ? `Last Synced: ${lastSyncTime}` : "Not synced yet"}
                   </div>
                 )}
               </div>
