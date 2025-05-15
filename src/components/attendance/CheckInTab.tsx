@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Edit, UserCheck, UserX, AlertCircle, Calendar } from "lucide-react";
+import { Edit, UserCheck, UserX, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
 import ManualCheckInDialog from "./dialogs/ManualCheckInDialog";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
 import { isSameDay } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Employee {
   id: number;
@@ -51,7 +51,7 @@ const CheckInTab = ({
   projects,
   locations,
   selectedDate,
-  dateSelected = false
+  dateSelected = true // Default to true since we're auto-selecting today
 }: CheckInTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -70,12 +70,10 @@ const CheckInTab = ({
 
   // Effect to refresh employee data when the date changes
   useEffect(() => {
-    if (dateSelected) {
-      // Here you would typically fetch data for the selected date
-      // For now, we'll use mock data
-      fetchEmployeeData();
-    }
-  }, [selectedDate, dateSelected]);
+    // Here you would typically fetch data for the selected date
+    // For now, we'll use mock data
+    fetchEmployeeData();
+  }, [selectedDate]);
   
   // Function to fetch employee data (mock implementation)
   const fetchEmployeeData = () => {
@@ -294,15 +292,6 @@ const CheckInTab = ({
 
   return (
     <div className="space-y-4">
-      {!dateSelected && (
-        <Alert className="bg-orange-50 border border-orange-200 mb-4">
-          <Calendar className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            Please select an attendance date before marking attendance
-          </AlertDescription>
-        </Alert>
-      )}
-      
       {showLocationWarning && (
         <Alert className="bg-white border border-gray-200 mb-4">
           <AlertCircle className="h-4 w-4 text-gray-400" />
@@ -326,13 +315,7 @@ const CheckInTab = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!dateSelected ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-orange-500">
-                  Please select an attendance date to view employees
-                </TableCell>
-              </TableRow>
-            ) : filteredEmployees.length > 0 ? (
+            {filteredEmployees.length > 0 ? (
               filteredEmployees.map((employee) => (
                 <TableRow key={employee.id}>
                   <TableCell className="font-medium">{employee.employeeId}</TableCell>

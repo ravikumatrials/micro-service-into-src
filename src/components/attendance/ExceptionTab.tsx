@@ -54,7 +54,7 @@ const ExceptionTab = ({
   projects,
   locations,
   selectedDate,
-  dateSelected = false
+  dateSelected = true // Default to true since we're auto-selecting today
 }: ExceptionTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -62,11 +62,9 @@ const ExceptionTab = ({
 
   // Effect to refresh exception data when date changes
   useEffect(() => {
-    if (dateSelected) {
-      // In a real app, this would fetch data for the specific date from an API
-      fetchPendingExceptions();
-    }
-  }, [selectedDate, dateSelected]);
+    // In a real app, this would fetch data for the specific date from an API
+    fetchPendingExceptions();
+  }, [selectedDate]);
   
   // Mock function to fetch employees with pending exceptions for the selected date
   const fetchPendingExceptions = () => {
@@ -208,17 +206,10 @@ const ExceptionTab = ({
       "3": "Tanseeq Engineering Co"
     };
     
-    return entityMap[entityId as keyof typeof entityMap] || "";
+    return entityMap[entityId as keyof entityMap] || "";
   };
 
-  const handleManualCheckOut = (employee: Employee) => {
-    if (!dateSelected) {
-      toast.error("Date selection required", {
-        description: "Please select an attendance date before resolving exceptions."
-      });
-      return;
-    }
-    
+  const handleManualCheckOut = (employee: Employee) => {    
     // Check if exception has already been resolved for this date
     if (employee.exceptionResolved && employee.exceptionResolvedDate && 
         isSameDay(employee.exceptionResolvedDate, selectedDate)) {
@@ -261,15 +252,6 @@ const ExceptionTab = ({
 
   return (
     <div className="space-y-4">
-      {!dateSelected && (
-        <Alert className="bg-orange-50 border border-orange-200 mb-4">
-          <Calendar className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            Please select an attendance date before resolving exceptions
-          </AlertDescription>
-        </Alert>
-      )}
-      
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -284,13 +266,7 @@ const ExceptionTab = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!dateSelected ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-orange-500">
-                  Please select an attendance date to view exceptions
-                </TableCell>
-              </TableRow>
-            ) : filteredPendingCheckouts.length === 0 ? (
+            {filteredPendingCheckouts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-10 text-gray-500">
                   No pending exceptions found matching your filters for {format(selectedDate, "PPP")}

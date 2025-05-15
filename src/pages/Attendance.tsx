@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Search, Building, UserCheck, Calendar } from "lucide-react";
+import { Upload, Search, Building, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
@@ -28,8 +27,9 @@ const Attendance = () => {
   const [selectedEntity, setSelectedEntity] = useState("all");
   
   // Add a state for the selected date to pass to tab components
+  // Default to today's date
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [dateSelected, setDateSelected] = useState<boolean>(false); // Default to false to require explicit selection
+  const [dateSelected, setDateSelected] = useState<boolean>(true); // Default to true since we're auto-selecting today
 
   // Mock projects with location data
   const projects = [
@@ -110,18 +110,10 @@ const Attendance = () => {
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className={cn(
-                    "w-[240px] justify-start text-left font-normal",
-                    !dateSelected && "border-orange-300 bg-orange-50 text-orange-800"
-                  )}
+                  className="w-[240px] justify-start text-left font-normal"
                 >
                   <Calendar className="mr-2 h-4 w-4" />
-                  {selectedDate ? (
-                    format(selectedDate, "MMMM d, yyyy")
-                  ) : (
-                    <span>Select Date</span>
-                  )}
-                  {!dateSelected && <span className="ml-auto text-xs font-medium text-orange-600">(Required)</span>}
+                  {format(selectedDate, "MMMM d, yyyy")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="center">
@@ -131,6 +123,8 @@ const Attendance = () => {
                   onSelect={handleDateChange}
                   initialFocus
                   className="pointer-events-auto"
+                  // Disable future dates
+                  disabled={(date) => date > new Date()}
                 />
               </PopoverContent>
             </Popover>

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Edit, UserCheck, AlertCircle, Calendar } from "lucide-react";
+import { Edit, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
 import { isSameDay } from "@/lib/utils";
 
@@ -52,7 +51,7 @@ const CheckOutTab = ({
   projects,
   locations,
   selectedDate,
-  dateSelected = false
+  dateSelected = true // Default to true since we're auto-selecting today
 }: CheckOutTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -60,11 +59,9 @@ const CheckOutTab = ({
   
   // Effect to refresh employee data when date changes
   useEffect(() => {
-    if (dateSelected) {
-      // In a real app, this would fetch data for the specific date from an API
-      fetchCheckedInEmployees();
-    }
-  }, [selectedDate, dateSelected]);
+    // In a real app, this would fetch data for the specific date from an API
+    fetchCheckedInEmployees();
+  }, [selectedDate]);
   
   // Mock function to fetch checked-in employees for the selected date
   const fetchCheckedInEmployees = () => {
@@ -207,14 +204,7 @@ const CheckOutTab = ({
     return entityMap[entityId as keyof typeof entityMap] || "";
   };
 
-  const handleManualCheckOut = (employee: Employee) => {
-    if (!dateSelected) {
-      toast.error("Date selection required", {
-        description: "Please select an attendance date before marking checkout."
-      });
-      return;
-    }
-    
+  const handleManualCheckOut = (employee: Employee) => {    
     // Check if employee already has been checked out for this date
     if (employee.checkedOutDate && isSameDay(employee.checkedOutDate, selectedDate)) {
       toast.error("Duplicate attendance", {
@@ -256,15 +246,6 @@ const CheckOutTab = ({
 
   return (
     <div className="space-y-4">
-      {!dateSelected && (
-        <Alert className="bg-orange-50 border border-orange-200 mb-4">
-          <Calendar className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            Please select an attendance date before marking checkout
-          </AlertDescription>
-        </Alert>
-      )}
-      
       <div className="bg-white rounded-md shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -279,13 +260,7 @@ const CheckOutTab = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!dateSelected ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-orange-500">
-                  Please select an attendance date to view checked-in employees
-                </TableCell>
-              </TableRow>
-            ) : filteredEmployees.length === 0 ? (
+            {filteredEmployees.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-10 text-gray-500">
                   No checked-in employees found matching your filters for {format(selectedDate, "PPP")}

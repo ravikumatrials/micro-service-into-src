@@ -11,7 +11,6 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
 interface ManualAttendanceTabsProps {
@@ -67,8 +66,8 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
                 onSelect={setSelectedDate}
                 initialFocus
                 className="pointer-events-auto"
-                // Optional: Disable future dates
-                // disabled={(date) => date > new Date()}
+                // Disable future dates
+                disabled={(date) => date > new Date()}
               />
             </PopoverContent>
           </Popover>
