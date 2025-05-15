@@ -22,6 +22,10 @@ const Attendance = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedEntity, setSelectedEntity] = useState("all");
+  
+  // Add a state for the selected date to pass to tab components
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [dateSelected, setDateSelected] = useState<boolean>(true); // Default to true since we start with current date
 
   // Mock projects with location data
   const projects = [
@@ -243,6 +247,8 @@ const Attendance = () => {
               selectedClassification={selectedClassification}
               selectedCategory={selectedCategory}
               selectedEntity={selectedEntity}
+              selectedDate={selectedDate}
+              dateSelected={dateSelected}
             />
           </TabsContent>
 
@@ -257,6 +263,8 @@ const Attendance = () => {
               selectedCategory={selectedCategory}
               selectedStatus={selectedStatus}
               selectedEntity={selectedEntity}
+              selectedDate={selectedDate}
+              dateSelected={dateSelected}
             />
           </TabsContent>
 
@@ -271,6 +279,8 @@ const Attendance = () => {
               selectedCategory={selectedCategory}
               selectedStatus={selectedStatus}
               selectedEntity={selectedEntity}
+              selectedDate={selectedDate}
+              dateSelected={dateSelected}
             />
           </TabsContent>
         </Tabs>
