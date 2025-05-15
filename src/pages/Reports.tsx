@@ -77,7 +77,7 @@ interface AttendanceRecord {
   checkInMode: "Face" | "Manual";
   checkOut: string;
   checkOutMode: "Face" | "Manual";
-  location?: string;
+  location?: string; // Making location optional with '?' since it may not exist in all records
 }
 
 // Function to export exception report

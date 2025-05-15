@@ -20,6 +20,7 @@ export const MOCK_ATTENDANCE_DATA: {
   checkInMode: "Face" | "Manual";
   checkOut: string;
   checkOutMode: "Face" | "Manual";
+  location?: string; // Added location as optional property
 }[] = [
   // Employee 1: John Smith - Multiple dates and projects
   {
