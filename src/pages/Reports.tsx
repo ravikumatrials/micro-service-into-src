@@ -61,7 +61,7 @@ interface ReportFilters {
   fromDate: Date | undefined;
   toDate: Date | undefined;
   attendanceMode: string;
-  showExceptionsOnly: boolean;  // New filter for exceptions only
+  showExceptionsOnly: boolean;
 }
 
 interface AttendanceRecord {
@@ -77,7 +77,7 @@ interface AttendanceRecord {
   checkInMode: "Face" | "Manual";
   checkOut: string;
   checkOutMode: "Face" | "Manual";
-  location?: string; // Added location field
+  location?: string;
 }
 
 // Function to export exception report
@@ -89,7 +89,7 @@ const exportExceptionReport = (data: AttendanceRecord[]) => {
     return false; // No records to export
   }
   
-  // Format data for CSV
+  // Format data for CSV - Updated to match the exception-only columns
   const csvHeader = "Employee ID,Name,Project,Location,Check-In Date,Check-In Time,Check-Out Date,Check-Out Time\n";
   const csvRows = exceptionRecords.map(record => {
     const checkInDate = format(new Date(record.date), "yyyy-MM-dd");
@@ -134,7 +134,7 @@ const Reports = () => {
     fromDate: undefined,
     toDate: undefined,
     attendanceMode: "all",
-    showExceptionsOnly: false  // Default to showing all records
+    showExceptionsOnly: false
   });
   
   const { toast } = useToast();
@@ -265,7 +265,6 @@ const Reports = () => {
       title: "Info",
       description: "Filters applied",
     });
-    // In a real app, this would trigger data fetching with the applied filters
   };
   
   const clearFilters = () => {
@@ -278,7 +277,7 @@ const Reports = () => {
       fromDate: undefined, 
       toDate: undefined,
       attendanceMode: "all",
-      showExceptionsOnly: false  // Reset exceptions filter too
+      showExceptionsOnly: false
     });
     toast({
       title: "Info",
@@ -343,7 +342,6 @@ const Reports = () => {
       <Card className="p-6 space-y-6">
         {/* Filters Section */}
         <div className="space-y-4 bg-white rounded-lg border border-gray-200">
-          {/* ... keep existing code (filters section) */}
           <div className="p-4">
             <h3 className="text-lg font-medium mb-4">Filters</h3>
             
@@ -602,16 +600,34 @@ const Reports = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Entity</TableHead>
-                  <TableHead>Classification</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Check-In</TableHead>
-                  <TableHead>Check-Out</TableHead>
-                  <TableHead>Working Hours</TableHead>
+                  {/* Render different columns based on exceptions-only mode */}
+                  {filters.showExceptionsOnly ? (
+                    // Exception-only columns
+                    <>
+                      <TableHead>Employee ID</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Project</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Check-In Date</TableHead>
+                      <TableHead>Check-In Time</TableHead>
+                      <TableHead>Check-Out Date</TableHead>
+                      <TableHead>Check-Out Time</TableHead>
+                    </>
+                  ) : (
+                    // Default columns
+                    <>
+                      <TableHead>Employee ID</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Entity</TableHead>
+                      <TableHead>Classification</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Project</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Check-In</TableHead>
+                      <TableHead>Check-Out</TableHead>
+                      <TableHead>Working Hours</TableHead>
+                    </>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -623,54 +639,85 @@ const Reports = () => {
                     
                     return (
                       <TableRow key={row.id} className={isMissingCheckOut ? "bg-amber-50" : ""}>
-                        <TableCell className="font-medium">{row.employeeId}</TableCell>
-                        <TableCell>{row.name}</TableCell>
-                        <TableCell>{row.entity}</TableCell>
-                        <TableCell>{row.classification}</TableCell>
-                        <TableCell>{row.category}</TableCell>
-                        <TableCell>{row.project}</TableCell>
-                        <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell>
-                        <TableCell>
-                          {row.checkIn} – <span className={row.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkInMode}</span>
-                        </TableCell>
-                        <TableCell>
-                          {row.checkOut ? (
-                            <>
-                              {row.checkOut} – <span className={row.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkOutMode}</span>
-                            </>
-                          ) : (
-                            <span className="text-red-600 text-sm font-medium flex items-center">
-                              <AlertTriangle className="h-3 w-3 mr-1" />
-                              Missing
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {isMissingCheckOut ? (
-                            <span className="text-amber-600 text-sm">Incomplete</span>
-                          ) : isOvertime ? (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="text-red-600 font-bold">
-                                    {workingHours}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Exceeds standard working hours</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          ) : (
-                            workingHours
-                          )}
-                        </TableCell>
+                        {/* Render different cell data based on exceptions-only mode */}
+                        {filters.showExceptionsOnly ? (
+                          // Exception-only cells
+                          <>
+                            <TableCell className="font-medium">{row.employeeId}</TableCell>
+                            <TableCell>{row.name}</TableCell>
+                            <TableCell>{row.project}</TableCell>
+                            <TableCell>{row.location || "N/A"}</TableCell>
+                            <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell>
+                            <TableCell>{row.checkIn || "N/A"}</TableCell>
+                            <TableCell>
+                              {row.checkOut ? format(new Date(row.date), "dd/MM/yyyy") : (
+                                <span className="text-red-600 text-sm font-medium">
+                                  Missing
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {row.checkOut || (
+                                <span className="text-red-600 text-sm font-medium flex items-center">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  Missing
+                                </span>
+                              )}
+                            </TableCell>
+                          </>
+                        ) : (
+                          // Default cells
+                          <>
+                            <TableCell className="font-medium">{row.employeeId}</TableCell>
+                            <TableCell>{row.name}</TableCell>
+                            <TableCell>{row.entity}</TableCell>
+                            <TableCell>{row.classification}</TableCell>
+                            <TableCell>{row.category}</TableCell>
+                            <TableCell>{row.project}</TableCell>
+                            <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell>
+                            <TableCell>
+                              {row.checkIn} – <span className={row.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkInMode}</span>
+                            </TableCell>
+                            <TableCell>
+                              {row.checkOut ? (
+                                <>
+                                  {row.checkOut} – <span className={row.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{row.checkOutMode}</span>
+                                </>
+                              ) : (
+                                <span className="text-red-600 text-sm font-medium flex items-center">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  Missing
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {isMissingCheckOut ? (
+                                <span className="text-amber-600 text-sm">Incomplete</span>
+                              ) : isOvertime ? (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="text-red-600 font-bold">
+                                        {workingHours}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Exceeds standard working hours</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                workingHours
+                              )}
+                            </TableCell>
+                          </>
+                        )}
                       </TableRow>
                     );
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-6">No records found</TableCell>
+                    <TableCell colSpan={filters.showExceptionsOnly ? 8 : 10} className="text-center py-6">No records found</TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -681,9 +728,7 @@ const Reports = () => {
           <div className="space-y-4">
             {Object.entries(filteredGroupedData).length > 0 ? (
               Object.entries(filteredGroupedData).map(([key, records]) => {
-                // ... keep existing code (summary view code)
                 const [employeeId, name] = key.split("-");
-                // Calculate total working hours for this employee
                 const totalHours = sumWorkingHours(records.map(r => 
                   calculateWorkingHours(r.checkIn, r.checkOut)
                 ));
@@ -726,12 +771,25 @@ const Reports = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Entity</TableHead>
-                              <TableHead>Project</TableHead>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Check-In</TableHead>
-                              <TableHead>Check-Out</TableHead>
-                              <TableHead>Working Hours</TableHead>
+                              {filters.showExceptionsOnly ? (
+                                <>
+                                  <TableHead>Project</TableHead>
+                                  <TableHead>Location</TableHead>
+                                  <TableHead>Check-In Date</TableHead>
+                                  <TableHead>Check-In Time</TableHead>
+                                  <TableHead>Check-Out Date</TableHead>
+                                  <TableHead>Check-Out Time</TableHead>
+                                </>
+                              ) : (
+                                <>
+                                  <TableHead>Entity</TableHead>
+                                  <TableHead>Project</TableHead>
+                                  <TableHead>Date</TableHead>
+                                  <TableHead>Check-In</TableHead>
+                                  <TableHead>Check-Out</TableHead>
+                                  <TableHead>Working Hours</TableHead>
+                                </>
+                              )}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -742,58 +800,84 @@ const Reports = () => {
                               
                               return (
                                 <TableRow key={record.id} className={isMissingCheckOut ? "bg-amber-50" : ""}>
-                                  <TableCell>{record.entity}</TableCell>
-                                  <TableCell>{record.project}</TableCell>
-                                  <TableCell>{format(new Date(record.date), "dd/MM/yyyy")}</TableCell>
-                                  <TableCell>
-                                    {record.checkIn} – <span className={record.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkInMode}</span>
-                                  </TableCell>
-                                  <TableCell>
-                                    {record.checkOut ? (
-                                      <>
-                                        {record.checkOut} – <span className={record.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkOutMode}</span>
-                                      </>
-                                    ) : (
-                                      <span className="text-red-600 text-sm font-medium flex items-center">
-                                        <AlertTriangle className="h-3 w-3 mr-1" />
-                                        Missing
-                                      </span>
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {isMissingCheckOut ? (
-                                      <span className="text-amber-600 text-sm">Incomplete</span>
-                                    ) : isOvertime ? (
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <span className="text-red-600 font-bold">
-                                              {workingHours}
-                                            </span>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            <p>Exceeds standard working hours</p>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
-                                    ) : (
-                                      workingHours
-                                    )}
-                                  </TableCell>
+                                  {filters.showExceptionsOnly ? (
+                                    <>
+                                      <TableCell>{record.project}</TableCell>
+                                      <TableCell>{record.location || "N/A"}</TableCell>
+                                      <TableCell>{format(new Date(record.date), "dd/MM/yyyy")}</TableCell>
+                                      <TableCell>{record.checkIn || "N/A"}</TableCell>
+                                      <TableCell>
+                                        {record.checkOut ? format(new Date(record.date), "dd/MM/yyyy") : (
+                                          <span className="text-red-600 text-sm font-medium">
+                                            Missing
+                                          </span>
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        {record.checkOut || (
+                                          <span className="text-red-600 text-sm font-medium flex items-center">
+                                            <AlertTriangle className="h-3 w-3 mr-1" />
+                                            Missing
+                                          </span>
+                                        )}
+                                      </TableCell>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <TableCell>{record.entity}</TableCell>
+                                      <TableCell>{record.project}</TableCell>
+                                      <TableCell>{format(new Date(record.date), "dd/MM/yyyy")}</TableCell>
+                                      <TableCell>
+                                        {record.checkIn} – <span className={record.checkInMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkInMode}</span>
+                                      </TableCell>
+                                      <TableCell>
+                                        {record.checkOut ? (
+                                          <>
+                                            {record.checkOut} – <span className={record.checkOutMode === 'Face' ? 'text-green-600' : 'text-amber-600'}>{record.checkOutMode}</span>
+                                          </>
+                                        ) : (
+                                          <span className="text-red-600 text-sm font-medium flex items-center">
+                                            <AlertTriangle className="h-3 w-3 mr-1" />
+                                            Missing
+                                          </span>
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        {isMissingCheckOut ? (
+                                          <span className="text-amber-600 text-sm">Incomplete</span>
+                                        ) : isOvertime ? (
+                                          <TooltipProvider>
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <span className="text-red-600 font-bold">
+                                                  {workingHours}
+                                                </span>
+                                              </TooltipTrigger>
+                                              <TooltipContent>
+                                                <p>Exceeds standard working hours</p>
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          </TooltipProvider>
+                                        ) : (
+                                          workingHours
+                                        )}
+                                      </TableCell>
+                                    </>
+                                  )}
                                 </TableRow>
                               );
                             })}
                           </TableBody>
                           <TableFooter>
                             <TableRow>
-                              <TableCell colSpan={5} className="text-right font-semibold">
+                              <TableCell colSpan={filters.showExceptionsOnly ? 5 : 5} className="text-right font-semibold">
                                 Total Working Hours:
                               </TableCell>
                               <TableCell className={cn(
                                 "font-semibold", 
                                 isEmployeeTotalOvertime ? "text-red-600" : ""
                               )}>
-                                {totalHours}
+                                {!filters.showExceptionsOnly ? totalHours : "N/A"}
                               </TableCell>
                             </TableRow>
                           </TableFooter>
