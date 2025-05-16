@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash, X, Info } from "lucide-react";
@@ -62,6 +61,16 @@ const initialRoles = [
     createdAt: "01/01/2023",
     isSystemDefined: false
   },
+  { 
+    id: 5, 
+    code: "STF", 
+    name: "Staff", 
+    description: "Regular staff member with basic permissions", 
+    webPermissions: [], 
+    mobilePermissions: ["Self Attendance"],
+    createdAt: "01/01/2023",
+    isSystemDefined: true
+  },
 ];
 
 // Lists of all possible permissions separated by platform - added new permissions
@@ -85,6 +94,9 @@ const mobilePermissions = [
   "Face Enroll"
 ];
 
+// System-defined roles that have special behavior
+const systemDefinedRoles = ["Labour", "Staff"];
+
 const Roles = () => {
   const [roles, setRoles] = useState(initialRoles);
   const [searchTerm, setSearchTerm] = useState("");
@@ -100,6 +112,11 @@ const Roles = () => {
   });
   const [activeTab, setActiveTab] = useState("web");
   const [validationError, setValidationError] = useState("");
+
+  // Helper function to check if a role is system-defined
+  const isSystemDefinedRole = (role) => {
+    return systemDefinedRoles.includes(role.name);
+  };
 
   // Filter roles based on search term
   const filteredRoles = roles.filter((role) => 
@@ -153,8 +170,8 @@ const Roles = () => {
   };
 
   const validatePermissions = (role) => {
-    // Labour role is exempt from permission validation
-    if (role.name === "Labour" || role.code === "LAB") {
+    // Labour and Staff roles are exempt from permission validation
+    if (isSystemDefinedRole(role)) {
       return true;
     }
     
@@ -163,12 +180,12 @@ const Roles = () => {
   };
 
   const handleCreateRole = () => {
-    // Validate permissions for non-Labour roles
+    // Validate permissions for non-system-defined roles
     if (!validatePermissions(newRole)) {
-      setValidationError("All roles (except Labour) must have at least one permission.");
+      setValidationError("All roles (except Labour and Staff) must have at least one permission.");
       toast({
         title: "Validation Error",
-        description: "All roles (except Labour) must have at least one permission.",
+        description: "All roles (except Labour and Staff) must have at least one permission.",
         variant: "destructive"
       });
       return;
@@ -209,11 +226,11 @@ const Roles = () => {
   };
 
   const handleEditRole = (role) => {
-    // Don't allow editing Labour role
-    if (role.name === "Labour" || role.code === "LAB") {
+    // Don't allow editing system-defined roles like Labour or Staff
+    if (isSystemDefinedRole(role)) {
       toast({
         title: "Cannot Edit System Role",
-        description: "The Labour role is system-defined and cannot be edited.",
+        description: `The ${role.name} role is system-defined and cannot be edited.`,
         variant: "destructive"
       });
       return;
@@ -226,10 +243,10 @@ const Roles = () => {
   const saveEditedRole = () => {
     // Validate permissions again before saving
     if (!validatePermissions(selectedRole)) {
-      setValidationError("All roles (except Labour) must have at least one permission.");
+      setValidationError("All roles (except Labour and Staff) must have at least one permission.");
       toast({
         title: "Validation Error",
-        description: "All roles (except Labour) must have at least one permission.",
+        description: "All roles (except Labour and Staff) must have at least one permission.",
         variant: "destructive"
       });
       return;
@@ -253,11 +270,13 @@ const Roles = () => {
   const deleteRole = (roleId) => {
     const roleToDelete = roles.find(role => role.id === roleId);
     
-    // Don't allow deleting Labour role
-    if (roleToDelete && (roleToDelete.name === "Labour" || roleToDelete.code === "LAB")) {
+    // Don't allow deleting system-defined roles or Super Admin
+    if (roleToDelete && (isSystemDefinedRole(roleToDelete) || roleToDelete.code === "SADM")) {
       toast({
         title: "Cannot Delete System Role",
-        description: "The Labour role is system-defined and cannot be deleted.",
+        description: isSystemDefinedRole(roleToDelete) ? 
+          `The ${roleToDelete.name} role is system-defined and cannot be deleted.` :
+          "The Super Admin role cannot be deleted.",
         variant: "destructive"
       });
       return;
@@ -278,7 +297,7 @@ const Roles = () => {
     const combinedPermissions = [...role.webPermissions, ...role.mobilePermissions];
     const uniquePermissions = Array.from(new Set(combinedPermissions));
     
-    if (role.name === "Labour" || role.code === "LAB") {
+    if (isSystemDefinedRole(role)) {
       return (
         <TooltipProvider>
           <Tooltip>
@@ -289,7 +308,7 @@ const Roles = () => {
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
-              <p>The Labour role is system-defined and does not require permissions.</p>
+              <p>The {role.name} role is system-defined and does not require permissions.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -381,26 +400,26 @@ const Roles = () => {
                         <button 
                           onClick={() => handleEditRole(role)}
                           className={`text-blue-500 hover:text-blue-700 ${
-                            role.name === "Labour" ? "opacity-50 cursor-not-allowed" : ""
+                            isSystemDefinedRole(role) ? "opacity-50 cursor-not-allowed" : ""
                           }`}
-                          title={role.name === "Labour" ? "System role cannot be edited" : "Edit Role"}
-                          disabled={role.name === "Labour"}
+                          title={isSystemDefinedRole(role) ? "System role cannot be edited" : "Edit Role"}
+                          disabled={isSystemDefinedRole(role)}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button 
                           onClick={() => deleteRole(role.id)}
                           className={`text-red-500 hover:text-red-700 ${
-                            role.name === "Labour" || role.code === "SADM" ? "opacity-50 cursor-not-allowed" : ""
+                            isSystemDefinedRole(role) || role.code === "SADM" ? "opacity-50 cursor-not-allowed" : ""
                           }`}
                           title={
-                            role.name === "Labour" 
+                            isSystemDefinedRole(role)
                               ? "System role cannot be deleted" 
                               : role.code === "SADM" 
                                 ? "Super Admin role cannot be deleted" 
                                 : "Delete Role"
                           }
-                          disabled={role.name === "Labour" || role.code === "SADM"}
+                          disabled={isSystemDefinedRole(role) || role.code === "SADM"}
                         >
                           <Trash className="h-4 w-4" />
                         </button>
@@ -484,10 +503,10 @@ const Roles = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <label className="block text-sm font-medium text-gray-700">
-                    Permissions {newRole.name !== "Labour" && <span className="text-red-500">*</span>}
+                    Permissions {!isSystemDefinedRole(newRole) && <span className="text-red-500">*</span>}
                   </label>
                   
-                  {newRole.name === "Labour" && (
+                  {isSystemDefinedRole(newRole) && (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -497,17 +516,17 @@ const Roles = () => {
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>The Labour role is system-defined and does not require permissions.</p>
+                          <p>The {newRole.name} role is system-defined and does not require permissions.</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   )}
                 </div>
                 
-                {newRole.name === "Labour" ? (
+                {isSystemDefinedRole(newRole) ? (
                   <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
                     <p className="text-gray-600 text-sm italic">
-                      The Labour role is system-defined and does not require permissions.
+                      The {newRole.name} role is system-defined and does not require permissions.
                     </p>
                   </div>
                 ) : (
@@ -553,7 +572,7 @@ const Roles = () => {
                   </Tabs>
                 )}
                 
-                {validationError && !newRole.name.includes("Labour") && (
+                {validationError && !isSystemDefinedRole(newRole) && (
                   <p className="mt-2 text-sm text-red-500">{validationError}</p>
                 )}
               </div>
@@ -642,7 +661,7 @@ const Roles = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <label className="block text-sm font-medium text-gray-700">
-                    Permissions {selectedRole.name !== "Labour" && <span className="text-red-500">*</span>}
+                    Permissions {!isSystemDefinedRole(selectedRole) && <span className="text-red-500">*</span>}
                   </label>
                 </div>
                 
@@ -695,7 +714,7 @@ const Roles = () => {
                   </p>
                 )}
                 
-                {validationError && !selectedRole.name.includes("Labour") && (
+                {validationError && !isSystemDefinedRole(selectedRole) && (
                   <p className="mt-2 text-sm text-red-500">{validationError}</p>
                 )}
               </div>

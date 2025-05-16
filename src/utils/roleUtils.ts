@@ -34,6 +34,14 @@ export const autoAssignRoleByClassification = (employee: {
   return employee.currentRole; // Keep existing role if any
 };
 
+// Define the system roles which are special cases
+export const systemDefinedRoles = ["Labour", "Staff"];
+
+// Check if a role is a system-defined role
+export const isSystemDefinedRole = (role?: string): boolean => {
+  return role ? systemDefinedRoles.includes(role) : false;
+};
+
 // Log role changes for audit purposes
 export const logRoleChange = (
   employeeId: string,
@@ -93,8 +101,8 @@ export const updateEmployeeRole = (
 
 // Function to check if a role is valid based on permissions
 export const isValidRole = (roleName: string, permissions: string[]) => {
-  // Labour role is exempt from permission validation
-  if (roleName === "Labour") {
+  // System-defined roles like Labour and Staff are exempt from permission validation
+  if (systemDefinedRoles.includes(roleName)) {
     return true;
   }
   
