@@ -100,23 +100,11 @@ export function RoleAssignDialog({
 
   // Determine the dialog title and button text based on the current role
   const getDialogTitle = () => {
-    if (employee.currentRole === "Staff") {
-      return "Assign Role";
-    } else if (employee.currentRole === "Labour") {
-      return "Update Role";
-    } else {
-      return employee.currentRole ? "Update Role" : "Assign Role";
-    }
+    return employee.currentRole ? "Update Role" : "Assign Role";
   };
 
   const getButtonText = () => {
-    if (employee.currentRole === "Staff") {
-      return "Assign Role";
-    } else if (employee.currentRole === "Labour") {
-      return "Update Role";
-    } else {
-      return employee.currentRole ? "Update Role" : "Assign Role";
-    }
+    return employee.currentRole ? "Update Role" : "Assign Role";
   };
 
   return (
@@ -152,7 +140,8 @@ export function RoleAssignDialog({
             </div>
             
             <div className="pt-2 flex justify-between">
-              {employee.currentRole && onRemoveRole && (
+              {/* Fix: Ensure the Remove Role button is always visible when onRemoveRole prop exists */}
+              {onRemoveRole && (
                 <Button 
                   variant="destructive" 
                   onClick={handleRemoveClick}
@@ -166,7 +155,7 @@ export function RoleAssignDialog({
               <Button 
                 variant="default" 
                 onClick={handleAssign}
-                className={employee.currentRole && onRemoveRole ? "" : "w-full"}
+                className={onRemoveRole ? "" : "w-full"}
               >
                 {getButtonText()}
               </Button>
