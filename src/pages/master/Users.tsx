@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Eye, Search, Building, User, Briefcase, ActivitySquare, Lock, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +37,7 @@ import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
 import { useToast } from "@/hooks/use-toast";
-import { updateEmployeeRole, availableRoles } from "@/utils/roleUtils";
+import { availableRoles, handleEmployeeRoleTransition, isSystemUserRole } from "@/utils/roleUtils";
 
 // Updated mock data to include login method and ensuring all have roles assigned
 const USERS = [
@@ -99,6 +99,49 @@ const USERS = [
   },
 ];
 
+// Mock employees data for transition between lists
+const initialEmployees = [
+  { 
+    id: 1, 
+    name: "John Smith", 
+    employeeId: "EMP001", 
+    role: "Labour", 
+    category: "Laborer",
+    classification: "Laborer",
+    entity: "Tanseeq Investment",
+    contactNumber: "+971 50 123 4567",
+    email: "john.smith@tanseeq.ae",
+    faceEnrolled: true,
+    status: "Active" 
+  },
+  { 
+    id: 3, 
+    name: "Robert Williams", 
+    employeeId: "EMP003", 
+    role: "Labour", 
+    category: "Laborer",
+    classification: "Laborer",
+    entity: "Al Maha Projects",
+    contactNumber: "+971 55 345 6789",
+    email: "robert.williams@almaha.ae",
+    faceEnrolled: false,
+    status: "Active" 
+  },
+  { 
+    id: 4, 
+    name: "Emily Davis", 
+    employeeId: "EMP004", 
+    role: "Labour", 
+    category: "Driver",
+    classification: "Staff",
+    entity: "Gulf Builders International",
+    contactNumber: "+971 54 456 7890",
+    email: "emily.davis@gulfbuilders.ae",
+    faceEnrolled: true,
+    status: "Active" 
+  }
+];
+
 // Extract unique values for filter dropdowns
 const getUniqueValues = (field: string) => {
   const values = USERS.map((user) => user[field as keyof typeof user]);
@@ -115,6 +158,10 @@ const Users = () => {
   const { toast } = useToast();
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<typeof USERS[0] | null>(null);
+  
+  // State for users and employees lists
+  const [users, setUsers] = useState(USERS);
+  const [employees, setEmployees] = useState(initialEmployees);
   
   // Filter state
   const [employeeIdFilter, setEmployeeIdFilter] = useState("");
@@ -140,10 +187,16 @@ const Users = () => {
   // Reset password dialog
   const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [resetPasswordUser, setResetPasswordUser] = useState<typeof USERS[0] | null>(null);
-  
+
+  // Initialize users to exclude employees that have Staff or Labour roles
+  useEffect(() => {
+    // In a real app, this would be API calls to get users and employees
+    // For now, just initialize with our mock data
+  }, []);
+
   // Filtered users - Only showing employees who have a role assigned
   const filteredUsers = useMemo(() => {
-    return USERS.filter((user) => {
+    return users.filter((user) => {
       // First ensure the user has a role assigned
       if (!user.role) return false;
       
@@ -167,6 +220,7 @@ const Users = () => {
       );
     });
   }, [
+    users,
     employeeIdFilter,
     nameFilter,
     entityFilter,
@@ -193,8 +247,8 @@ const Users = () => {
     setIsViewModalOpen(true);
   };
 
-  // Handle changing a role
-  const handleChangeRole = (user: typeof USERS[0]) => {
+  // Handle updating a role
+  const handleUpdateRole = (user: typeof USERS[0]) => {
     setRoleDialogUser({
       name: user.name,
       employeeId: user.employeeId,
@@ -207,24 +261,76 @@ const Users = () => {
   const handleRoleAssigned = (role: string) => {
     if (!roleDialogUser) return;
     
-    // Update the role in the USERS array
-    const success = updateEmployeeRole(USERS, roleDialogUser.employeeId, role);
-    
-    if (success) {
+    // Check if the new role is a system user role
+    if (isSystemUserRole(role)) {
+      // Update role but keep in Users list
+      const updatedUsers = users.map(user => 
+        user.employeeId === roleDialogUser.employeeId
+          ? { ...user, role: role }
+          : user
+      );
+      setUsers(updatedUsers);
+      
       // Find the updated user to pass to the credentials dialog
-      const updatedUser = USERS.find(u => u.employeeId === roleDialogUser.employeeId);
+      const updatedUser = updatedUsers.find(u => u.employeeId === roleDialogUser.employeeId);
       
       if (updatedUser) {
         // Set up the credentials dialog with the updated user data
         setCredentialsUser(updatedUser);
         setIsCredentialsDialogOpen(true);
       }
-    } else {
+      
       toast({
-        title: "Error",
-        description: "Failed to update role. User not found.",
-        variant: "destructive"
+        title: "Success",
+        description: `Role updated to ${role} for ${roleDialogUser.name}`,
       });
+    } else {
+      // If role changed to Staff/Labour, move to Employees list
+      const userToMove = users.find(u => u.employeeId === roleDialogUser.employeeId);
+      
+      if (userToMove) {
+        const { updatedEmployees, updatedUsers } = handleEmployeeRoleTransition(
+          userToMove,
+          role,
+          employees,
+          users
+        );
+        
+        setEmployees(updatedEmployees);
+        setUsers(updatedUsers);
+        
+        toast({
+          title: "Success",
+          description: `${roleDialogUser.name} has been moved to Employees with role ${role}`,
+        });
+        
+        setIsRoleDialogOpen(false);
+      }
+    }
+  };
+  
+  // Handle removing a role
+  const handleRemoveRole = () => {
+    if (!roleDialogUser) return;
+    
+    const userToMove = users.find(u => u.employeeId === roleDialogUser.employeeId);
+    
+    if (userToMove) {
+      const { updatedEmployees, updatedUsers } = handleEmployeeRoleTransition(
+        userToMove,
+        null, // null signifies no role
+        employees,
+        users
+      );
+      
+      setEmployees(updatedEmployees);
+      setUsers(updatedUsers);
+      
+      toast({
+        title: "Success",
+        description: `${roleDialogUser.name} has been moved to Employees with no role assigned`,
+      });
+      
       setIsRoleDialogOpen(false);
     }
   };
@@ -241,10 +347,6 @@ const Users = () => {
     // If dialog is closing, also close the role dialog and show success message
     if (!open) {
       setIsRoleDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Role ${roleDialogUser?.currentRole ? "updated" : "assigned"} successfully for ${roleDialogUser?.name}`,
-      });
     }
   };
 
@@ -487,7 +589,7 @@ const Users = () => {
                     <TableCell>
                       <Badge 
                         className="bg-blue-100 text-blue-800 cursor-pointer"
-                        onClick={() => handleChangeRole(user)}
+                        onClick={() => handleUpdateRole(user)}
                       >
                         {user.role}
                       </Badge>
@@ -509,12 +611,12 @@ const Users = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        {/* Change Role Button */}
+                        {/* Update Role Button */}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button 
-                                onClick={() => handleChangeRole(user)}
+                                onClick={() => handleUpdateRole(user)}
                                 variant="ghost"
                                 size="sm"
                                 className="h-8 w-8 p-0"
@@ -523,7 +625,7 @@ const Users = () => {
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Change Role</p>
+                              <p>Update Role</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -636,13 +738,14 @@ const Users = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Role Change Dialog */}
+        {/* Role Update Dialog - Note the onRemoveRole prop */}
         <RoleAssignDialog
           open={isRoleDialogOpen}
           onOpenChange={setIsRoleDialogOpen}
           employee={roleDialogUser}
           roles={availableRoles}
           onAssignRole={handleRoleAssigned}
+          onRemoveRole={handleRemoveRole}
         />
         
         {/* Set/Update Login Credentials Dialog */}

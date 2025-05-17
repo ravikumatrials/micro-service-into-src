@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation, Navigate } from "react-router-dom";
 import { 
@@ -65,9 +64,9 @@ const menuItems: MenuItem[] = [
         requiredPermission: "Manage Employees"
       },
       {
-        name: "Projects",
-        path: "/master/projects",
-        requiredPermission: "Manage Projects"
+        name: "Users",
+        path: "/master/users",
+        requiredPermission: "Manage Users"
       },
       {
         name: "Roles",
@@ -75,14 +74,9 @@ const menuItems: MenuItem[] = [
         requiredPermission: "Manage Roles"
       },
       {
-        name: "Role Mapping",
-        path: "/role-mapping",
-        requiredPermission: "Role Mapping"
-      },
-      {
-        name: "Users",
-        path: "/master/users",
-        requiredPermission: "Manage Users"
+        name: "Projects",
+        path: "/master/projects",
+        requiredPermission: "Manage Projects"
       }
     ]
   },
