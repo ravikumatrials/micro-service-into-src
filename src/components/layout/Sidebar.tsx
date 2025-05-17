@@ -80,7 +80,7 @@ const menuItems: MenuItem[] = [
         requiredPermission: "Role Mapping"
       },
       {
-        name: "Users",
+        name: "Assigned Employees",
         path: "/master/users",
         requiredPermission: "Manage Users"
       }

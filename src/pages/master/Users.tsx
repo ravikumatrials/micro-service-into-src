@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { Eye, Search, Building, User, Briefcase, ActivitySquare, Lock, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -261,7 +262,7 @@ const Users = () => {
   return (
     <div className="space-y-5 px-1 pt-5">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-5">User Management</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-5">Assigned Employees</h1>
         
         {/* Search and Filter Section */}
         <Card className="p-5 mb-6">
