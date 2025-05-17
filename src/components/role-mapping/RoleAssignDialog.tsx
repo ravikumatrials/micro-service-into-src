@@ -98,20 +98,24 @@ export function RoleAssignDialog({
 
   if (!employee) return null;
 
-  // Determine the dialog title and button text based on the context
+  // Determine the dialog title and button text based on the current role
   const getDialogTitle = () => {
-    if (employee.currentRole) {
+    if (employee.currentRole === "Staff") {
+      return "Assign Role";
+    } else if (employee.currentRole === "Labour") {
       return "Update Role";
     } else {
-      return "Assign Role";
+      return employee.currentRole ? "Update Role" : "Assign Role";
     }
   };
 
   const getButtonText = () => {
-    if (employee.currentRole) {
+    if (employee.currentRole === "Staff") {
+      return "Assign Role";
+    } else if (employee.currentRole === "Labour") {
       return "Update Role";
     } else {
-      return "Assign Role";
+      return employee.currentRole ? "Update Role" : "Assign Role";
     }
   };
 
@@ -177,7 +181,7 @@ export function RoleAssignDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Role Removal</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove the role from {employee.name}? This will move the employee back to the Employees list.
+              Are you sure you want to remove the role from Employee {employee.employeeId}?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

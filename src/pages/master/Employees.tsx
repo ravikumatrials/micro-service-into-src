@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Eye, User, Search, Filter, Check, X, Clock, UserCheck, UserPlus } from "lucide-react";
+import { Eye, User, Search, Filter, Check, X, Clock, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
@@ -26,10 +26,6 @@ import { Separator } from "@/components/ui/separator";
 import EmployeeActionsCell from "./EmployeeActionsCell";
 import FaceEnrollmentModal from "./FaceEnrollmentModal";
 import { calculateWorkingHours, isOvertimeWorked } from "@/utils/timeUtils";
-import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
-import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
-import { availableRoles, handleEmployeeRoleTransition, isSystemUserRole } from "@/utils/roleUtils";
-import { useToast } from "@/hooks/use-toast";
 
 // Sample entities for dummy data
 const entities = [
@@ -279,65 +275,8 @@ const mockEnrollmentInfo = {
   "EMP007": { doneBy: "System Admin", doneOn: "May 1, 2025, 3:10 PM" }
 };
 
-// Mock Users data to simulate Users submenu
-const mockUsers = [
-  { 
-    id: 1, 
-    name: "Sarah Johnson", 
-    employeeId: "EMP002", 
-    role: "Supervisor", 
-    category: "Supervisor",
-    classification: "Staff",
-    entity: "Tanseeq Landscaping LLC",
-    contactNumber: "+971 52 234 5678",
-    email: "sarah.johnson@tanseeq.ae",
-    faceEnrolled: true,
-    status: "Active",
-    hasAccount: true,
-    loginMethod: "Email",
-    assignedBy: "Admin User",
-    assignmentDate: "2025-04-15"
-  },
-  { 
-    id: 2,
-    name: "James Miller", 
-    employeeId: "EMP005", 
-    role: "Report Admin", 
-    category: "Engineer",
-    classification: "Staff",
-    entity: "Zenith Infrastructure",
-    contactNumber: "+971 56 567 8901",
-    email: "james.miller@zenith.ae",
-    faceEnrolled: true,
-    status: "Active",
-    hasAccount: true,
-    loginMethod: "EmployeeID",
-    assignedBy: "Admin User",
-    assignmentDate: "2025-03-20"
-  },
-  { 
-    id: 3,
-    name: "Michael Brown", 
-    employeeId: "EMP007", 
-    role: "Super Admin", 
-    category: "Manager",
-    classification: "Staff",
-    entity: "Tanseeq Landscaping LLC",
-    contactNumber: "+971 52 789 0123",
-    email: "michael.brown@tanseeq.ae",
-    faceEnrolled: true,
-    status: "Active",
-    hasAccount: true,
-    loginMethod: "Email",
-    assignedBy: "System Admin",
-    assignmentDate: "2025-02-10"
-  }
-];
-
 const Employees = () => {
-  const { toast } = useToast();
-  const [employees, setEmployees] = useState([]);
-  const [users, setUsers] = useState(mockUsers);
+  const [employees, setEmployees] = useState(initialEmployees);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -350,23 +289,8 @@ const Employees = () => {
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
   const [selectedFaceEmployee, setSelectedFaceEmployee] = useState(null);
   
-  // Role assignment state
-  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
-  const [roleDialogEmployee, setRoleDialogEmployee] = useState(null);
-  const [isCredentialsDialogOpen, setIsCredentialsDialogOpen] = useState(false);
-  const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
-  
   // Current user role - in a real app, this would come from auth context
   const currentUserRole = "Super Admin";
-
-  // Initialize employees list, removing any that are already in the users list
-  useEffect(() => {
-    const existingUserIds = users.map(user => user.employeeId);
-    const filteredEmployees = initialEmployees.filter(
-      emp => !existingUserIds.includes(emp.employeeId)
-    );
-    setEmployees(filteredEmployees);
-  }, []);
 
   const filteredEmployees = employees.filter((employee) => {
     const searchMatch = 
@@ -438,69 +362,6 @@ const Employees = () => {
   const handleFaceEnrollment = (employee) => {
     setSelectedFaceEmployee(employee);
     setIsFaceModalOpen(true);
-  };
-
-  // New function to handle assigning role to employee
-  const handleAssignEmployee = (employee) => {
-    setRoleDialogEmployee(employee);
-    setIsRoleDialogOpen(true);
-  };
-
-  // Handle role assigned
-  const handleRoleAssigned = (role) => {
-    if (!roleDialogEmployee) return;
-    
-    // Check if the role is a system user role (should be in Users submenu)
-    if (isSystemUserRole(role)) {
-      // Move employee between lists
-      const { updatedEmployees, updatedUsers } = handleEmployeeRoleTransition(
-        roleDialogEmployee,
-        role,
-        employees,
-        users
-      );
-      
-      setEmployees(updatedEmployees);
-      setUsers(updatedUsers);
-      
-      // Find the updated user to pass to the credentials dialog
-      const updatedUser = updatedUsers.find(u => u.employeeId === roleDialogEmployee.employeeId);
-      
-      if (updatedUser) {
-        // Set up for credentials dialog
-        setEmployeeForCredentials(updatedUser);
-        setIsCredentialsDialogOpen(true);
-      }
-      
-      toast({
-        title: "Success",
-        description: `${roleDialogEmployee.name} has been assigned the role of ${role} and moved to Users.`,
-      });
-    } else {
-      // For Staff/Labour roles - just update the role but keep in Employees list
-      const updatedEmployees = employees.map(emp => 
-        emp.employeeId === roleDialogEmployee.employeeId
-          ? {...emp, role, currentRole: role}
-          : emp
-      );
-      
-      setEmployees(updatedEmployees);
-      
-      toast({
-        title: "Success",
-        description: `${roleDialogEmployee.name} has been assigned the role of ${role}.`,
-      });
-      
-      setIsRoleDialogOpen(false);
-    }
-  };
-
-  // Handle credentials dialog close
-  const handleCredentialsDialogClose = (open) => {
-    setIsCredentialsDialogOpen(open);
-    if (!open) {
-      setIsRoleDialogOpen(false);
-    }
   };
 
   return (
@@ -632,23 +493,6 @@ const Employees = () => {
                           }}
                           onEnrollFace={handleFaceEnrollment}
                         />
-                        
-                        {/* New Assign Employee Button */}
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button 
-                                onClick={() => handleAssignEmployee(employee)}
-                                className="text-blue-600 hover:text-blue-800 p-1"
-                              >
-                                <UserPlus className="h-4 w-4" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Assign Employee</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
                         
                         <TooltipProvider>
                           <Tooltip>
@@ -865,22 +709,6 @@ const Employees = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Role Assignment Dialog */}
-      <RoleAssignDialog
-        open={isRoleDialogOpen}
-        onOpenChange={setIsRoleDialogOpen}
-        employee={roleDialogEmployee}
-        roles={availableRoles}
-        onAssignRole={handleRoleAssigned}
-      />
-
-      {/* Login Credentials Dialog */}
-      <SetLoginCredentialsDialog
-        open={isCredentialsDialogOpen}
-        onOpenChange={handleCredentialsDialogClose}
-        employee={employeeForCredentials}
-      />
-
       {isTanseeqModalOpen && (
         <TanseeqImportModal 
           open={isTanseeqModalOpen}
@@ -889,7 +717,7 @@ const Employees = () => {
         />
       )}
       
-      {/* Face Enrollment Modal */}
+      {/* Face Enrollment Modal - Now without showing enrollment info in the dialog */}
       {selectedFaceEmployee && (
         <FaceEnrollmentModal
           isOpen={isFaceModalOpen}

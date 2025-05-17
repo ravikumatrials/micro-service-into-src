@@ -65,11 +65,11 @@ export const logRoleChange = (
   return auditLog;
 };
 
-// Function to handle role updates in Employees and Users screens
+// Function to handle role updates in both Role Mapping and Users screens
 export const updateEmployeeRole = (
   employees: any[],
   employeeId: string, 
-  newRole: string | null,
+  newRole: string,
   performedBy: string = "Admin User"
 ) => {
   let updated = false;
@@ -84,19 +84,13 @@ export const updateEmployeeRole = (
         emp.role = newRole;
       }
       
-      // Update the currentRole property (for Employees menu)
+      // Update the currentRole property (for Role Mapping menu)
       if (emp.currentRole !== undefined) {
         emp.currentRole = newRole;
       }
       
       // Log the role change for auditing
-      if (newRole === null) {
-        logRoleChange(employeeId, oldRole, undefined, "remove", performedBy);
-      } else if (oldRole) {
-        logRoleChange(employeeId, oldRole, newRole, "update", performedBy);
-      } else {
-        logRoleChange(employeeId, undefined, newRole, "assign", performedBy);
-      }
+      logRoleChange(employeeId, oldRole, newRole, oldRole ? "update" : "assign", performedBy);
       
       updated = true;
     }
@@ -124,7 +118,7 @@ export const findEmployeeById = (employees: any[], employeeId: string) => {
   );
 };
 
-// Generate a shared employee object that works in both Employees and Users screens
+// Generate a shared employee object that works in both Role Mapping and Users screens
 export const createSharedEmployeeObject = (employee: any) => {
   return {
     id: employee.id || Math.floor(Math.random() * 10000), // Generate ID if not exists
@@ -140,73 +134,4 @@ export const createSharedEmployeeObject = (employee: any) => {
     hasAccount: employee.hasAccount !== undefined ? employee.hasAccount : false,
     loginMethod: employee.loginMethod || null
   };
-};
-
-// Check if a role makes an employee a system user (should appear in Users submenu)
-export const isSystemUserRole = (role?: string): boolean => {
-  if (!role) return false;
-  return !roleMappingVisibleRoles.includes(role);
-};
-
-// Move employee between Employees and Users lists based on role changes
-export const handleEmployeeRoleTransition = (
-  employee: any,
-  newRole: string | null,
-  employeesList: any[],
-  usersList: any[]
-): { updatedEmployees: any[], updatedUsers: any[] } => {
-  const updatedEmployees = [...employeesList];
-  const updatedUsers = [...usersList];
-  
-  // If role is removed or set to Staff/Labour, employee should be in Employees list
-  if (newRole === null || roleMappingVisibleRoles.includes(newRole)) {
-    // Remove from Users list if present
-    const userIndex = updatedUsers.findIndex(u => u.employeeId === employee.employeeId);
-    if (userIndex !== -1) {
-      updatedUsers.splice(userIndex, 1);
-    }
-    
-    // Add to Employees list if not already there
-    const employeeIndex = updatedEmployees.findIndex(e => e.employeeId === employee.employeeId);
-    if (employeeIndex === -1) {
-      // Create employee object with consistent properties
-      const employeeObj = {
-        ...employee,
-        currentRole: newRole,
-        role: newRole
-      };
-      updatedEmployees.push(employeeObj);
-    } else {
-      // Update existing employee
-      updatedEmployees[employeeIndex].currentRole = newRole;
-      updatedEmployees[employeeIndex].role = newRole;
-    }
-  } 
-  // If role is set to a system user role (not Staff/Labour), employee should be in Users list
-  else {
-    // Remove from Employees list
-    const employeeIndex = updatedEmployees.findIndex(e => e.employeeId === employee.employeeId);
-    if (employeeIndex !== -1) {
-      updatedEmployees.splice(employeeIndex, 1);
-    }
-    
-    // Add to or update in Users list
-    const userIndex = updatedUsers.findIndex(u => u.employeeId === employee.employeeId);
-    if (userIndex === -1) {
-      // Create new user object
-      const userObj = {
-        ...employee,
-        role: newRole,
-        currentRole: newRole,
-        status: "Active"
-      };
-      updatedUsers.push(userObj);
-    } else {
-      // Update existing user
-      updatedUsers[userIndex].role = newRole;
-      updatedUsers[userIndex].currentRole = newRole;
-    }
-  }
-  
-  return { updatedEmployees, updatedUsers };
 };
