@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -236,6 +235,13 @@ const AssignedEmployees = () => {
     setRemoveRoleDialogOpen(false);
   };
 
+  const handlePasswordReset = () => {
+    toast({
+      title: "Success",
+      description: `Password reset process completed for employee.`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -471,6 +477,7 @@ const AssignedEmployees = () => {
         open={resetPasswordDialogOpen}
         onOpenChange={setResetPasswordDialogOpen}
         employee={employeeForPasswordReset}
+        onPasswordReset={handlePasswordReset}
       />
       
       <EmployeeDetailModal
