@@ -241,13 +241,13 @@ const Users = () => {
     setRoleFilter("all");
   };
 
-  // Open view modal
+  // Handle opening the view modal
   const handleOpenViewModal = (user: typeof USERS[0]) => {
     setSelectedUser(user);
     setIsViewModalOpen(true);
   };
 
-  // Handle updating a role
+  // Handle updating a role - renamed from "Change Role" to "Update Role"
   const handleUpdateRole = (user: typeof USERS[0]) => {
     setRoleDialogUser({
       name: user.name,

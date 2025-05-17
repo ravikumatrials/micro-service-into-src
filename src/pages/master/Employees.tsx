@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Eye, User, Search, Filter, Check, X, Clock, UserCheck, UserPlus } from "lucide-react";
+import { Eye, User, Search, Filter, Check, X, Clock, UserCheck, UserPlus, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmployeeActionsCell from "./EmployeeActionsCell";
 import FaceEnrollmentModal from "./FaceEnrollmentModal";
 import { calculateWorkingHours, isOvertimeWorked } from "@/utils/timeUtils";
@@ -349,6 +350,7 @@ const Employees = () => {
   const [isTanseeqModalOpen, setIsTanseeqModalOpen] = useState(false);
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
   const [selectedFaceEmployee, setSelectedFaceEmployee] = useState(null);
+  const [activeTab, setActiveTab] = useState("unassigned");
   
   // Role assignment state
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
@@ -359,15 +361,17 @@ const Employees = () => {
   // Current user role - in a real app, this would come from auth context
   const currentUserRole = "Super Admin";
 
-  // Initialize employees list, removing any that are already in the users list
+  // Initialize employees list and users list
   useEffect(() => {
-    const existingUserIds = users.map(user => user.employeeId);
-    const filteredEmployees = initialEmployees.filter(
-      emp => !existingUserIds.includes(emp.employeeId)
-    );
-    setEmployees(filteredEmployees);
+    // In a real app, this would be API calls to get employees and users
+    const unassignedEmployees = initialEmployees.filter(emp => !emp.role || emp.role === "Labour" || emp.role === "Staff");
+    const systemUsers = initialEmployees.filter(emp => emp.role && emp.role !== "Labour" && emp.role !== "Staff");
+    
+    setEmployees(unassignedEmployees);
+    setUsers([...mockUsers, ...systemUsers]);
   }, []);
 
+  // Filtered employees based on active tab and filters
   const filteredEmployees = employees.filter((employee) => {
     const searchMatch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -386,6 +390,21 @@ const Employees = () => {
       employee.classification === classificationFilter;
 
     return searchMatch && statusMatch && categoryMatch && entityMatch && classificationMatch;
+  });
+
+  // Filtered users (employees with system roles)
+  const filteredUsers = users.filter((user) => {
+    const searchMatch = 
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
+    const statusMatch = 
+      statusFilter === "all" || 
+      user.status.toLowerCase() === statusFilter.toLowerCase();
+    const entityMatch = 
+      entityFilter === "all" || 
+      user.entity === entityFilter;
+
+    return searchMatch && statusMatch && entityMatch;
   });
 
   const handleEmployeeView = (employee) => {
@@ -518,183 +537,300 @@ const Employees = () => {
         </div>
       </div>
       
-      <Card className="p-0 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              className="pl-10 pr-3 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
-              placeholder="Search by name or employee ID"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col md:flex-row gap-4 md:items-center">
-            <div className="flex items-center">
-              <Filter className="h-5 w-5 text-gray-400 mr-2" />
-              <span className="text-sm text-gray-600 mr-2">Status:</span>
-              <select
-                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-600 mr-2">Category:</span>
-              <select
-                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-              >
-                <option value="all">All Categories</option>
-                {categories.map((category, index) => (
-                  <option key={index} value={category.toLowerCase()}>{category}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-600 mr-2">Classification:</span>
-              <select
-                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
-                value={classificationFilter}
-                onChange={(e) => setClassificationFilter(e.target.value)}
-              >
-                <option value="all">All Classifications</option>
-                {classifications.map((classification, index) => (
-                  <option key={index} value={classification}>{classification}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-600 mr-2">Entity:</span>
-              <select
-                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
-                value={entityFilter}
-                onChange={(e) => setEntityFilter(e.target.value)}
-              >
-                <option value="all">All Entities</option>
-                {entities.map((entity, index) => (
-                  <option key={index} value={entity}>{entity}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Employee ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Entity</TableHead>
-                <TableHead>Classification</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEmployees.length > 0 ? (
-                filteredEmployees.map(employee => (
-                  <TableRow key={employee.id}>
-                    <TableCell className="font-medium">{employee.employeeId}</TableCell>
-                    <TableCell>{employee.name}</TableCell>
-                    <TableCell className="max-w-[200px] truncate" title={employee.entity}>
-                      {employee.entity}
-                    </TableCell>
-                    <TableCell>{employee.classification}</TableCell>
-                    <TableCell>{employee.category}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        className={
-                          employee.status === "Active" 
-                            ? "bg-green-100 text-green-800 hover:bg-green-200" 
-                            : "bg-red-100 text-red-800 hover:bg-red-200"
-                        }
-                      >
-                        {employee.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-3">
-                        <EmployeeActionsCell
-                          employee={{
-                            id: employee.employeeId,
-                            name: employee.name,
-                            hasFaceEnrolled: employee.faceEnrolled
-                          }}
-                          onEnrollFace={handleFaceEnrollment}
-                        />
-                        
-                        {/* New Assign Employee Button */}
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button 
-                                onClick={() => handleAssignEmployee(employee)}
-                                className="text-blue-600 hover:text-blue-800 p-1"
-                              >
-                                <UserPlus className="h-4 w-4" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Assign Employee</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button 
-                                onClick={() => handleEmployeeView(employee)}
-                                className="text-blue-500 hover:text-blue-700 p-1"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>View Employee Details</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-6 text-gray-500">
-                    No employees found matching the search criteria
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="unassigned" className="flex items-center">
+            <User className="h-4 w-4 mr-2" />
+            Unassigned
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center">
+            <Users className="h-4 w-4 mr-2" />
+            Users
+          </TabsTrigger>
+        </TabsList>
         
-        <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 bg-gray-50">
-          <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">{filteredEmployees.length}</span> of{" "}
-            <span className="font-medium">{employees.length}</span> employees
+        <Card className="p-0 overflow-hidden">
+          <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="pl-10 pr-3 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-proscape"
+                placeholder="Search by name or employee ID"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col md:flex-row gap-4 md:items-center">
+              <div className="flex items-center">
+                <Filter className="h-5 w-5 text-gray-400 mr-2" />
+                <span className="text-sm text-gray-600 mr-2">Status:</span>
+                <select
+                  className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div className="flex items-center">
+                <span className="text-sm text-gray-600 mr-2">Category:</span>
+                <select
+                  className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map((category, index) => (
+                    <option key={index} value={category.toLowerCase()}>{category}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center">
+                <span className="text-sm text-gray-600 mr-2">Entity:</span>
+                <select
+                  className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
+                  value={entityFilter}
+                  onChange={(e) => setEntityFilter(e.target.value)}
+                >
+                  <option value="all">All Entities</option>
+                  {entities.map((entity, index) => (
+                    <option key={index} value={entity}>{entity}</option>
+                  ))}
+                </select>
+              </div>
+              {activeTab === 'unassigned' && (
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-600 mr-2">Classification:</span>
+                  <select
+                    className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-proscape"
+                    value={classificationFilter}
+                    onChange={(e) => setClassificationFilter(e.target.value)}
+                  >
+                    <option value="all">All Classifications</option>
+                    {classifications.map((classification, index) => (
+                      <option key={index} value={classification}>{classification}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex space-x-2">
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50">
-              Previous
-            </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
-              Next
-            </button>
+          
+          <TabsContent value="unassigned" className="mt-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Employee ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Entity</TableHead>
+                    <TableHead>Classification</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredEmployees.length > 0 ? (
+                    filteredEmployees.map(employee => (
+                      <TableRow key={employee.id}>
+                        <TableCell className="font-medium">{employee.employeeId}</TableCell>
+                        <TableCell>{employee.name}</TableCell>
+                        <TableCell className="max-w-[200px] truncate" title={employee.entity}>
+                          {employee.entity}
+                        </TableCell>
+                        <TableCell>{employee.classification}</TableCell>
+                        <TableCell>{employee.category}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            className={
+                              employee.status === "Active" 
+                                ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                                : "bg-red-100 text-red-800 hover:bg-red-200"
+                            }
+                          >
+                            {employee.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-3">
+                            {/* New Assign Employee Button */}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button 
+                                    onClick={() => handleAssignEmployee(employee)}
+                                    className="text-blue-600 hover:text-blue-800 p-1"
+                                  >
+                                    <UserPlus className="h-4 w-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Assign Employee</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button 
+                                    onClick={() => handleEmployeeView(employee)}
+                                    className="text-blue-500 hover:text-blue-700 p-1"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>View Employee Details</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-6 text-gray-500">
+                        No employees found matching the search criteria
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="users" className="mt-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Employee ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Entity</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map(user => (
+                      <TableRow key={user.id || user.employeeId}>
+                        <TableCell className="font-medium">{user.employeeId}</TableCell>
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell className="max-w-[200px] truncate" title={user.entity}>
+                          {user.entity}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-blue-100 text-blue-800">
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            className={
+                              user.status === "Active" 
+                                ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                                : "bg-red-100 text-red-800 hover:bg-red-200"
+                            }
+                          >
+                            {user.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-3">
+                            {/* Update Role Button */}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button 
+                                    onClick={() => handleAssignEmployee(user)}
+                                    className="text-blue-600 hover:text-blue-800 p-1"
+                                  >
+                                    <UserCheck className="h-4 w-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Update Role</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            
+                            {user.faceEnrolled !== undefined && (
+                              <EmployeeActionsCell
+                                employee={{
+                                  id: user.employeeId,
+                                  name: user.name,
+                                  hasFaceEnrolled: user.faceEnrolled
+                                }}
+                                onEnrollFace={handleFaceEnrollment}
+                              />
+                            )}
+                            
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button 
+                                    onClick={() => handleEmployeeView(user)}
+                                    className="text-blue-500 hover:text-blue-700 p-1"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>View Employee Details</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                        No users found matching the search criteria
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+        
+          <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 bg-gray-50">
+            <div className="text-sm text-gray-700">
+              {activeTab === 'unassigned' ? (
+                <>
+                  Showing <span className="font-medium">{filteredEmployees.length}</span> of{" "}
+                  <span className="font-medium">{employees.length}</span> unassigned employees
+                </>
+              ) : (
+                <>
+                  Showing <span className="font-medium">{filteredUsers.length}</span> of{" "}
+                  <span className="font-medium">{users.length}</span> users
+                </>
+              )}
+            </div>
+            <div className="flex space-x-2">
+              <button className="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                Previous
+              </button>
+              <button className="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                Next
+              </button>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </Tabs>
 
       {/* Enhanced View Employee Modal */}
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
@@ -872,6 +1008,7 @@ const Employees = () => {
         employee={roleDialogEmployee}
         roles={availableRoles}
         onAssignRole={handleRoleAssigned}
+        onRemoveRole={roleDialogEmployee?.role ? handleRemoveRole : undefined}
       />
 
       {/* Login Credentials Dialog */}

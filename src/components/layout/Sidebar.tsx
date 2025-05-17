@@ -64,11 +64,6 @@ const menuItems: MenuItem[] = [
         requiredPermission: "Manage Employees"
       },
       {
-        name: "Users",
-        path: "/master/users",
-        requiredPermission: "Manage Users"
-      },
-      {
         name: "Roles",
         path: "/master/roles",
         requiredPermission: "Manage Roles"
