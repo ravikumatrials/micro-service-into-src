@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -56,7 +57,7 @@ const initialEmployees = [
     entity: "Tanseeq Investment",
     contactNumber: "+971 50 123 4567",
     email: "ibrahim.almazrouei@tanseeq.ae",
-    loginMethod: "Face",
+    loginMethod: "Employee ID", // Restricted to allowed values
     status: "Active" 
   },
   { 
@@ -69,7 +70,7 @@ const initialEmployees = [
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 234 5678",
     email: "fatima.alhashimi@tanseeq.ae",
-    loginMethod: "Email/Password",
+    loginMethod: "Email ID", // Restricted to allowed values
     status: "Active" 
   },
   { 
@@ -82,7 +83,7 @@ const initialEmployees = [
     entity: "Al Maha Projects",
     contactNumber: "+971 55 345 6789",
     email: "mohammed.alfarsi@almaha.ae",
-    loginMethod: "Face",
+    loginMethod: "Employee ID", // Restricted to allowed values
     status: "Active" 
   },
   { 
@@ -95,7 +96,7 @@ const initialEmployees = [
     entity: "Gulf Builders International",
     contactNumber: "+971 54 456 7890",
     email: "aisha.alblooshi@gulfbuilders.ae",
-    loginMethod: "Face",
+    loginMethod: "Email ID", // Restricted to allowed values
     status: "Active" 
   },
   { 
@@ -108,7 +109,7 @@ const initialEmployees = [
     entity: "Zenith Infrastructure",
     contactNumber: "+971 56 567 8901",
     email: "yusuf.alqasimi@zenith.ae",
-    loginMethod: "Email/Password",
+    loginMethod: "Email ID", // Restricted to allowed values
     status: "Active" 
   },
   { 
@@ -121,7 +122,7 @@ const initialEmployees = [
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 789 0123",
     email: "khalid.almansoori@tanseeq.ae",
-    loginMethod: "Email/Password",
+    loginMethod: "Employee ID", // Restricted to allowed values
     status: "Active" 
   }
 ];
@@ -368,6 +369,7 @@ const AssignedEmployees = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
+                      {/* Restricted to only Email ID or Employee ID */}
                       {employee.loginMethod ? employee.loginMethod : "-"}
                     </TableCell>
                     <TableCell>

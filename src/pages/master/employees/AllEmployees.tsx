@@ -45,105 +45,105 @@ const classifications = ["Laborer", "Staff"];
 const initialEmployees = [
   { 
     id: 1, 
-    name: "John Smith", 
+    name: "Ahmed Al-Mansouri", 
     employeeId: "EMP001", 
-    role: "Labour", 
+    role: "Labour", // Standardized to match classification
     category: "Laborer",
     classification: "Laborer",
     entity: "Tanseeq Investment",
     contactNumber: "+971 50 123 4567",
-    email: "john.smith@tanseeq.ae",
+    email: "ahmed.almansouri@tanseeq.ae",
     faceEnrolled: true,
     status: "Active" 
   },
   { 
     id: 2, 
-    name: "Sarah Johnson", 
+    name: "Fatima Al-Hashimi", 
     employeeId: "EMP002", 
-    role: "Supervisor", 
+    role: "Staff", // Standardized to match classification
     category: "Supervisor",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 234 5678",
-    email: "sarah.johnson@tanseeq.ae",
+    email: "fatima.alhashimi@tanseeq.ae",
     faceEnrolled: true,
     status: "Active" 
   },
   { 
     id: 3, 
-    name: "Robert Williams", 
+    name: "Mohammed Al-Farsi", 
     employeeId: "EMP003", 
-    role: "Labour", 
+    role: "Labour", // Standardized to match classification
     category: "Laborer",
     classification: "Laborer",
     entity: "Al Maha Projects",
     contactNumber: "+971 55 345 6789",
-    email: "robert.williams@almaha.ae",
+    email: "mohammed.alfarsi@almaha.ae",
     faceEnrolled: false,
     status: "Active" 
   },
   { 
     id: 4, 
-    name: "Emily Davis", 
+    name: "Aisha Al-Blooshi", 
     employeeId: "EMP004", 
-    role: "Labour", 
+    role: "Staff", // Standardized to match classification
     category: "Driver",
     classification: "Staff",
     entity: "Gulf Builders International",
     contactNumber: "+971 54 456 7890",
-    email: "emily.davis@gulfbuilders.ae",
+    email: "aisha.alblooshi@gulfbuilders.ae",
     faceEnrolled: true,
     status: "Active" 
   },
   { 
     id: 5, 
-    name: "James Miller", 
+    name: "Yusuf Al-Qasimi", 
     employeeId: "EMP005", 
-    role: "Report Admin", 
+    role: "Staff", // Standardized to match classification
     category: "Engineer",
     classification: "Staff",
     entity: "Zenith Infrastructure",
     contactNumber: "+971 56 567 8901",
-    email: "james.miller@zenith.ae",
+    email: "yusuf.alqasimi@zenith.ae",
     faceEnrolled: true,
     status: "Active" 
   },
   { 
     id: 6, 
-    name: "Jennifer Wilson", 
+    name: "Mariam Al-Zaabi", 
     employeeId: "EMP006", 
-    role: null, 
+    role: "Staff", // Standardized to match classification
     category: "Consultant",
     classification: "Staff",
     entity: "Tanseeq Investment",
     contactNumber: "+971 50 678 9012",
-    email: "jennifer.wilson@tanseeq.ae",
+    email: "mariam.alzaabi@tanseeq.ae",
     faceEnrolled: false,
     status: "Inactive" 
   },
   { 
     id: 7, 
-    name: "Michael Brown", 
+    name: "Khalid Al-Mansoori", 
     employeeId: "EMP007", 
-    role: "Super Admin", 
+    role: "Staff", // Standardized to match classification 
     category: "Manager",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 789 0123",
-    email: "michael.brown@tanseeq.ae",
+    email: "khalid.almansoori@tanseeq.ae",
     faceEnrolled: true,
     status: "Active" 
   },
   { 
     id: 8, 
-    name: "David Thompson", 
+    name: "Omar Al-Shamsi", 
     employeeId: "EMP008", 
-    role: null, 
+    role: "Labour", // Standardized to match classification
     category: "Laborer",
     classification: "Laborer",
     entity: "Al Maha Projects",
     contactNumber: "+971 55 890 1234",
-    email: "david.thompson@almaha.ae",
+    email: "omar.alshamsi@almaha.ae",
     faceEnrolled: false,
     status: "Active" 
   },
@@ -193,24 +193,31 @@ const AllEmployees = () => {
     setIsFaceModalOpen(true);
   };
 
+  // Update the handleTanseeqImport function to ensure roles match classifications
   const handleTanseeqImport = (newEmployees) => {
     const maxId = Math.max(...employees.map(e => e.id));
     
-    const employeesToAdd = newEmployees.map((emp, index) => ({
-      id: maxId + index + 1,
-      name: emp.name,
-      employeeId: emp.employeeId,
-      role: emp.role || null,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      entity: entities[Math.floor(Math.random() * entities.length)],
-      contactNumber: "+971 5" + Math.floor(Math.random() * 10) + " " + 
-                    Math.floor(Math.random() * 900 + 100) + " " + 
-                    Math.floor(Math.random() * 9000 + 1000),
-      email: emp.name.toLowerCase().replace(" ", ".") + "@tanseeq.ae",
-      faceEnrolled: false,
-      status: "Active",
-      classification: classifications[Math.floor(Math.random() * classifications.length)]
-    }));
+    const employeesToAdd = newEmployees.map((emp, index) => {
+      // Determine role based on classification
+      const classification = classifications[Math.floor(Math.random() * classifications.length)];
+      const role = classification === "Laborer" ? "Labour" : "Staff";
+      
+      return {
+        id: maxId + index + 1,
+        name: emp.name,
+        employeeId: emp.employeeId,
+        role: role, // Set role based on classification
+        category: categories[Math.floor(Math.random() * categories.length)],
+        entity: entities[Math.floor(Math.random() * entities.length)],
+        contactNumber: "+971 5" + Math.floor(Math.random() * 10) + " " + 
+                      Math.floor(Math.random() * 900 + 100) + " " + 
+                      Math.floor(Math.random() * 9000 + 1000),
+        email: emp.name.toLowerCase().replace(" ", ".") + "@tanseeq.ae",
+        faceEnrolled: false,
+        status: "Active",
+        classification: classification
+      };
+    });
     
     setEmployees([...employees, ...employeesToAdd]);
   };
@@ -325,20 +332,12 @@ const AllEmployees = () => {
                     <TableCell>{employee.classification}</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>
-                      {employee.role && (
-                        <Badge 
-                          className="bg-green-100 text-green-800 hover:bg-green-200"
-                        >
-                          {employee.role}
-                        </Badge>
-                      )}
-                      {!employee.role && (
-                        <Badge 
-                          className="bg-gray-100 text-gray-800 hover:bg-gray-200"
-                        >
-                          Unassigned
-                        </Badge>
-                      )}
+                      {/* Standardized Role display */}
+                      <Badge 
+                        className="bg-green-100 text-green-800 hover:bg-green-200"
+                      >
+                        {employee.classification === "Laborer" ? "Labour" : "Staff"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge 

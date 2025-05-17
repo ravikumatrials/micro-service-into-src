@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Calendar } from "lucide-react";
+import { User } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -30,7 +30,6 @@ export function EmployeeDetailModal({
       location: "Abu Dhabi Site A",
       mode: "Face",
       workingHours: "9.5",
-      status: "Approved",
       comments: ""
     },
     {
@@ -41,7 +40,6 @@ export function EmployeeDetailModal({
       location: "Abu Dhabi Site A",
       mode: "Face",
       workingHours: "9.42",
-      status: "Approved",
       comments: ""
     },
     {
@@ -52,7 +50,6 @@ export function EmployeeDetailModal({
       location: "Abu Dhabi Site A",
       mode: "Manual",
       workingHours: "8.5",
-      status: "Approved",
       comments: "Employee forgot to check in with face recognition"
     },
     {
@@ -63,7 +60,6 @@ export function EmployeeDetailModal({
       location: "Abu Dhabi Site B",
       mode: "Face",
       workingHours: "9.5",
-      status: "Approved",
       comments: ""
     },
     {
@@ -74,7 +70,6 @@ export function EmployeeDetailModal({
       location: "Abu Dhabi Site B",
       mode: "Manual",
       workingHours: "7.5",
-      status: "Exception",
       comments: "Early departure due to medical appointment"
     }
   ];
@@ -176,55 +171,42 @@ export function EmployeeDetailModal({
           </TabsContent>
           
           <TabsContent value="attendance" className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-500">ATTENDANCE HISTORY</h4>
+            <h4 className="text-sm font-medium text-gray-500 mb-3">ATTENDANCE HISTORY</h4>
             
+            {/* Improved Attendance History UI */}
             <div className="overflow-x-auto rounded-md border">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-In</th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-Out</th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mode</th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-In</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-Out</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mode</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {attendanceHistory.map((record, index) => (
                     <tr key={index}>
-                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
                         {format(record.date, "MMM dd, yyyy")}
                       </td>
-                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{record.checkIn}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{record.checkOut}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{record.project}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{record.location}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-sm">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{record.checkIn}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{record.checkOut}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{record.project}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{record.location}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm">
                         <Badge
                           className={record.mode === "Face" ? "bg-blue-100 text-blue-800" : "bg-orange-100 text-orange-800"}
                         >
                           {record.mode}
                         </Badge>
                       </td>
-                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{record.workingHours}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-sm">
-                        <Badge
-                          className={
-                            record.status === "Approved"
-                              ? "bg-green-100 text-green-800"
-                              : record.status === "Exception"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }
-                        >
-                          {record.status}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-3 text-sm text-gray-500 max-w-[200px] truncate" title={record.comments}>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{record.workingHours}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900 max-w-[200px] truncate" title={record.comments}>
                         {record.comments || "-"}
                       </td>
                     </tr>
