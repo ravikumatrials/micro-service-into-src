@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { Eye, Search, Building, User, Briefcase, ActivitySquare, Lock, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -657,7 +656,7 @@ const Users = () => {
         <ResetPasswordDialog
           open={isResetPasswordOpen}
           onOpenChange={setIsResetPasswordOpen}
-          user={resetPasswordUser}
+          employee={resetPasswordUser}
           onPasswordReset={handlePasswordReset}
         />
       </div>
