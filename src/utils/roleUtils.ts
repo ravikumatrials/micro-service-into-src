@@ -1,3 +1,4 @@
+
 // Define available roles
 export const availableRoles = [
   { id: 1, name: "Labour", isSystemDefined: true },
@@ -64,7 +65,7 @@ export const logRoleChange = (
   return auditLog;
 };
 
-// Function to handle role updates in both Role Mapping and Assigned Employees screens
+// Function to handle role updates in both Role Mapping and Users screens
 export const updateEmployeeRole = (
   employees: any[],
   employeeId: string, 
@@ -78,7 +79,7 @@ export const updateEmployeeRole = (
     if (emp.employeeId === employeeId) {
       const oldRole = emp.currentRole || emp.role;
       
-      // Update the role property (for Assigned Employees menu)
+      // Update the role property (for Users menu)
       if (emp.role !== undefined) {
         emp.role = newRole;
       }
@@ -117,7 +118,7 @@ export const findEmployeeById = (employees: any[], employeeId: string) => {
   );
 };
 
-// Generate a shared employee object that works in both Role Mapping and Assigned Employees screens
+// Generate a shared employee object that works in both Role Mapping and Users screens
 export const createSharedEmployeeObject = (employee: any) => {
   return {
     id: employee.id || Math.floor(Math.random() * 10000), // Generate ID if not exists

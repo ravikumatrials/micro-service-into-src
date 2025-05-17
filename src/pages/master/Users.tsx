@@ -259,9 +259,9 @@ const Users = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Assigned Employees</h1>
+    <div className="space-y-5 px-1 pt-5">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-800 mb-5">User Management</h1>
         
         {/* Search and Filter Section */}
         <Card className="p-5 mb-6">

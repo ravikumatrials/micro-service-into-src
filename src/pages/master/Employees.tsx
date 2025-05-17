@@ -65,11 +65,7 @@ const initialEmployees = [
     contactNumber: "+971 50 123 4567",
     email: "john.smith@tanseeq.ae",
     faceEnrolled: true,
-    status: "Active",
-    hasAccount: false,
-    loginMethod: "",
-    assignedBy: "",
-    assignmentDate: ""
+    status: "Active" 
   },
   { 
     id: 2, 
@@ -82,11 +78,7 @@ const initialEmployees = [
     contactNumber: "+971 52 234 5678",
     email: "sarah.johnson@tanseeq.ae",
     faceEnrolled: true,
-    status: "Active",
-    hasAccount: false,
-    loginMethod: "",
-    assignedBy: "",
-    assignmentDate: ""
+    status: "Active" 
   },
   { 
     id: 3, 
@@ -99,11 +91,7 @@ const initialEmployees = [
     contactNumber: "+971 55 345 6789",
     email: "robert.williams@almaha.ae",
     faceEnrolled: false,
-    status: "Active",
-    hasAccount: false,
-    loginMethod: "",
-    assignedBy: "",
-    assignmentDate: ""
+    status: "Active" 
   },
   { 
     id: 4, 
@@ -116,11 +104,7 @@ const initialEmployees = [
     contactNumber: "+971 54 456 7890",
     email: "emily.davis@gulfbuilders.ae",
     faceEnrolled: true,
-    status: "Active",
-    hasAccount: false,
-    loginMethod: "",
-    assignedBy: "",
-    assignmentDate: ""
+    status: "Active" 
   },
   { 
     id: 5, 
@@ -133,11 +117,7 @@ const initialEmployees = [
     contactNumber: "+971 56 567 8901",
     email: "james.miller@zenith.ae",
     faceEnrolled: true,
-    status: "Active",
-    hasAccount: false,
-    loginMethod: "",
-    assignedBy: "",
-    assignmentDate: ""
+    status: "Active" 
   },
   { 
     id: 6, 
@@ -150,11 +130,7 @@ const initialEmployees = [
     contactNumber: "+971 50 678 9012",
     email: "jennifer.wilson@tanseeq.ae",
     faceEnrolled: false,
-    status: "Inactive",
-    hasAccount: false,
-    loginMethod: "",
-    assignedBy: "",
-    assignmentDate: ""
+    status: "Inactive" 
   },
   { 
     id: 7, 
@@ -167,11 +143,7 @@ const initialEmployees = [
     contactNumber: "+971 52 789 0123",
     email: "michael.brown@tanseeq.ae",
     faceEnrolled: true,
-    status: "Active",
-    hasAccount: false,
-    loginMethod: "",
-    assignedBy: "",
-    assignmentDate: ""
+    status: "Active" 
   },
   { 
     id: 8, 
@@ -184,12 +156,8 @@ const initialEmployees = [
     contactNumber: "+971 55 890 1234",
     email: "david.thompson@almaha.ae",
     faceEnrolled: false,
-    status: "Active",
-    hasAccount: false,
-    loginMethod: "",
-    assignedBy: "",
-    assignmentDate: ""
-  }
+    status: "Active" 
+  },
 ];
 
 const mockAttendanceRecords = [
@@ -380,11 +348,7 @@ const Employees = () => {
       email: emp.name.toLowerCase().replace(" ", ".") + "@tanseeq.ae",
       faceEnrolled: false,
       status: "Active",
-      classification: classifications[Math.floor(Math.random() * classifications.length)],
-      hasAccount: false,
-      loginMethod: "",
-      assignedBy: "",
-      assignmentDate: ""
+      classification: classifications[Math.floor(Math.random() * classifications.length)]
     }));
     
     setEmployees([...employees, ...employeesToAdd]);
@@ -398,11 +362,6 @@ const Employees = () => {
   const handleFaceEnrollment = (employee) => {
     setSelectedFaceEmployee(employee);
     setIsFaceModalOpen(true);
-  };
-
-  const handleRemoveRole = (employeeId) => {
-    console.log("Removing role for employee:", employeeId);
-    // In a real app, this would update the employee's role and move them between lists
   };
 
   return (
