@@ -22,12 +22,15 @@ interface ResetPasswordDialogProps {
     employeeId: string;
     loginMethod?: string;
   } | null;
+  // Add the onPasswordReset callback property
+  onPasswordReset?: () => void;
 }
 
 export function ResetPasswordDialog({
   open,
   onOpenChange,
   employee,
+  onPasswordReset,
 }: ResetPasswordDialogProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -70,6 +73,11 @@ export function ResetPasswordDialog({
         title: "Password Reset Successful",
         description: `Password for ${employee.name} has been reset. Please share the new password with the employee.`,
       });
+    }
+    
+    // Call the onPasswordReset callback if provided
+    if (onPasswordReset) {
+      onPasswordReset();
     }
     
     // Reset form and close dialog
