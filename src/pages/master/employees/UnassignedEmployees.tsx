@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -9,12 +8,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { toast } from "@/hooks/use-toast";
+import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
 
 // Sample entities for dummy data
 const entities = [
@@ -96,12 +95,12 @@ const UnassignedEmployees = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
   const [classificationFilter, setClassificationFilter] = useState("all");
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
   const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
 
   const filteredEmployees = employees.filter((employee) => {
     const searchMatch = 
@@ -125,7 +124,7 @@ const UnassignedEmployees = () => {
 
   const handleEmployeeView = (employee) => {
     setSelectedEmployee(employee);
-    setIsViewModalOpen(true);
+    setViewModalOpen(true);
   };
 
   const handleAssignRole = (employee) => {
@@ -350,6 +349,12 @@ const UnassignedEmployees = () => {
         open={credentialsDialogOpen}
         onOpenChange={handleCredentialsDialogClose}
         employee={employeeForCredentials}
+      />
+      
+      <EmployeeDetailModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        employee={selectedEmployee}
       />
     </div>
   );

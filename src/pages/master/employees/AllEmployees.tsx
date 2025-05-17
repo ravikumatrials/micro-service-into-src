@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Eye, User, Search, Filter, CloudDownload } from "lucide-react";
+import { Eye, Search, Filter, CloudDownload } from "lucide-react";
 import { TanseeqImportModal } from "@/components/employees/TanseeqImportModal";
 import { useNavigate } from "react-router-dom";
 import {
@@ -11,11 +10,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import EmployeeActionsCell from "../EmployeeActionsCell";
 import FaceEnrollmentModal from "../FaceEnrollmentModal";
+import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
 
 // Sample entities for dummy data
 const entities = [
@@ -158,12 +156,12 @@ const AllEmployees = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
   const [classificationFilter, setClassificationFilter] = useState("all");
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
   const [isTanseeqModalOpen, setIsTanseeqModalOpen] = useState(false);
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
   const [selectedFaceEmployee, setSelectedFaceEmployee] = useState(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
 
   const filteredEmployees = employees.filter((employee) => {
     const searchMatch = 
@@ -187,7 +185,7 @@ const AllEmployees = () => {
 
   const handleEmployeeView = (employee) => {
     setSelectedEmployee(employee);
-    setIsViewModalOpen(true);
+    setViewModalOpen(true);
   };
 
   const handleFaceEnrollment = (employee) => {
@@ -427,6 +425,12 @@ const AllEmployees = () => {
           isUpdate={selectedFaceEmployee.hasFaceEnrolled}
         />
       )}
+      
+      <EmployeeDetailModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        employee={selectedEmployee}
+      />
     </div>
   );
 };

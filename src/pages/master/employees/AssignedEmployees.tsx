@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Eye, Search, Filter, UserCog } from "lucide-react";
+import { Eye, Search, Filter, UserCog, KeyRound } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -15,6 +15,8 @@ import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
+import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
+import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
 
 // Sample entities for dummy data
 const entities = [
@@ -138,7 +140,6 @@ const AssignedEmployees = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
   const [classificationFilter, setClassificationFilter] = useState("all");
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -146,6 +147,9 @@ const AssignedEmployees = () => {
   const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
   const [removeRoleDialogOpen, setRemoveRoleDialogOpen] = useState(false);
   const [employeeToRemoveRole, setEmployeeToRemoveRole] = useState(null);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [employeeForPasswordReset, setEmployeeForPasswordReset] = useState(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
 
   const roles = Array.from(new Set(employees.map(emp => emp.role))).filter(Boolean);
 
@@ -171,12 +175,17 @@ const AssignedEmployees = () => {
 
   const handleEmployeeView = (employee) => {
     setSelectedEmployee(employee);
-    setIsViewModalOpen(true);
+    setViewModalOpen(true);
   };
 
   const handleUpdateRole = (employee) => {
     setSelectedEmployee(employee);
     setDialogOpen(true);
+  };
+  
+  const handleResetPassword = (employee) => {
+    setEmployeeForPasswordReset(employee);
+    setResetPasswordDialogOpen(true);
   };
 
   const handleRoleAssigned = (role: string) => {
@@ -367,6 +376,22 @@ const AssignedEmployees = () => {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <button 
+                                onClick={() => handleResetPassword(employee)}
+                                className="text-orange-500 hover:text-orange-700 p-1"
+                              >
+                                <KeyRound className="h-4 w-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Reset Password</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button 
                                 onClick={() => handleEmployeeView(employee)}
                                 className="text-blue-500 hover:text-blue-700 p-1"
                               >
@@ -441,6 +466,18 @@ const AssignedEmployees = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <ResetPasswordDialog
+        open={resetPasswordDialogOpen}
+        onOpenChange={setResetPasswordDialogOpen}
+        employee={employeeForPasswordReset}
+      />
+      
+      <EmployeeDetailModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        employee={selectedEmployee}
+      />
     </div>
   );
 };
