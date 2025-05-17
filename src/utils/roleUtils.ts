@@ -11,9 +11,17 @@ export const availableRoles = [
 // Define the roles that should be visible in the Employee Management views
 export const employeeManagementVisibleRoles = ["Staff", "Labour"];
 
+// Define the roles that should be visible in the Role Mapping views
+export const roleMappingVisibleRoles = ["Staff", "Labour"];
+
 // Check if a role should be visible in Employee Management view
 export const isEmployeeManagementVisibleRole = (role?: string): boolean => {
   return !role || employeeManagementVisibleRoles.includes(role);
+};
+
+// Check if a role should be visible in Role Mapping view
+export const isRoleMappingVisibleRole = (role?: string): boolean => {
+  return !role || roleMappingVisibleRoles.includes(role);
 };
 
 // Auto-assign a role based on classification

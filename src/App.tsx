@@ -63,7 +63,7 @@ const App = () => {
               </PermissionGuard>
             } />
             
-            {/* New Employee submenu routes */}
+            {/* Employee submenu routes */}
             <Route path="/master/employees/all" element={
               <PermissionGuard requiredPermission="Manage Employees">
                 <Layout><AllEmployees /></Layout>
