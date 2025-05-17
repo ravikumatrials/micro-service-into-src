@@ -11,13 +11,14 @@ import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
 import AttendanceHistory from "./pages/AttendanceHistory";
 import BulkAttendance from "./pages/BulkAttendance";
-import RoleMapping from "./pages/RoleMapping";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Employees from "./pages/master/Employees";
+import AllEmployees from "./pages/master/employees/AllEmployees";
+import UnassignedEmployees from "./pages/master/employees/UnassignedEmployees";
+import AssignedEmployees from "./pages/master/employees/AssignedEmployees";
 import Roles from "./pages/master/Roles";
 import Projects from "./pages/master/Projects";
-import Users from "./pages/master/Users";
 import NotFound from "./pages/NotFound";
 
 // Create a new QueryClient instance inside the component to ensure it's created when React is ready
@@ -48,11 +49,6 @@ const App = () => {
               </PermissionGuard>
             } />
             <Route path="/attendance-history" element={<Layout><AttendanceHistory /></Layout>} />
-            <Route path="/role-mapping" element={
-              <PermissionGuard requiredPermission="Role Mapping">
-                <Layout><RoleMapping /></Layout>
-              </PermissionGuard>
-            } />
             <Route path="/reports" element={
               <PermissionGuard requiredPermission="View Reports">
                 <Layout><Reports /></Layout>
@@ -66,6 +62,24 @@ const App = () => {
                 <Layout><Employees /></Layout>
               </PermissionGuard>
             } />
+            
+            {/* New Employee submenu routes */}
+            <Route path="/master/employees/all" element={
+              <PermissionGuard requiredPermission="Manage Employees">
+                <Layout><AllEmployees /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/master/employees/unassigned" element={
+              <PermissionGuard requiredPermission="Manage Employees">
+                <Layout><UnassignedEmployees /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/master/employees/assigned" element={
+              <PermissionGuard requiredPermission="Manage Users">
+                <Layout><AssignedEmployees /></Layout>
+              </PermissionGuard>
+            } />
+            
             <Route path="/master/roles" element={
               <PermissionGuard requiredPermission="Manage Roles">
                 <Layout><Roles /></Layout>
@@ -74,11 +88,6 @@ const App = () => {
             <Route path="/master/projects" element={
               <PermissionGuard requiredPermission="Manage Projects">
                 <Layout><Projects /></Layout>
-              </PermissionGuard>
-            } />
-            <Route path="/master/users" element={
-              <PermissionGuard requiredPermission="Manage Users">
-                <Layout><Users /></Layout>
               </PermissionGuard>
             } />
             

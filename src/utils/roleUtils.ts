@@ -8,21 +8,24 @@ export const availableRoles = [
   { id: 5, name: "Staff", isSystemDefined: true }
 ];
 
-// Define the roles that should be visible in Role Mapping view
-export const roleMappingVisibleRoles = ["Staff", "Labour"];
+// Define the roles that should be visible in the Employee Management views
+export const employeeManagementVisibleRoles = ["Staff", "Labour"];
 
-// Check if a role should be visible in Role Mapping view
-export const isRoleMappingVisibleRole = (role?: string): boolean => {
-  return !role || roleMappingVisibleRoles.includes(role);
+// Check if a role should be visible in Employee Management view
+export const isEmployeeManagementVisibleRole = (role?: string): boolean => {
+  return !role || employeeManagementVisibleRoles.includes(role);
 };
 
 // Auto-assign a role based on classification
 export const autoAssignRoleByClassification = (employee: {
   classification?: string;
   currentRole?: string;
+  role?: string;
 }) => {
   // Only assign a role if one isn't already assigned
-  if (!employee.currentRole) {
+  const currentRole = employee.currentRole || employee.role;
+  
+  if (!currentRole) {
     // Logic for auto-assignment
     if (employee.classification === "Laborer") {
       return "Labour"; // Automatically assign Labour role
@@ -31,7 +34,7 @@ export const autoAssignRoleByClassification = (employee: {
     }
     // For other classifications, do not auto-assign any role (return undefined)
   }
-  return employee.currentRole; // Keep existing role if any
+  return currentRole; // Keep existing role if any
 };
 
 // Define the system roles which are special cases
@@ -65,7 +68,7 @@ export const logRoleChange = (
   return auditLog;
 };
 
-// Function to handle role updates in both Role Mapping and Assigned Employees screens
+// Function to handle role updates in both Employee Management screens
 export const updateEmployeeRole = (
   employees: any[],
   employeeId: string, 
@@ -79,12 +82,12 @@ export const updateEmployeeRole = (
     if (emp.employeeId === employeeId) {
       const oldRole = emp.currentRole || emp.role;
       
-      // Update the role property (for Assigned Employees menu)
+      // Update the role property 
       if (emp.role !== undefined) {
         emp.role = newRole;
       }
       
-      // Update the currentRole property (for Role Mapping menu)
+      // Update the currentRole property
       if (emp.currentRole !== undefined) {
         emp.currentRole = newRole;
       }
@@ -118,7 +121,7 @@ export const findEmployeeById = (employees: any[], employeeId: string) => {
   );
 };
 
-// Generate a shared employee object that works in both Role Mapping and Assigned Employees screens
+// Generate a shared employee object that works in all Employee Management screens
 export const createSharedEmployeeObject = (employee: any) => {
   return {
     id: employee.id || Math.floor(Math.random() * 10000), // Generate ID if not exists
@@ -134,4 +137,12 @@ export const createSharedEmployeeObject = (employee: any) => {
     hasAccount: employee.hasAccount !== undefined ? employee.hasAccount : false,
     loginMethod: employee.loginMethod || null
   };
+};
+
+// Filter employees by role assignment status
+export const filterEmployeesByRoleStatus = (employees: any[], hasRole: boolean) => {
+  return employees.filter(emp => {
+    const hasAssignedRole = Boolean(emp.role || emp.currentRole);
+    return hasRole ? hasAssignedRole : !hasAssignedRole;
+  });
 };
