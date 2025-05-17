@@ -44,82 +44,83 @@ const categories = [
 const classifications = ["Laborer", "Staff"];
 
 // Mock data for assigned employees (employees with a role)
+// Updated with Muslim names and ensuring they have roles other than "Labour" or "Staff"
 const initialEmployees = [
   { 
     id: 1, 
-    name: "John Smith", 
+    name: "Ibrahim Al-Mazrouei", 
     employeeId: "EMP001", 
-    role: "Labour", 
-    category: "Laborer",
-    classification: "Laborer",
+    role: "Supervisor", 
+    category: "Supervisor",
+    classification: "Staff",
     entity: "Tanseeq Investment",
     contactNumber: "+971 50 123 4567",
-    email: "john.smith@tanseeq.ae",
+    email: "ibrahim.almazrouei@tanseeq.ae",
     loginMethod: "Face",
     status: "Active" 
   },
   { 
     id: 2, 
-    name: "Sarah Johnson", 
+    name: "Fatima Al-Hashimi", 
     employeeId: "EMP002", 
-    role: "Supervisor", 
+    role: "Admin", 
     category: "Supervisor",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 234 5678",
-    email: "sarah.johnson@tanseeq.ae",
+    email: "fatima.alhashimi@tanseeq.ae",
     loginMethod: "Email/Password",
     status: "Active" 
   },
   { 
     id: 3, 
-    name: "Robert Williams", 
+    name: "Mohammed Al-Farsi", 
     employeeId: "EMP003", 
-    role: "Labour", 
-    category: "Laborer",
-    classification: "Laborer",
+    role: "Project Manager", 
+    category: "Manager",
+    classification: "Staff",
     entity: "Al Maha Projects",
     contactNumber: "+971 55 345 6789",
-    email: "robert.williams@almaha.ae",
+    email: "mohammed.alfarsi@almaha.ae",
     loginMethod: "Face",
     status: "Active" 
   },
   { 
     id: 4, 
-    name: "Emily Davis", 
+    name: "Aisha Al-Blooshi", 
     employeeId: "EMP004", 
-    role: "Labour", 
-    category: "Driver",
+    role: "HR Manager", 
+    category: "Manager",
     classification: "Staff",
     entity: "Gulf Builders International",
     contactNumber: "+971 54 456 7890",
-    email: "emily.davis@gulfbuilders.ae",
+    email: "aisha.alblooshi@gulfbuilders.ae",
     loginMethod: "Face",
     status: "Active" 
   },
   { 
     id: 5, 
-    name: "James Miller", 
+    name: "Yusuf Al-Qasimi", 
     employeeId: "EMP005", 
     role: "Report Admin", 
     category: "Engineer",
     classification: "Staff",
     entity: "Zenith Infrastructure",
     contactNumber: "+971 56 567 8901",
-    email: "james.miller@zenith.ae",
+    email: "yusuf.alqasimi@zenith.ae",
     loginMethod: "Email/Password",
     status: "Active" 
   },
   { 
     id: 7, 
-    name: "Michael Brown", 
+    name: "Khalid Al-Mansoori", 
     employeeId: "EMP007", 
     role: "Super Admin", 
     category: "Manager",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 789 0123",
-    email: "michael.brown@tanseeq.ae",
+    email: "khalid.almansoori@tanseeq.ae",
     loginMethod: "Email/Password",
     status: "Active" 
   }
@@ -130,6 +131,10 @@ const mockRoles = [
   { id: 2, name: "Staff" },
   { id: 3, name: "Super Admin" },
   { id: 4, name: "Report Admin" },
+  { id: 5, name: "HR Manager" },
+  { id: 6, name: "Project Manager" },
+  { id: 7, name: "Supervisor" },
+  { id: 8, name: "Admin" },
 ];
 
 const AssignedEmployees = () => {
@@ -150,9 +155,17 @@ const AssignedEmployees = () => {
   const [employeeForPasswordReset, setEmployeeForPasswordReset] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
 
-  const roles = Array.from(new Set(employees.map(emp => emp.role))).filter(Boolean);
+  // Get unique list of roles, excluding "Labour" and "Staff"
+  const roles = Array.from(
+    new Set(employees.map(emp => emp.role))
+  ).filter(role => role !== "Labour" && role !== "Staff" && Boolean(role));
 
   const filteredEmployees = employees.filter((employee) => {
+    // Filter out employees with "Labour" or "Staff" roles
+    if (employee.role === "Labour" || employee.role === "Staff") {
+      return false;
+    }
+    
     const searchMatch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
@@ -189,6 +202,14 @@ const AssignedEmployees = () => {
 
   const handleRoleAssigned = (role: string) => {
     if (!selectedEmployee) return;
+    
+    // If role is "Labour" or "Staff", employee should not be in Assigned Employees
+    if (role === "Labour" || role === "Staff") {
+      toast({
+        title: "Role Assignment Note",
+        description: `Employee will be moved to Unassigned Employees with role "${role}".`,
+      });
+    }
     
     // Update employee role
     const updatedEmployees = employees.map(emp => 
@@ -460,7 +481,7 @@ const AssignedEmployees = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Role</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove the role from {employeeToRemoveRole?.name}? 
+              Are you sure you want to remove the role from {employeeToRemoveRole?.name} (Employee ID: {employeeToRemoveRole?.employeeId})? 
               They will be moved to Unassigned Employees.
             </AlertDialogDescription>
           </AlertDialogHeader>

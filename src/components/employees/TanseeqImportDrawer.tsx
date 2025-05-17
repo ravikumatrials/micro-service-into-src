@@ -1,8 +1,6 @@
-
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CloudDownload } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -58,14 +56,31 @@ export function TanseeqImportDrawer({
 
   const handleImport = () => {
     if (fetchedEmployees) {
-      const selectedRecords = fetchedEmployees.filter(emp => 
-        selectedEmployees.includes(emp.id)
-      );
+      const selectedRecords = fetchedEmployees
+        .filter(emp => selectedEmployees.includes(emp.id))
+        .map(emp => {
+          // Automatically assign roles based on classification
+          let assignedRole = null;
+          if (emp.classification === "Laborer") {
+            assignedRole = "Labour";
+          } else if (emp.classification === "Staff") {
+            assignedRole = "Staff";
+          }
+
+          return {
+            ...emp,
+            // If there's an assigned role based on classification, set it
+            role: assignedRole || emp.role
+          };
+        });
+
       onImportComplete(selectedRecords);
+      
       toast({
         title: "Import Successful",
         description: `Successfully imported ${selectedRecords.length} employees from Tanseeq.`,
       });
+      
       onOpenChange(false);
     }
   };
@@ -168,10 +183,15 @@ export function TanseeqImportDrawer({
                           {employee.name}
                         </label>
                         <p className="text-sm text-gray-500">
-                          {employee.employeeId} · {employee.role}
+                          {employee.employeeId} · {employee.role} · {employee.classification}
                         </p>
                         <p className="text-sm text-gray-500">
                           {employee.project} · {employee.location}
+                        </p>
+                        <p className="text-xs text-blue-500 mt-1">
+                          {employee.classification === "Laborer" ? "Will be assigned Labour role" : 
+                           employee.classification === "Staff" ? "Will be assigned Staff role" : 
+                           "No default role will be assigned"}
                         </p>
                       </div>
                     </div>

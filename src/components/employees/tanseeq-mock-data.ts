@@ -20,10 +20,11 @@ export const projects = [
 ];
 
 // Enhanced mock data with additional fields needed for the employee import table
+// Updated with Muslim names
 export const mockTanseeqEmployees = [
   {
     id: "emp-001",
-    name: "John Smith",
+    name: "Ahmed Al-Mansouri",
     employeeId: "EMP001",
     role: "Construction Worker",
     project: "Main Building Construction",
@@ -35,7 +36,7 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "emp-002",
-    name: "Sarah Johnson",
+    name: "Fatima Al-Hashimi",
     employeeId: "EMP002",
     role: "Site Supervisor",
     project: "Bridge Expansion Project",
@@ -59,7 +60,7 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "emp-004",
-    name: "Fatima Hassan",
+    name: "Aisha Hassan",
     employeeId: "EMP004",
     role: "Administrative Assistant",
     project: "Commercial Center Development",
@@ -71,7 +72,7 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "emp-005",
-    name: "Robert Chen",
+    name: "Yusuf Al-Mahmoud",
     employeeId: "EMP005",
     role: "Construction Worker",
     project: "Residential Complex Construction",
@@ -95,7 +96,7 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "emp-007",
-    name: "Priya Sharma",
+    name: "Layla Al-Zaabi",
     employeeId: "EMP007",
     role: "Safety Officer",
     project: "Highway Renovation",
@@ -107,7 +108,7 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "emp-008",
-    name: "James Wilson",
+    name: "Omar Khalid",
     employeeId: "EMP008",
     role: "Construction Worker",
     project: "Bridge Expansion Project",
@@ -119,7 +120,7 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "emp-009",
-    name: "Ahmed Mohammed",
+    name: "Ibrahim Mohammed",
     employeeId: "EMP009",
     role: "Project Manager",
     project: "Commercial Center Development",
@@ -131,7 +132,7 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "emp-010",
-    name: "Maria Rodriguez",
+    name: "Mariam Al-Qahtani",
     employeeId: "EMP010",
     role: "Administrative Assistant",
     project: "Residential Complex Construction",
@@ -155,7 +156,7 @@ export const mockTanseeqEmployees = [
   },
   {
     id: "emp-012",
-    name: "Lisa Wong",
+    name: "Zainab Al-Naqbi",
     employeeId: "EMP012",
     role: "Accountant",
     project: "Highway Renovation",
