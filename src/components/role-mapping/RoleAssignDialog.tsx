@@ -17,7 +17,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface RoleAssignDialogProps {
   open: boolean;
@@ -26,6 +28,8 @@ interface RoleAssignDialogProps {
     name: string;
     employeeId: string;
     currentRole?: string;
+    email?: string;
+    loginMethod?: string;
   } | null;
   roles: { name: string; id?: number }[];
   onAssignRole: (role: string) => void;
@@ -53,6 +57,15 @@ export function RoleAssignDialog({
     }
     onOpenChange(open);
   };
+
+  // Reset selectedRole when employee changes
+  useEffect(() => {
+    if (employee?.currentRole) {
+      setSelectedRole(employee.currentRole);
+    } else {
+      setSelectedRole("");
+    }
+  }, [employee]);
 
   const handleAssign = () => {
     if (!selectedRole) {
@@ -96,6 +109,17 @@ export function RoleAssignDialog({
     }
   };
 
+  // Function to determine employee's login method display
+  const getLoginMethodDisplay = () => {
+    if (!employee) return "";
+    
+    if (employee.loginMethod === "email" && employee.email) {
+      return `Login Method: Email ID – ${employee.email}`;
+    } else {
+      return `Login Method: Employee ID – ${employee.employeeId}`;
+    }
+  };
+
   if (!employee) return null;
 
   // Determine the dialog title and button text based on the current role
@@ -123,7 +147,7 @@ export function RoleAssignDialog({
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Select Role</label>
               <Select 
-                value={selectedRole || employee.currentRole || ""} 
+                value={selectedRole || ""} 
                 onValueChange={(value) => setSelectedRole(value)}
               >
                 <SelectTrigger>
@@ -139,9 +163,19 @@ export function RoleAssignDialog({
               </Select>
             </div>
             
+            {/* Display login method only when a role is selected */}
+            {selectedRole && (
+              <Alert className="bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-500" />
+                <AlertDescription className="text-blue-700">
+                  {getLoginMethodDisplay()}
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <div className="pt-2 flex justify-between">
-              {/* Always show Remove Role button when onRemoveRole is provided */}
-              {onRemoveRole && (
+              {/* Only show Remove Role button when onRemoveRole is provided AND employee has a currentRole */}
+              {onRemoveRole && employee.currentRole && (
                 <Button 
                   variant="destructive" 
                   onClick={handleRemoveClick}
@@ -155,7 +189,7 @@ export function RoleAssignDialog({
               <Button 
                 variant="default" 
                 onClick={handleAssign}
-                className={!onRemoveRole ? "w-full" : ""}
+                className={!(onRemoveRole && employee.currentRole) ? "w-full" : ""}
               >
                 {getButtonText()}
               </Button>
