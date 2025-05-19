@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -247,7 +246,7 @@ const UnassignedEmployees = () => {
                 <TableHead>Entity</TableHead>
                 <TableHead>Classification</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Role</TableHead> {/* Added Role column */}
+                <TableHead>Role</TableHead> {/* Role column based on classification */}
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>

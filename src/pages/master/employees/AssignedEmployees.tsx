@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -9,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
@@ -45,7 +43,6 @@ const categories = [
 const classifications = ["Laborer", "Staff"];
 
 // Mock data for assigned employees (employees with a role)
-// Updated with Muslim names and ensuring they have roles other than "Labour" or "Staff"
 const initialEmployees = [
   { 
     id: 1, 

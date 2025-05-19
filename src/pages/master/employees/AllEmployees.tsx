@@ -224,17 +224,14 @@ const AllEmployees = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">All Employees</h1>
-        <div className="flex space-x-3">
-          <button 
-            onClick={() => setIsTanseeqModalOpen(true)}
-            className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            <CloudDownload className="h-4 w-4 mr-2" />
-            Import from Tanseeq API
-          </button>
-        </div>
+      <div className="flex justify-end items-center mb-4">
+        <button 
+          onClick={() => setIsTanseeqModalOpen(true)}
+          className="flex items-center bg-proscape hover:bg-proscape-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        >
+          <CloudDownload className="h-4 w-4 mr-2" />
+          Import from Tanseeq API
+        </button>
       </div>
       
       <Card className="p-0 overflow-hidden">
