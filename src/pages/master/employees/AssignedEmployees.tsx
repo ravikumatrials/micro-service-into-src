@@ -209,7 +209,7 @@ const AssignedEmployees = () => {
       });
     }
     
-    // Update employee role
+    // Update employee role - don't open credentials dialog
     const updatedEmployees = employees.map(emp => 
       emp.id === selectedEmployee.id 
         ? {...emp, role} 
@@ -223,8 +223,8 @@ const AssignedEmployees = () => {
       description: `${selectedEmployee.name}'s role has been updated to ${role}.`,
     });
     
-    setEmployeeForCredentials(selectedEmployee);
-    setCredentialsDialogOpen(true);
+    // Close the dialog - no longer opening credentials dialog after role update
+    setDialogOpen(false);
   };
 
   const handleCredentialsDialogClose = (open: boolean) => {

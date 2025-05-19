@@ -13,6 +13,13 @@ import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ResetPasswordDialogProps {
   open: boolean;
@@ -21,6 +28,7 @@ interface ResetPasswordDialogProps {
     name: string;
     employeeId: string;
     loginMethod?: string;
+    email?: string;
   } | null;
   // Add the onPasswordReset callback property
   onPasswordReset?: () => void;
@@ -35,10 +43,42 @@ export function ResetPasswordDialog({
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loginMethod, setLoginMethod] = useState<string>("");
+  const [loginValue, setLoginValue] = useState<string>("");
   
   if (!employee) return null;
   
-  const isEmailLogin = employee.loginMethod?.toLowerCase().includes("email");
+  // Initialize state when dialog opens
+  const handleOpenChange = (open: boolean) => {
+    if (open && employee) {
+      // Set initial login method from employee data
+      setLoginMethod(employee.loginMethod || "employeeId");
+      // Set initial login value based on method
+      if (employee.loginMethod === "email") {
+        setLoginValue(employee.email || "");
+      } else {
+        setLoginValue(employee.employeeId || "");
+      }
+    }
+    
+    if (!open) {
+      // Reset form when dialog closes
+      setNewPassword("");
+      setConfirmPassword("");
+      setError("");
+    }
+    
+    onOpenChange(open);
+  };
+  
+  // Format display of current login method
+  const getLoginMethodDisplay = () => {
+    if (employee.loginMethod === "email") {
+      return `Login via: Email ID – ${employee.email || ""}`;
+    } else {
+      return `Login via: Employee ID – ${employee.employeeId || ""}`;
+    }
+  };
   
   const handleReset = () => {
     // Form validation
@@ -57,23 +97,18 @@ export function ResetPasswordDialog({
       return;
     }
     
-    // Reset password logic would go here
+    // Reset password and update login method if needed
     // For this demo, we'll just show a success message
     
     // Log the password reset - in a real app, this would be sent to the backend
     console.log("Password reset for employee:", employee.employeeId);
+    console.log("Updated login method:", loginMethod);
+    console.log("Updated login value:", loginValue);
     
-    if (isEmailLogin) {
-      toast({
-        title: "Password Reset Email Sent",
-        description: `A password reset link has been sent to ${employee.name}'s email.`,
-      });
-    } else {
-      toast({
-        title: "Password Reset Successful",
-        description: `Password for ${employee.name} has been reset. Please share the new password with the employee.`,
-      });
-    }
+    toast({
+      title: "Login Credentials Updated",
+      description: `Login credentials updated successfully for Employee ${employee.employeeId}.`,
+    });
     
     // Call the onPasswordReset callback if provided
     if (onPasswordReset) {
@@ -87,42 +122,51 @@ export function ResetPasswordDialog({
     onOpenChange(false);
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      // Reset form when dialog closes
-      setNewPassword("");
-      setConfirmPassword("");
-      setError("");
-    }
-    onOpenChange(open);
-  };
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Reset Password</DialogTitle>
+          <DialogTitle>Update Login Credentials</DialogTitle>
           <DialogDescription>
-            Reset password for {employee.name} ({employee.employeeId})
+            Update login credentials for {employee.name} ({employee.employeeId})
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
-          {isEmailLogin ? (
-            <Alert className="bg-blue-50 border-blue-200">
-              <Info className="h-4 w-4 text-blue-500" />
-              <AlertDescription className="text-blue-700">
-                A password reset email will be sent to the employee's registered email address.
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Alert className="bg-amber-50 border-amber-200">
-              <Info className="h-4 w-4 text-amber-500" />
-              <AlertDescription className="text-amber-700">
-                You will need to share the new password with the employee offline.
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* Display current login method */}
+          <Alert className="bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-700">
+              {getLoginMethodDisplay()}
+            </AlertDescription>
+          </Alert>
+          
+          {/* Login Method Selection */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Login Method (Optional)</label>
+            <Select value={loginMethod} onValueChange={setLoginMethod}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose login method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="email">Email ID</SelectItem>
+                <SelectItem value="employeeId">Employee ID</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Login Value (Email or Employee ID) */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              {loginMethod === "email" ? "Email Address" : "Employee ID"}
+            </label>
+            <Input
+              type={loginMethod === "email" ? "email" : "text"}
+              value={loginValue}
+              onChange={(e) => setLoginValue(e.target.value)}
+              placeholder={loginMethod === "email" ? "Enter email address" : "Enter employee ID"}
+            />
+          </div>
           
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">New Password</label>
@@ -154,7 +198,7 @@ export function ResetPasswordDialog({
             Cancel
           </Button>
           <Button onClick={handleReset}>
-            Reset Password
+            Update Credentials
           </Button>
         </DialogFooter>
       </DialogContent>

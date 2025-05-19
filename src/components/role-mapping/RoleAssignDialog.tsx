@@ -107,6 +107,9 @@ export function RoleAssignDialog({
     return employee.currentRole ? "Update Role" : "Assign Role";
   };
 
+  // Only show Remove Role button if the employee already has a role AND onRemoveRole is provided
+  const showRemoveRoleButton = employee.currentRole && onRemoveRole;
+
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -140,8 +143,8 @@ export function RoleAssignDialog({
             </div>
             
             <div className="pt-2 flex justify-between">
-              {/* Fix: Ensure the Remove Role button is always visible when onRemoveRole prop exists */}
-              {onRemoveRole && (
+              {/* Only show Remove Role button if the employee already has a role */}
+              {showRemoveRoleButton && (
                 <Button 
                   variant="destructive" 
                   onClick={handleRemoveClick}
@@ -155,7 +158,7 @@ export function RoleAssignDialog({
               <Button 
                 variant="default" 
                 onClick={handleAssign}
-                className={onRemoveRole ? "" : "w-full"}
+                className={!showRemoveRoleButton ? "w-full" : ""}
               >
                 {getButtonText()}
               </Button>

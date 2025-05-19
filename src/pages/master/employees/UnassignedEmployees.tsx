@@ -143,7 +143,7 @@ const UnassignedEmployees = () => {
     );
     
     // Remove employee from list (as they now have a role and would move to Assigned Employees)
-    const filteredEmployees = updatedEmployees.filter(emp => emp.role === null);
+    const filteredEmployees = updatedEmployees.filter(emp => emp.role === "Labour" || emp.role === "Staff");
     setEmployees(filteredEmployees);
     
     toast({
@@ -151,6 +151,7 @@ const UnassignedEmployees = () => {
       description: `${selectedEmployee.name} has been assigned the role of ${role}.`,
     });
     
+    // For unassigned employees, we still need to set up login credentials
     setEmployeeForCredentials(selectedEmployee);
     setCredentialsDialogOpen(true);
   };
