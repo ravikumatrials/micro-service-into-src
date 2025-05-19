@@ -338,13 +338,13 @@ const AllEmployees = () => {
                     <TableCell>{employee.classification}</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>
-                      {/* Updated Role display to only show user-assigned roles */}
+                      {/* Updated Role display to show "No Role" instead of dash */}
                       {shouldDisplayRole(employee.role) ? (
                         <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
                           {employee.role}
                         </Badge>
                       ) : (
-                        <span className="text-sm text-gray-500">-</span>
+                        <span className="text-sm text-gray-500">No Role</span>
                       )}
                     </TableCell>
                     <TableCell>
