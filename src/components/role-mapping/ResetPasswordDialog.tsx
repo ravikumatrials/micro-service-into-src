@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -41,15 +40,28 @@ export function ResetPasswordDialog({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
+  // Store the current login method display separately to keep it static
+  const [currentLoginMethodDisplay, setCurrentLoginMethodDisplay] = useState<string>("");
+  
   // Initialize state when dialog opens or employee changes
   useEffect(() => {
     if (employee) {
       // Default to employeeId if no login method is set
-      setLoginMethod(employee.loginMethod || "employeeId");
+      const initialLoginMethod = employee.loginMethod || "employeeId";
+      setLoginMethod(initialLoginMethod);
       
-      // Pre-fill login value based on the login method
+      // Set the current login method display (this won't change with radio selections)
       if (employee.loginMethod === "email" && employee.email) {
+        setCurrentLoginMethodDisplay(`Current Login Method: Email ID – ${employee.email}`);
         setLoginValue(employee.email);
+      } else {
+        setCurrentLoginMethodDisplay(`Current Login Method: Employee ID – ${employee.employeeId}`);
+        setLoginValue(employee.employeeId);
+      }
+      
+      // Set the editable login value based on login method
+      if (initialLoginMethod === "email") {
+        setLoginValue(employee.email || "");
       } else {
         setLoginValue(employee.employeeId);
       }
@@ -70,20 +82,11 @@ export function ResetPasswordDialog({
     onOpenChange(open);
   };
   
-  // Format display of current login method
-  const getLoginMethodDisplay = () => {
-    if (loginMethod === "email") {
-      return `Current Login Method: Email ID – ${loginValue || employee.email || ""}`;
-    } else {
-      return `Current Login Method: Employee ID – ${employee.employeeId}`;
-    }
-  };
-  
   // Handle login method change
   const handleLoginMethodChange = (value: string) => {
     setLoginMethod(value);
     
-    // Update login value based on selected method
+    // Update login value based on selected method (without changing the display at the top)
     if (value === "email") {
       setLoginValue(employee.email || "");
     } else {
@@ -144,11 +147,11 @@ export function ResetPasswordDialog({
         </DialogHeader>
         
         <div className="space-y-4 py-4">
-          {/* Display current login method */}
+          {/* Display current login method - this is now static */}
           <Alert className="bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-blue-700">
-              {getLoginMethodDisplay()}
+              {currentLoginMethodDisplay}
             </AlertDescription>
           </Alert>
           

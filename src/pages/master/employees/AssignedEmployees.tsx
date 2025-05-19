@@ -9,12 +9,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
-import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
 import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
+import { UpdateRoleDialog } from "@/components/role-mapping/UpdateRoleDialog";
 
 // Sample entities for dummy data
 const entities = [
@@ -144,9 +143,7 @@ const AssignedEmployees = () => {
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
-  const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
+  const [updateRoleDialogOpen, setUpdateRoleDialogOpen] = useState(false);
   const [removeRoleDialogOpen, setRemoveRoleDialogOpen] = useState(false);
   const [employeeToRemoveRole, setEmployeeToRemoveRole] = useState(null);
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
@@ -190,7 +187,7 @@ const AssignedEmployees = () => {
 
   const handleUpdateRole = (employee) => {
     setSelectedEmployee(employee);
-    setDialogOpen(true);
+    setUpdateRoleDialogOpen(true);
   };
   
   const handleResetPassword = (employee) => {
@@ -209,7 +206,7 @@ const AssignedEmployees = () => {
       });
     }
     
-    // Update employee role - don't open credentials dialog
+    // Update employee role
     const updatedEmployees = employees.map(emp => 
       emp.id === selectedEmployee.id 
         ? {...emp, role} 
@@ -222,16 +219,6 @@ const AssignedEmployees = () => {
       title: "Role Updated",
       description: `${selectedEmployee.name}'s role has been updated to ${role}.`,
     });
-    
-    // Close the dialog - no longer opening credentials dialog after role update
-    setDialogOpen(false);
-  };
-
-  const handleCredentialsDialogClose = (open: boolean) => {
-    setCredentialsDialogOpen(open);
-    if (!open) {
-      setDialogOpen(false);
-    }
   };
 
   const openRemoveRoleDialog = (employee) => {
@@ -460,21 +447,22 @@ const AssignedEmployees = () => {
         </div>
       </Card>
 
-      <RoleAssignDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+      <UpdateRoleDialog
+        open={updateRoleDialogOpen}
+        onOpenChange={setUpdateRoleDialogOpen}
         employee={selectedEmployee}
         roles={mockRoles}
         onAssignRole={handleRoleAssigned}
         onRemoveRole={() => openRemoveRoleDialog(selectedEmployee)}
       />
 
-      <SetLoginCredentialsDialog
-        open={credentialsDialogOpen}
-        onOpenChange={handleCredentialsDialogClose}
-        employee={employeeForCredentials}
+      <ResetPasswordDialog
+        open={resetPasswordDialogOpen}
+        onOpenChange={setResetPasswordDialogOpen}
+        employee={employeeForPasswordReset}
+        onPasswordReset={handlePasswordReset}
       />
-
+      
       <AlertDialog open={removeRoleDialogOpen} onOpenChange={setRemoveRoleDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -492,13 +480,6 @@ const AssignedEmployees = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
-      <ResetPasswordDialog
-        open={resetPasswordDialogOpen}
-        onOpenChange={setResetPasswordDialogOpen}
-        employee={employeeForPasswordReset}
-        onPasswordReset={handlePasswordReset}
-      />
       
       <EmployeeDetailModal
         open={viewModalOpen}
