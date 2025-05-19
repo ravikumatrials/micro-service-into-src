@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { RoleMappingFilters } from "@/components/role-mapping/RoleMappingFilters";
 import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
+import { AssignRoleDialog } from "@/components/role-mapping/AssignRoleDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { BulkLoginCredentialsDialog } from "@/components/role-mapping/BulkLoginCredentialsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -58,6 +58,9 @@ const RoleMapping = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  
+  const [assignRoleDialogOpen, setAssignRoleDialogOpen] = useState(false);
+  const [updateRoleDialogOpen, setUpdateRoleDialogOpen] = useState(false);
   
   const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
   const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
@@ -113,7 +116,13 @@ const RoleMapping = () => {
 
   const handleAssignRole = (employee) => {
     setSelectedEmployee(employee);
-    setDialogOpen(true);
+    
+    // Check if the employee already has a role to determine which dialog to open
+    if (employee.currentRole) {
+      setUpdateRoleDialogOpen(true);
+    } else {
+      setAssignRoleDialogOpen(true);
+    }
   };
 
   const handleRoleAssigned = (role: string) => {
@@ -180,8 +189,11 @@ const RoleMapping = () => {
       }
     }
     
-    setEmployeeForCredentials(selectedEmployee);
-    setCredentialsDialogOpen(true);
+    // No longer automatically opening the credentials dialog
+    toast({
+      title: "Role Updated",
+      description: `${selectedEmployee.name}'s role has been updated to ${role}.`,
+    });
   };
 
   const handleRemoveRole = () => {
@@ -536,9 +548,17 @@ const RoleMapping = () => {
         )}
       </Card>
 
+      <AssignRoleDialog
+        open={assignRoleDialogOpen}
+        onOpenChange={setAssignRoleDialogOpen}
+        employee={selectedEmployee}
+        roles={mockRoles}
+        onAssignRole={handleRoleAssigned}
+      />
+
       <RoleAssignDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={updateRoleDialogOpen}
+        onOpenChange={setUpdateRoleDialogOpen}
         employee={selectedEmployee}
         roles={mockRoles}
         onAssignRole={handleRoleAssigned}

@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, Eye, EyeOff } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ResetPasswordDialogProps {
   open: boolean;
@@ -23,7 +24,6 @@ interface ResetPasswordDialogProps {
     loginMethod?: string;
     email?: string;
   } | null;
-  // Add the onPasswordReset callback property
   onPasswordReset?: () => void;
 }
 
@@ -73,9 +73,21 @@ export function ResetPasswordDialog({
   // Format display of current login method
   const getLoginMethodDisplay = () => {
     if (loginMethod === "email") {
-      return `Login Method: Email ID – ${loginValue || employee.email || ""}`;
+      return `Current Login Method: Email ID – ${loginValue || employee.email || ""}`;
     } else {
-      return `Login Method: Employee ID – ${employee.employeeId}`;
+      return `Current Login Method: Employee ID – ${employee.employeeId}`;
+    }
+  };
+  
+  // Handle login method change
+  const handleLoginMethodChange = (value: string) => {
+    setLoginMethod(value);
+    
+    // Update login value based on selected method
+    if (value === "email") {
+      setLoginValue(employee.email || "");
+    } else {
+      setLoginValue(employee.employeeId);
     }
   };
   
@@ -125,7 +137,7 @@ export function ResetPasswordDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Update Login Credentials</DialogTitle>
+          <DialogTitle>Reset Password</DialogTitle>
           <DialogDescription>
             Update login credentials for {employee.name} ({employee.employeeId})
           </DialogDescription>
@@ -139,6 +151,30 @@ export function ResetPasswordDialog({
               {getLoginMethodDisplay()}
             </AlertDescription>
           </Alert>
+          
+          {/* Login Method Selection */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Login Method</label>
+            <RadioGroup 
+              value={loginMethod} 
+              onValueChange={handleLoginMethodChange}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="employeeId" id="reset-employeeId" />
+                <label htmlFor="reset-employeeId" className="text-sm">
+                  Employee ID: {employee.employeeId}
+                </label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="email" id="reset-email" />
+                <label htmlFor="reset-email" className="text-sm">
+                  Email ID
+                </label>
+              </div>
+            </RadioGroup>
+          </div>
           
           {/* Login Value - Only editable if using email */}
           {loginMethod === "email" && (
@@ -206,7 +242,7 @@ export function ResetPasswordDialog({
             Cancel
           </Button>
           <Button onClick={handleReset}>
-            Update Credentials
+            Reset Password
           </Button>
         </DialogFooter>
       </DialogContent>

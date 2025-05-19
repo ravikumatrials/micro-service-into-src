@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { RoleAssignDialog } from "@/components/role-mapping/RoleAssignDialog";
+import { AssignRoleDialog } from "@/components/role-mapping/AssignRoleDialog";
 import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
 import { toast } from "@/hooks/use-toast";
 import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
@@ -151,9 +151,8 @@ const UnassignedEmployees = () => {
       description: `${selectedEmployee.name} has been assigned the role of ${role}.`,
     });
     
-    // For unassigned employees, we still need to set up login credentials
-    setEmployeeForCredentials(selectedEmployee);
-    setCredentialsDialogOpen(true);
+    // Close the dialog - no longer opening credentials dialog
+    setDialogOpen(false);
   };
 
   const handleCredentialsDialogClose = (open: boolean) => {
@@ -346,13 +345,12 @@ const UnassignedEmployees = () => {
         </div>
       </Card>
 
-      <RoleAssignDialog
+      <AssignRoleDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         employee={selectedEmployee}
         roles={mockRoles}
         onAssignRole={handleRoleAssigned}
-        onRemoveRole={() => {}}
       />
 
       <SetLoginCredentialsDialog

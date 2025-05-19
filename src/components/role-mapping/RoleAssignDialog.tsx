@@ -78,7 +78,14 @@ export function RoleAssignDialog({
     }
     
     onAssignRole(selectedRole);
-    // Note: Dialog will be closed by parent component
+    
+    toast({
+      title: "Role Updated",
+      description: `${employee?.name}'s role has been updated to ${selectedRole}.`,
+    });
+    
+    // Close the dialog
+    onOpenChange(false);
   };
 
   const handleRemoveClick = () => {
@@ -122,14 +129,8 @@ export function RoleAssignDialog({
 
   if (!employee) return null;
 
-  // Determine the dialog title and button text based on the current role
-  const getDialogTitle = () => {
-    return employee.currentRole ? "Update Role" : "Assign Role";
-  };
-
-  const getButtonText = () => {
-    return employee.currentRole ? "Update Role" : "Assign Role";
-  };
+  // Determine if this is an employee with a current role (update scenario)
+  const hasRole = !!employee.currentRole;
 
   return (
     <>
@@ -137,7 +138,7 @@ export function RoleAssignDialog({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {getDialogTitle()}
+              {hasRole ? "Update Role" : "Assign Role"}
             </DialogTitle>
             <DialogDescription>
               {employee.name} ({employee.employeeId})
@@ -174,8 +175,8 @@ export function RoleAssignDialog({
             )}
             
             <div className="pt-2 flex justify-between">
-              {/* Only show Remove Role button when onRemoveRole is provided AND employee has a currentRole */}
-              {onRemoveRole && employee.currentRole && (
+              {/* Only show Remove Role button for assigned employees */}
+              {hasRole && onRemoveRole && (
                 <Button 
                   variant="destructive" 
                   onClick={handleRemoveClick}
@@ -189,9 +190,9 @@ export function RoleAssignDialog({
               <Button 
                 variant="default" 
                 onClick={handleAssign}
-                className={!(onRemoveRole && employee.currentRole) ? "w-full" : ""}
+                className={!(hasRole && onRemoveRole) ? "w-full" : ""}
               >
-                {getButtonText()}
+                {hasRole ? "Update Role" : "Assign Role"}
               </Button>
             </div>
           </div>
