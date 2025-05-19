@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { Info, Eye, EyeOff } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -45,22 +45,28 @@ export function ResetPasswordDialog({
   const [error, setError] = useState("");
   const [loginMethod, setLoginMethod] = useState<string>("");
   const [loginValue, setLoginValue] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Initialize state when dialog opens or employee changes
+  useEffect(() => {
+    if (employee) {
+      // Default to employeeId if no login method is set
+      setLoginMethod(employee.loginMethod || "employeeId");
+      
+      // Pre-fill login value based on the login method
+      if (employee.loginMethod === "email" && employee.email) {
+        setLoginValue(employee.email);
+      } else {
+        setLoginValue(employee.employeeId);
+      }
+    }
+  }, [employee, open]);
   
   if (!employee) return null;
   
-  // Initialize state when dialog opens
+  // Handle dialog open/close
   const handleOpenChange = (open: boolean) => {
-    if (open && employee) {
-      // Set initial login method from employee data
-      setLoginMethod(employee.loginMethod || "employeeId");
-      // Set initial login value based on method
-      if (employee.loginMethod === "email") {
-        setLoginValue(employee.email || "");
-      } else {
-        setLoginValue(employee.employeeId || "");
-      }
-    }
-    
     if (!open) {
       // Reset form when dialog closes
       setNewPassword("");
@@ -73,10 +79,22 @@ export function ResetPasswordDialog({
   
   // Format display of current login method
   const getLoginMethodDisplay = () => {
-    if (employee.loginMethod === "email") {
-      return `Login via: Email ID – ${employee.email || ""}`;
+    if (loginMethod === "email") {
+      return `Login via: Email ID – ${employee.email || loginValue || ""}`;
     } else {
-      return `Login via: Employee ID – ${employee.employeeId || ""}`;
+      return `Login via: Employee ID – ${employee.employeeId || loginValue || ""}`;
+    }
+  };
+  
+  // Handle login method change
+  const handleLoginMethodChange = (value: string) => {
+    setLoginMethod(value);
+    
+    // Update login value based on selected method
+    if (value === "email") {
+      setLoginValue(employee.email || "");
+    } else {
+      setLoginValue(employee.employeeId || "");
     }
   };
   
@@ -144,7 +162,7 @@ export function ResetPasswordDialog({
           {/* Login Method Selection */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Login Method (Optional)</label>
-            <Select value={loginMethod} onValueChange={setLoginMethod}>
+            <Select value={loginMethod} onValueChange={handleLoginMethodChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Choose login method" />
               </SelectTrigger>
@@ -155,7 +173,7 @@ export function ResetPasswordDialog({
             </Select>
           </div>
           
-          {/* Login Value (Email or Employee ID) */}
+          {/* Login Value (Email or Employee ID) - Pre-filled */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
               {loginMethod === "email" ? "Email Address" : "Employee ID"}
@@ -168,24 +186,45 @@ export function ResetPasswordDialog({
             />
           </div>
           
+          {/* Password fields with visibility toggle */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">New Password</label>
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Enter new password"
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
           
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Confirm Password</label>
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
-            />
+            <div className="relative">
+              <Input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
           
           {error && (

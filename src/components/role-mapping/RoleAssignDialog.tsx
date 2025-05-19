@@ -65,7 +65,7 @@ export function RoleAssignDialog({
     }
     
     onAssignRole(selectedRole);
-    // Note: Dialog will be kept open by parent component until credentials are set
+    // Note: Dialog will be closed by parent component
   };
 
   const handleRemoveClick = () => {
@@ -107,9 +107,6 @@ export function RoleAssignDialog({
     return employee.currentRole ? "Update Role" : "Assign Role";
   };
 
-  // Only show Remove Role button if the employee already has a role AND onRemoveRole is provided
-  const showRemoveRoleButton = employee.currentRole && onRemoveRole;
-
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -143,8 +140,8 @@ export function RoleAssignDialog({
             </div>
             
             <div className="pt-2 flex justify-between">
-              {/* Only show Remove Role button if the employee already has a role */}
-              {showRemoveRoleButton && (
+              {/* Always show Remove Role button when onRemoveRole is provided */}
+              {onRemoveRole && (
                 <Button 
                   variant="destructive" 
                   onClick={handleRemoveClick}
@@ -158,7 +155,7 @@ export function RoleAssignDialog({
               <Button 
                 variant="default" 
                 onClick={handleAssign}
-                className={!showRemoveRoleButton ? "w-full" : ""}
+                className={!onRemoveRole ? "w-full" : ""}
               >
                 {getButtonText()}
               </Button>
