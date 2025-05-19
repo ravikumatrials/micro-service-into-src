@@ -17,10 +17,9 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Eye, EyeOff } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
+import { Eye, EyeOff } from "lucide-react";
 
 // Define interface for component props
 interface AssignRoleDialogProps {
@@ -42,7 +41,7 @@ export function AssignRoleDialog({
   roles,
   onAssignRole,
 }: AssignRoleDialogProps) {
-  // State for the dialog steps
+  // State for step tracking (1: role selection, 2: login setup)
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [loginMethod, setLoginMethod] = useState<"employeeId" | "email">("employeeId");
@@ -52,7 +51,7 @@ export function AssignRoleDialog({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Reset the dialog state when it opens or employee changes
+  // Reset the dialog state when it opens or closes
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       resetState();
@@ -72,27 +71,25 @@ export function AssignRoleDialog({
     setShowConfirmPassword(false);
   };
 
-  // Handle continuing to step 2
+  // Proceed to login method selection step
   const handleContinue = () => {
     if (!selectedRole) {
       setError("Please select a role");
       return;
     }
     
-    // Default to employee's email if available, otherwise use employeeId
-    if (employee?.email) {
-      setLoginMethod("email");
-    } else {
-      setLoginMethod("employeeId");
-    }
-    
     setError("");
     setStep(2);
   };
 
-  // Handle assigning the role with credentials
-  const handleAssign = () => {
+  // Submit the form to assign role and set credentials
+  const handleSubmit = () => {
     // Validate form
+    if (!loginMethod) {
+      setError("Please select a login method");
+      return;
+    }
+    
     if (!password || !confirmPassword) {
       setError("Please fill in all password fields");
       return;
@@ -132,14 +129,10 @@ export function AssignRoleDialog({
     onOpenChange(false);
   };
   
-  // Format the display of login method
-  const getLoginMethodDisplay = () => {
-    if (selectedRole && employee) {
-      if (loginMethod === "email" && employee.email) {
-        return `Login Method: Email ID – ${employee.email}`;
-      } else {
-        return `Login Method: Employee ID – ${employee.employeeId}`;
-      }
+  // Get login value based on selected method
+  const getLoginValue = () => {
+    if (employee) {
+      return loginMethod === "email" ? employee.email : employee.employeeId;
     }
     return "";
   };
@@ -179,23 +172,13 @@ export function AssignRoleDialog({
                 </Select>
               </div>
               
-              {selectedRole && (
-                <Alert className="bg-blue-50 border-blue-200">
-                  <Info className="h-4 w-4 text-blue-500" />
-                  <AlertDescription className="text-blue-700">
-                    {getLoginMethodDisplay()}
-                  </AlertDescription>
-                </Alert>
-              )}
-              
               {error && (
                 <p className="text-sm text-red-500">{error}</p>
               )}
             </div>
           ) : (
-            // Step 2: Set Login Credentials
+            // Step 2: Login Method Selection
             <div className="space-y-4">
-              {/* Login Method Selection */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Login Method</label>
                 <RadioGroup 
@@ -281,7 +264,7 @@ export function AssignRoleDialog({
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleContinue} disabled={!selectedRole}>
+              <Button onClick={handleContinue}>
                 Assign
               </Button>
             </>
@@ -291,7 +274,7 @@ export function AssignRoleDialog({
               <Button variant="outline" onClick={() => setStep(1)}>
                 Back
               </Button>
-              <Button onClick={handleAssign}>
+              <Button onClick={handleSubmit}>
                 Submit
               </Button>
             </>
