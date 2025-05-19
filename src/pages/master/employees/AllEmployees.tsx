@@ -41,13 +41,16 @@ const categories = [
 // Sample classifications
 const classifications = ["Laborer", "Staff"];
 
+// System-defined roles that should not be shown in UI
+const systemDefinedRoles = ["Labour", "Staff"];
+
 // Mock data for all employees
 const initialEmployees = [
   { 
     id: 1, 
     name: "Ahmed Al-Mansouri", 
     employeeId: "EMP001", 
-    role: "Labour", // Standardized to match classification
+    role: "", // No user-assigned role (only classification)
     category: "Laborer",
     classification: "Laborer",
     entity: "Tanseeq Investment",
@@ -60,7 +63,7 @@ const initialEmployees = [
     id: 2, 
     name: "Fatima Al-Hashimi", 
     employeeId: "EMP002", 
-    role: "Staff", // Standardized to match classification
+    role: "Supervisor", // User-assigned role
     category: "Supervisor",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
@@ -73,7 +76,7 @@ const initialEmployees = [
     id: 3, 
     name: "Mohammed Al-Farsi", 
     employeeId: "EMP003", 
-    role: "Labour", // Standardized to match classification
+    role: "", // No user-assigned role (only classification)
     category: "Laborer",
     classification: "Laborer",
     entity: "Al Maha Projects",
@@ -86,7 +89,7 @@ const initialEmployees = [
     id: 4, 
     name: "Aisha Al-Blooshi", 
     employeeId: "EMP004", 
-    role: "Staff", // Standardized to match classification
+    role: "Report Admin", // User-assigned role
     category: "Driver",
     classification: "Staff",
     entity: "Gulf Builders International",
@@ -99,7 +102,7 @@ const initialEmployees = [
     id: 5, 
     name: "Yusuf Al-Qasimi", 
     employeeId: "EMP005", 
-    role: "Staff", // Standardized to match classification
+    role: "Site Manager", // User-assigned role
     category: "Engineer",
     classification: "Staff",
     entity: "Zenith Infrastructure",
@@ -112,7 +115,7 @@ const initialEmployees = [
     id: 6, 
     name: "Mariam Al-Zaabi", 
     employeeId: "EMP006", 
-    role: "Staff", // Standardized to match classification
+    role: "", // No user-assigned role
     category: "Consultant",
     classification: "Staff",
     entity: "Tanseeq Investment",
@@ -125,7 +128,7 @@ const initialEmployees = [
     id: 7, 
     name: "Khalid Al-Mansoori", 
     employeeId: "EMP007", 
-    role: "Staff", // Standardized to match classification 
+    role: "Super Admin", // User-assigned role
     category: "Manager",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
@@ -138,7 +141,7 @@ const initialEmployees = [
     id: 8, 
     name: "Omar Al-Shamsi", 
     employeeId: "EMP008", 
-    role: "Labour", // Standardized to match classification
+    role: "", // No user-assigned role
     category: "Laborer",
     classification: "Laborer",
     entity: "Al Maha Projects",
@@ -220,6 +223,12 @@ const AllEmployees = () => {
     });
     
     setEmployees([...employees, ...employeesToAdd]);
+  };
+
+  // Helper function to determine if role should be displayed
+  const shouldDisplayRole = (role) => {
+    // Only show user-assigned roles
+    return role && !systemDefinedRoles.includes(role) && role !== "";
   };
 
   return (
@@ -329,12 +338,14 @@ const AllEmployees = () => {
                     <TableCell>{employee.classification}</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>
-                      {/* Standardized Role display */}
-                      <Badge 
-                        className="bg-green-100 text-green-800 hover:bg-green-200"
-                      >
-                        {employee.classification === "Laborer" ? "Labour" : "Staff"}
-                      </Badge>
+                      {/* Updated Role display to only show user-assigned roles */}
+                      {shouldDisplayRole(employee.role) ? (
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                          {employee.role}
+                        </Badge>
+                      ) : (
+                        <span className="text-sm text-gray-500">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge 

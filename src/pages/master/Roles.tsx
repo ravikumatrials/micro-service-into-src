@@ -22,6 +22,7 @@ import { toast } from "@/components/ui/use-toast";
 
 // Updated mock data with separate web and mobile permissions
 const initialRoles = [
+  // System-defined roles will be filtered out from the main display
   { 
     id: 1, 
     code: "LAB", 
@@ -94,11 +95,12 @@ const mobilePermissions = [
   "Attendance History"
 ];
 
-// System-defined roles that have special behavior
+// System-defined roles that have special behavior and should not be shown in UI
 const systemDefinedRoles = ["Labour", "Staff"];
 
 const Roles = () => {
-  const [roles, setRoles] = useState(initialRoles);
+  // Filter out system-defined roles from initial display
+  const [roles, setRoles] = useState(initialRoles.filter(role => !systemDefinedRoles.includes(role.name)));
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -170,29 +172,35 @@ const Roles = () => {
   };
 
   const validatePermissions = (role) => {
-    // Labour and Staff roles are exempt from permission validation
-    if (isSystemDefinedRole(role)) {
-      return true;
-    }
-    
-    // All other roles must have at least one permission (web or mobile)
+    // All roles must have at least one permission (web or mobile)
     return role.webPermissions.length > 0 || role.mobilePermissions.length > 0;
   };
 
   const handleCreateRole = () => {
-    // Validate permissions for non-system-defined roles
-    if (!validatePermissions(newRole)) {
-      setValidationError("All roles (except Labour and Staff) must have at least one permission.");
+    // Validate role name isn't a system-defined role
+    if (systemDefinedRoles.includes(newRole.name)) {
+      setValidationError("Cannot create a role with this name as it is system-defined.");
       toast({
         title: "Validation Error",
-        description: "All roles (except Labour and Staff) must have at least one permission.",
+        description: "Cannot create a role with this name as it is system-defined.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validate permissions
+    if (!validatePermissions(newRole)) {
+      setValidationError("All roles must have at least one permission.");
+      toast({
+        title: "Validation Error",
+        description: "All roles must have at least one permission.",
         variant: "destructive"
       });
       return;
     }
     
     // Generate a new ID that's one higher than the current max ID
-    const maxId = Math.max(...roles.map(r => r.id));
+    const maxId = Math.max(...initialRoles.map(r => r.id));
     const newId = maxId + 1;
     
     const roleToAdd = {
@@ -241,12 +249,23 @@ const Roles = () => {
   };
 
   const saveEditedRole = () => {
-    // Validate permissions again before saving
-    if (!validatePermissions(selectedRole)) {
-      setValidationError("All roles (except Labour and Staff) must have at least one permission.");
+    // Validate new name isn't a system-defined role
+    if (systemDefinedRoles.includes(selectedRole.name)) {
+      setValidationError("Cannot rename to a system-defined role name.");
       toast({
         title: "Validation Error",
-        description: "All roles (except Labour and Staff) must have at least one permission.",
+        description: "Cannot rename to a system-defined role name.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validate permissions again before saving
+    if (!validatePermissions(selectedRole)) {
+      setValidationError("All roles must have at least one permission.");
+      toast({
+        title: "Validation Error",
+        description: "All roles must have at least one permission.",
         variant: "destructive"
       });
       return;
@@ -296,24 +315,6 @@ const Roles = () => {
   const getCombinedPermissionsDisplay = (role) => {
     const combinedPermissions = [...role.webPermissions, ...role.mobilePermissions];
     const uniquePermissions = Array.from(new Set(combinedPermissions));
-    
-    if (isSystemDefinedRole(role)) {
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center text-gray-500">
-                <span className="text-xs italic mr-1">System-defined role</span>
-                <Info className="h-4 w-4" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
-              <p>The {role.name} role is system-defined and does not require permissions.</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    }
     
     return uniquePermissions.length > 0 ? (
       <>
@@ -746,4 +747,3 @@ const Roles = () => {
 };
 
 export default Roles;
-

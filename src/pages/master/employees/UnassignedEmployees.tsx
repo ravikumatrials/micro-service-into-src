@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -47,7 +48,7 @@ const initialEmployees = [
     id: 6, 
     name: "Mariam Al-Zaabi", 
     employeeId: "EMP006", 
-    role: "Staff", // Added role based on classification
+    role: "", // Removed role based on classification
     category: "Consultant",
     classification: "Staff",
     entity: "Tanseeq Investment",
@@ -59,7 +60,7 @@ const initialEmployees = [
     id: 8, 
     name: "Omar Al-Shamsi", 
     employeeId: "EMP008", 
-    role: "Labour", // Added role based on classification
+    role: "", // Removed role based on classification
     category: "Laborer",
     classification: "Laborer",
     entity: "Al Maha Projects",
@@ -71,7 +72,7 @@ const initialEmployees = [
     id: 9, 
     name: "Layla Al-Balushi", 
     employeeId: "EMP009", 
-    role: "Labour", // Added role based on classification
+    role: "", // Removed role based on classification
     category: "Electrician",
     classification: "Laborer",
     entity: "Tanseeq Investment",
@@ -82,10 +83,10 @@ const initialEmployees = [
 ];
 
 const mockRoles = [
-  { id: 1, name: "Labour" },
-  { id: 2, name: "Staff" },
+  { id: 1, name: "Supervisor" },
+  { id: 2, name: "Report Admin" },
   { id: 3, name: "Super Admin" },
-  { id: 4, name: "Report Admin" },
+  { id: 4, name: "Site Manager" },
 ];
 
 const UnassignedEmployees = () => {
@@ -246,7 +247,7 @@ const UnassignedEmployees = () => {
                 <TableHead>Entity</TableHead>
                 <TableHead>Classification</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Role</TableHead> {/* Role column based on classification */}
+                <TableHead>Role</TableHead> 
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -263,11 +264,11 @@ const UnassignedEmployees = () => {
                     <TableCell>{employee.classification}</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>
-                      {/* Display role based on classification */}
+                      {/* Display "No Role" for all unassigned employees */}
                       <Badge 
                         className="bg-gray-100 text-gray-800 hover:bg-gray-200"
                       >
-                        {employee.classification === "Laborer" ? "Labour" : "Staff"}
+                        No Role
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -320,7 +321,7 @@ const UnassignedEmployees = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-6 text-gray-500"> {/* Updated colspan to 8 */}
+                  <TableCell colSpan={8} className="text-center py-6 text-gray-500"> 
                     No unassigned employees found matching the search criteria
                   </TableCell>
                 </TableRow>
