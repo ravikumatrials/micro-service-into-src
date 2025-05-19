@@ -13,13 +13,6 @@ import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, Eye, EyeOff } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface ResetPasswordDialogProps {
   open: boolean;
@@ -80,21 +73,9 @@ export function ResetPasswordDialog({
   // Format display of current login method
   const getLoginMethodDisplay = () => {
     if (loginMethod === "email") {
-      return `Login via: Email ID – ${employee.email || loginValue || ""}`;
+      return `Login Method: Email ID – ${loginValue || employee.email || ""}`;
     } else {
-      return `Login via: Employee ID – ${employee.employeeId || loginValue || ""}`;
-    }
-  };
-  
-  // Handle login method change
-  const handleLoginMethodChange = (value: string) => {
-    setLoginMethod(value);
-    
-    // Update login value based on selected method
-    if (value === "email") {
-      setLoginValue(employee.email || "");
-    } else {
-      setLoginValue(employee.employeeId || "");
+      return `Login Method: Employee ID – ${employee.employeeId}`;
     }
   };
   
@@ -120,8 +101,8 @@ export function ResetPasswordDialog({
     
     // Log the password reset - in a real app, this would be sent to the backend
     console.log("Password reset for employee:", employee.employeeId);
-    console.log("Updated login method:", loginMethod);
-    console.log("Updated login value:", loginValue);
+    console.log("Login method:", loginMethod);
+    console.log("Login value:", loginValue);
     
     toast({
       title: "Login Credentials Updated",
@@ -159,32 +140,20 @@ export function ResetPasswordDialog({
             </AlertDescription>
           </Alert>
           
-          {/* Login Method Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Login Method (Optional)</label>
-            <Select value={loginMethod} onValueChange={handleLoginMethodChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose login method" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="email">Email ID</SelectItem>
-                <SelectItem value="employeeId">Employee ID</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {/* Login Value (Email or Employee ID) - Pre-filled */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              {loginMethod === "email" ? "Email Address" : "Employee ID"}
-            </label>
-            <Input
-              type={loginMethod === "email" ? "email" : "text"}
-              value={loginValue}
-              onChange={(e) => setLoginValue(e.target.value)}
-              placeholder={loginMethod === "email" ? "Enter email address" : "Enter employee ID"}
-            />
-          </div>
+          {/* Login Value - Only editable if using email */}
+          {loginMethod === "email" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <Input
+                type="email"
+                value={loginValue}
+                onChange={(e) => setLoginValue(e.target.value)}
+                placeholder="Enter email address"
+              />
+            </div>
+          )}
           
           {/* Password fields with visibility toggle */}
           <div className="space-y-2">
