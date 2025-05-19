@@ -19,7 +19,7 @@ type SubMenuItem = {
   name: string;
   path: string;
   icon?: React.ReactNode;
-  requiredPermission?: string; // Added requiredPermission property
+  requiredPermission?: string;
 };
 
 type MenuItem = {
@@ -28,7 +28,7 @@ type MenuItem = {
   icon: React.ReactNode;
   subMenus?: SubMenuItem[];
   hidden?: boolean;
-  requiredPermission?: string; // Added requiredPermission property
+  requiredPermission?: string;
 };
 
 // Mock function to get current user permissions - in a real app, this would come from an auth context
@@ -64,21 +64,10 @@ const menuItems: MenuItem[] = [
         path: "/master/employees",
         requiredPermission: "Manage Employees"
       },
-      {
-        name: "All Employees",
-        path: "/master/employees/all",
-        requiredPermission: "Manage Employees"
-      },
-      {
-        name: "Unassigned Employees",
-        path: "/master/employees/unassigned",
-        requiredPermission: "Manage Employees"
-      },
-      {
-        name: "Assigned Employees",
-        path: "/master/employees/assigned",
-        requiredPermission: "Manage Users"
-      },
+      // Removed the employee submenu items:
+      // - All Employees
+      // - Unassigned Employees
+      // - Assigned Employees
       {
         name: "Roles",
         path: "/master/roles",
@@ -144,20 +133,8 @@ export function Sidebar() {
       if (item.subMenus) {
         // Special handling for Master menu to show nested structure for Employees
         if (item.name === "Master") {
-          // Group Employees submenus
-          const employeeMenus = item.subMenus.filter(subItem => 
-            subItem.path.includes("/master/employees") && 
-            subItem.path !== "/master/employees"
-          );
-          
-          // Get non-employee submenus
-          const otherSubMenus = item.subMenus.filter(subItem => 
-            !subItem.path.includes("/master/employees") || 
-            subItem.path === "/master/employees"
-          );
-          
-          // Create organized submenus with proper structure
-          const organizedSubMenus = otherSubMenus.filter(
+          // Filter and organize submenus
+          const organizedSubMenus = item.subMenus.filter(
             subItem => !subItem.requiredPermission || userPermissions.includes(subItem.requiredPermission)
           );
           
@@ -178,12 +155,6 @@ export function Sidebar() {
       return item;
     })
     .filter(item => !item.subMenus || item.subMenus.length > 0); // Hide parent menus with no visible children
-
-  // Special handling for the Employee submenu
-  const employeeSubmenus = menuItems[1].subMenus?.filter(
-    item => item.path.includes("/master/employees") && item.path !== "/master/employees" &&
-    (!item.requiredPermission || userPermissions.includes(item.requiredPermission))
-  ) || [];
 
   return (
     <div className="relative">
@@ -244,57 +215,20 @@ export function Sidebar() {
                       </button>
                       {expanded === item.name && !isCollapsed && (
                         <ul className="pl-8 mt-1 space-y-1">
-                          {/* Main submenu items (except Employees) */}
                           {item.subMenus.map((subItem) => (
-                            subItem.path === "/master/employees" ? (
-                              <li key={subItem.name}>
-                                <div>
-                                  <Link
-                                    to={subItem.path}
-                                    className={`flex items-center px-3 py-2 text-sm rounded-md ${
-                                      location.pathname === subItem.path
-                                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                                    }`}
-                                  >
-                                    {subItem.icon}
-                                    <span className="ml-2">{subItem.name}</span>
-                                  </Link>
-                                  
-                                  {/* Show employee submenus */}
-                                  <ul className="pl-4 mt-1 space-y-1">
-                                    {employeeSubmenus.map((employeeSubItem) => (
-                                      <li key={employeeSubItem.name}>
-                                        <Link
-                                          to={employeeSubItem.path}
-                                          className={`flex items-center px-3 py-2 text-sm rounded-md ${
-                                            location.pathname === employeeSubItem.path
-                                              ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                                              : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                                          }`}
-                                        >
-                                          <span className="ml-2">{employeeSubItem.name}</span>
-                                        </Link>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              </li>
-                            ) : (
-                              <li key={subItem.name}>
-                                <Link
-                                  to={subItem.path}
-                                  className={`flex items-center px-3 py-2 text-sm rounded-md ${
-                                    location.pathname === subItem.path
-                                      ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                                      : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                                  }`}
-                                >
-                                  {subItem.icon}
-                                  <span className="ml-2">{subItem.name}</span>
-                                </Link>
-                              </li>
-                            )
+                            <li key={subItem.name}>
+                              <Link
+                                to={subItem.path}
+                                className={`flex items-center px-3 py-2 text-sm rounded-md ${
+                                  location.pathname === subItem.path
+                                    ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                                    : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                                }`}
+                              >
+                                {subItem.icon}
+                                <span className="ml-2">{subItem.name}</span>
+                              </Link>
+                            </li>
                           ))}
                         </ul>
                       )}

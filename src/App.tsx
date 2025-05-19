@@ -14,9 +14,6 @@ import BulkAttendance from "./pages/BulkAttendance";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Employees from "./pages/master/Employees";
-import AllEmployees from "./pages/master/employees/AllEmployees";
-import UnassignedEmployees from "./pages/master/employees/UnassignedEmployees";
-import AssignedEmployees from "./pages/master/employees/AssignedEmployees";
 import Roles from "./pages/master/Roles";
 import Projects from "./pages/master/Projects";
 import NotFound from "./pages/NotFound";
@@ -63,22 +60,7 @@ const App = () => {
               </PermissionGuard>
             } />
             
-            {/* Employee submenu routes */}
-            <Route path="/master/employees/all" element={
-              <PermissionGuard requiredPermission="Manage Employees">
-                <Layout><AllEmployees /></Layout>
-              </PermissionGuard>
-            } />
-            <Route path="/master/employees/unassigned" element={
-              <PermissionGuard requiredPermission="Manage Employees">
-                <Layout><UnassignedEmployees /></Layout>
-              </PermissionGuard>
-            } />
-            <Route path="/master/employees/assigned" element={
-              <PermissionGuard requiredPermission="Manage Users">
-                <Layout><AssignedEmployees /></Layout>
-              </PermissionGuard>
-            } />
+            {/* Remove individual employee submenu routes */}
             
             <Route path="/master/roles" element={
               <PermissionGuard requiredPermission="Manage Roles">
