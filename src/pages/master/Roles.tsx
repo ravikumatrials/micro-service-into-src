@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash, X, Info } from "lucide-react";
@@ -27,7 +28,7 @@ const initialRoles = [
     name: "Labour", 
     description: "Regular construction worker with basic permissions", 
     webPermissions: [], 
-    mobilePermissions: ["Self Attendance"],
+    mobilePermissions: ["Mark Attendance"],
     createdAt: "01/01/2023",
     isSystemDefined: true
   },
@@ -36,8 +37,8 @@ const initialRoles = [
     code: "SUP", 
     name: "Supervisor", 
     description: "Manages workers and can mark their attendance", 
-    webPermissions: ["View Reports"], 
-    mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History"],
+    webPermissions: ["Dashboard", "Reports"], 
+    mobilePermissions: ["Dashboard", "Mark Attendance", "Attendance History"],
     createdAt: "01/01/2023",
     isSystemDefined: false
   },
@@ -46,8 +47,8 @@ const initialRoles = [
     code: "SADM", 
     name: "Super Admin", 
     description: "Has full access to all system functionalities", 
-    webPermissions: ["Manual Attendance", "View Reports", "Manage Employees", "Manage Projects", "Manage Locations", "Export Reports", "Face Enroll", "Manage Roles", "Role Mapping", "Manage Users"], 
-    mobilePermissions: ["Self Attendance", "Mark Attendance", "Attendance History", "Face Enroll"],
+    webPermissions: ["Dashboard", "Add Employees", "Face Enroll", "Assign Role", "Create Role", "Add Projects", "Manual Attendance", "Bulk Attendance", "Reports"], 
+    mobilePermissions: ["Dashboard", "Face Enroll", "Mark Attendance", "Attendance History"],
     createdAt: "01/01/2023",
     isSystemDefined: false
   },
@@ -56,8 +57,8 @@ const initialRoles = [
     code: "RADM", 
     name: "Report Admin", 
     description: "Can view and export all reports", 
-    webPermissions: ["View Reports", "Export Reports"], 
-    mobilePermissions: ["Attendance History"],
+    webPermissions: ["Dashboard", "Reports"], 
+    mobilePermissions: ["Dashboard", "Attendance History"],
     createdAt: "01/01/2023",
     isSystemDefined: false
   },
@@ -67,31 +68,30 @@ const initialRoles = [
     name: "Staff", 
     description: "Regular staff member with basic permissions", 
     webPermissions: [], 
-    mobilePermissions: ["Self Attendance"],
+    mobilePermissions: ["Mark Attendance"],
     createdAt: "01/01/2023",
     isSystemDefined: true
   },
 ];
 
-// Lists of all possible permissions separated by platform - added new permissions
+// Updated lists of all possible permissions separated by platform
 const webPermissions = [
-  "Manual Attendance",
-  "View Reports",
-  "Manage Employees",
-  "Manage Projects",
-  "Manage Locations",
-  "Export Reports",
+  "Dashboard",
+  "Add Employees",
   "Face Enroll",
-  "Manage Roles",
-  "Role Mapping",
-  "Manage Users"
+  "Assign Role",
+  "Create Role", 
+  "Add Projects",
+  "Manual Attendance",
+  "Bulk Attendance",
+  "Reports"
 ];
 
 const mobilePermissions = [
-  "Self Attendance",
+  "Dashboard",
+  "Face Enroll",
   "Mark Attendance",
-  "Attendance History",
-  "Face Enroll"
+  "Attendance History"
 ];
 
 // System-defined roles that have special behavior
@@ -746,3 +746,4 @@ const Roles = () => {
 };
 
 export default Roles;
+
