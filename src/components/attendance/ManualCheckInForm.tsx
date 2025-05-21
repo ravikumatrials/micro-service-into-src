@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, MapPin, AlertCircle } from "lucide-react";
 import EmployeeField from "../ManualFormFields/EmployeeField";
 import ProjectField from "../ManualFormFields/ProjectField";
@@ -7,10 +7,22 @@ import TimeField from "../ManualFormFields/TimeField";
 import ReasonField from "../ManualFormFields/ReasonField";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { FormField } from "@/components/ui/form";
 
 interface ManualCheckInFormProps {
   projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];
 }
+
+// Define attendance reason options
+const attendanceReasons = [
+  { value: "medical", label: "Medical", type: "present_offsite" },
+  { value: "visa", label: "Visa", type: "present_offsite" },
+  { value: "id", label: "ID", type: "present_offsite" },
+  { value: "sick", label: "Sick", type: "absent_excused" },
+  { value: "casual", label: "Casual", type: "absent_unexcused" }
+];
 
 const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
   const { toast } = useToast();
@@ -18,7 +30,9 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
     employeeId: "",
     project: "",
     checkInTime: "",
-    reason: ""
+    reason: "",
+    attendanceStatus: "present", // New field: 'present', 'present_offsite', 'absent_excused', 'absent_unexcused'
+    attendanceReason: "" // New field for attendance reason dropdown
   });
   
   // Location states
@@ -26,6 +40,16 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
   const [assignedLocation, setAssignedLocation] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   
+  // Track if the check-in is a facial recognition check-in
+  const [isFacialCheckIn, setIsFacialCheckIn] = useState(false);
+  
+  // Determine if attendance reason field should be displayed
+  const shouldShowAttendanceReason = !isFacialCheckIn && (
+    formData.attendanceStatus === "absent_excused" || 
+    formData.attendanceStatus === "absent_unexcused" || 
+    formData.attendanceStatus === "present_offsite"
+  );
+
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
@@ -36,6 +60,14 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
       // Reset location info if project is deselected
       setAssignedLocation(null);
       setLocationError(null);
+    }
+    
+    // Update attendance status based on selected reason
+    if (field === "attendanceReason" && value) {
+      const selectedReason = attendanceReasons.find(reason => reason.value === value);
+      if (selectedReason) {
+        setFormData(prev => ({ ...prev, attendanceStatus: selectedReason.type }));
+      }
     }
   };
 
@@ -113,10 +145,20 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
       return;
     }
     
+    // Validate attendance reason is provided when required
+    if (shouldShowAttendanceReason && !formData.attendanceReason) {
+      toast({
+        title: "Attendance Reason Required",
+        description: "Please select an attendance reason for this check-in",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Submit form logic would go here
     toast({
       title: "Manual Check-In Recorded",
-      description: `Employee ${formData.employeeId} checked in successfully`,
+      description: `Employee ${formData.employeeId} checked in successfully${formData.attendanceReason ? ` (${attendanceReasons.find(r => r.value === formData.attendanceReason)?.label})` : ''}`,
     });
     
     // Reset form
@@ -124,7 +166,9 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
       employeeId: "",
       project: "",
       checkInTime: "",
-      reason: ""
+      reason: "",
+      attendanceStatus: "present",
+      attendanceReason: ""
     });
     setAssignedLocation(null);
   };
@@ -187,9 +231,36 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
           onChange={(value) => handleChange("checkInTime", value)}
         />
         
+        {/* New Attendance Reason dropdown - only shown when applicable */}
+        <div className={`${shouldShowAttendanceReason ? 'block' : 'hidden'} space-y-2`}>
+          <Label className="text-xl font-medium text-gray-700">
+            Attendance Reason <span className="text-red-500">*</span>
+          </Label>
+          <Select 
+            value={formData.attendanceReason} 
+            onValueChange={(value) => handleChange("attendanceReason", value)}
+          >
+            <SelectTrigger className="w-full px-5 py-4 text-xl border-gray-300">
+              <SelectValue placeholder="Select a reason" />
+            </SelectTrigger>
+            <SelectContent>
+              {attendanceReasons.map((reason) => (
+                <SelectItem key={reason.value} value={reason.value}>
+                  {reason.label} → {reason.type === "present_offsite" ? "Present (Off-site)" : 
+                                    reason.type === "absent_excused" ? "Absent (Excused)" : 
+                                    "Absent (Unexcused)"}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-sm text-gray-500">
+            Required for manual check-ins without face recognition
+          </p>
+        </div>
+        
         <ReasonField 
-          label="Reason for Manual Check In" 
-          placeholder="Enter reason" 
+          label="Additional Comments (Optional)" 
+          placeholder="Enter any additional comments" 
           value={formData.reason}
           onChange={(value) => handleChange("reason", value)}
         />
@@ -198,7 +269,7 @@ const ManualCheckInForm = ({ projects }: ManualCheckInFormProps) => {
           <button
             type="submit"
             className="bg-proscape hover:bg-proscape-dark text-white px-10 py-4 rounded-xl text-xl font-medium transition-colors shadow-md"
-            disabled={isLoadingLocation || !assignedLocation}
+            disabled={isLoadingLocation || !assignedLocation || (shouldShowAttendanceReason && !formData.attendanceReason)}
           >
             Submit
           </button>

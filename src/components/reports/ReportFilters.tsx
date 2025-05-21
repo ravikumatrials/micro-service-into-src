@@ -21,6 +21,8 @@ interface ReportFiltersProps {
   setAttendanceTypeFilter: (value: string) => void;
   entryMethodFilter: string;
   setEntryMethodFilter: (value: string) => void;
+  attendanceReasonFilter?: string;  // New prop for attendance reason filter
+  setAttendanceReasonFilter?: (value: string) => void;  // New setter prop
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   startDate: string;
@@ -40,6 +42,8 @@ export function ReportFilters({
   setAttendanceTypeFilter,
   entryMethodFilter,
   setEntryMethodFilter,
+  attendanceReasonFilter = "all",  // Default value
+  setAttendanceReasonFilter = () => {},  // Default no-op function
   searchTerm,
   setSearchTerm,
   startDate,
@@ -123,7 +127,7 @@ export function ReportFilters({
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Role
@@ -170,6 +174,26 @@ export function ReportFilters({
               <SelectItem value="all">All Methods</SelectItem>
               <SelectItem value="face">Face Recognition</SelectItem>
               <SelectItem value="manual">Manual Entry</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* New Attendance Reason filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Attendance Reason
+          </label>
+          <Select value={attendanceReasonFilter} onValueChange={setAttendanceReasonFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Reasons" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Reasons</SelectItem>
+              <SelectItem value="medical">Medical (Present Off-site)</SelectItem>
+              <SelectItem value="visa">Visa (Present Off-site)</SelectItem>
+              <SelectItem value="id">ID (Present Off-site)</SelectItem>
+              <SelectItem value="sick">Sick (Absent Excused)</SelectItem>
+              <SelectItem value="casual">Casual (Absent Unexcused)</SelectItem>
             </SelectContent>
           </Select>
         </div>

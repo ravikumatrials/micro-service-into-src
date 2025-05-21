@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Edit, UserCheck, UserX, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,8 @@ interface Employee {
   activeStatus: "Active" | "Inactive";
   entity?: string;
   attendanceDate?: Date; // Added to track the date of attendance
+  attendanceReason?: string; // Added to track attendance reason
+  attendanceStatus?: string; // Added to track attendance status
 }
 
 interface CheckInTabProps {
@@ -120,7 +123,9 @@ const CheckInTab = ({
         location: "Office",
         locationId: 3,
         imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-        entity: "Tanseeq Engineering Co"
+        entity: "Tanseeq Engineering Co",
+        attendanceReason: "medical",
+        attendanceStatus: "present_offsite"
       },
       {
         id: 4,
@@ -234,6 +239,19 @@ const CheckInTab = ({
     return entityMap[entityId as keyof typeof entityMap] || "";
   };
 
+  // Helper function to get attendance reason label
+  const getAttendanceReasonLabel = (reason: string) => {
+    const reasonMap: { [key: string]: string } = {
+      "medical": "Medical (Present Off-site)",
+      "visa": "Visa (Present Off-site)",
+      "id": "ID (Present Off-site)",
+      "sick": "Sick (Absent Excused)",
+      "casual": "Casual (Absent Unexcused)"
+    };
+    
+    return reasonMap[reason] || reason;
+  };
+
   const handleManualCheckIn = (employee: Employee) => {
     if (!dateSelected) {
       toast.error("Date selection required", {
@@ -258,7 +276,9 @@ const CheckInTab = ({
     projectId: string, 
     locationId: string, 
     time: string,
-    reason: string
+    reason: string,
+    attendanceReason?: string,
+    attendanceStatus?: string
   ) => {
     setOpenManualDialog(false);
     
@@ -272,7 +292,10 @@ const CheckInTab = ({
       });
     }
     
-    toast.success(`${selectedEmployee?.name} has been manually checked in`, {
+    // Include attendance reason in success message if provided
+    const reasonText = attendanceReason ? ` with reason: ${getAttendanceReasonLabel(attendanceReason)}` : "";
+    
+    toast.success(`${selectedEmployee?.name} has been manually checked in${reasonText}`, {
       description: `Project: ${selectedProjectName}, Date: ${format(selectedDate, "PPP")}`
     });
     
@@ -281,7 +304,14 @@ const CheckInTab = ({
       setEmployees(current => 
         current.map(emp => 
           emp.id === selectedEmployee.id 
-            ? { ...emp, status: "checkedin", attendanceDate: selectedDate, checkedInProject: selectedProjectName }
+            ? { 
+                ...emp, 
+                status: "checkedin", 
+                attendanceDate: selectedDate, 
+                checkedInProject: selectedProjectName,
+                attendanceReason: attendanceReason,
+                attendanceStatus: attendanceStatus
+              }
             : emp
         )
       );
@@ -311,6 +341,7 @@ const CheckInTab = ({
               <TableHead>Classification</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Check-In Status</TableHead>
+              <TableHead>Attendance Reason</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -346,6 +377,15 @@ const CheckInTab = ({
                       </div>
                     )}
                   </TableCell>
+                  <TableCell>
+                    {employee.attendanceReason ? (
+                      <span className="text-sm font-medium">
+                        {getAttendanceReasonLabel(employee.attendanceReason)}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-500">-</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button 
                       onClick={() => handleManualCheckIn(employee)} 
@@ -362,7 +402,7 @@ const CheckInTab = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={8} className="text-center py-10 text-gray-500">
                   No employees found matching your filters
                 </TableCell>
               </TableRow>

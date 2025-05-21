@@ -64,7 +64,11 @@ const ManualAttendanceRecords = () => {
       <ManualAttendanceTabs 
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        filteredRecords={filteredRecords}
+        filteredRecords={filteredRecords.map(record => ({
+          ...record,
+          // Add attendance reason field to records that don't have it
+          attendanceReason: record.attendanceReason || "-"
+        }))}
         filters={filters}
         projects={mockProjects}
         selectedDate={selectedDate}
