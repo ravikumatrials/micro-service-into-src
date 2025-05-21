@@ -1,210 +1,289 @@
 
 import React, { useState } from "react";
-import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Clock, Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { format } from "date-fns";
+import { Clock, User } from "lucide-react";
+
+// Define attendance reason options
+const attendanceReasons = [
+  { value: "medical", label: "Medical", type: "present_offsite" },
+  { value: "visa", label: "Visa", type: "present_offsite" },
+  { value: "id", label: "ID", type: "present_offsite" },
+  { value: "sick", label: "Sick", type: "absent_excused" },
+  { value: "casual", label: "Casual", type: "absent_unexcused" }
+];
 
 interface Employee {
   id: number;
-  name: string;
   employeeId: string;
-  status?: string;
-  project?: string;
-  projectId?: number;
-  location?: string;
-  locationId?: number;
+  name: string;
+  role?: string;
+  imageUrl: string;
 }
 
 interface ManualCheckInDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   employee: Employee | null;
-  projects: { id: number; name: string }[];
+  projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];
   locations: { id: number; name: string }[];
-  onComplete: (
-    projectId: string, 
-    locationId: string, 
-    time: string,
-    reason: string,
-    attendanceReason?: string
-  ) => void;
-  attendanceReasons?: {
-    id: string;
-    label: string;
-    category: "present-offsite" | "absent";
-  }[];
-  isOffSiteMarkingAvailable?: boolean;
+  onComplete: (projectId: string, locationId: string, time: string, reason: string, attendanceReason?: string, attendanceStatus?: string) => void;
 }
 
-const ManualCheckInDialog = ({ 
-  open, 
-  onOpenChange, 
-  employee, 
-  projects, 
-  locations, 
-  onComplete,
-  attendanceReasons = [],
-  isOffSiteMarkingAvailable = true
+const ManualCheckInDialog = ({
+  open,
+  onOpenChange,
+  employee,
+  projects,
+  locations,
+  onComplete
 }: ManualCheckInDialogProps) => {
-  const [projectId, setProjectId] = useState(employee?.projectId?.toString() || "");
-  const [locationId, setLocationId] = useState(employee?.locationId?.toString() || "");
-  const [time, setTime] = useState(format(new Date(), "HH:mm"));
+  const [selectedProject, setSelectedProject] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [time, setTime] = useState<string>(format(new Date(), "HH:mm"));
   const [reason, setReason] = useState("");
   const [attendanceReason, setAttendanceReason] = useState("");
-  const [isOffsite, setIsOffsite] = useState(false);
-
-  // Reset form when dialog opens/closes or employee changes
+  const [attendanceStatus, setAttendanceStatus] = useState("present");
+  const [isFacialCheckIn, setIsFacialCheckIn] = useState(true);
+  
+  // Determine if attendance reason field should be displayed
+  const shouldShowAttendanceReason = !isFacialCheckIn && (
+    attendanceStatus === "absent_excused" || 
+    attendanceStatus === "absent_unexcused" || 
+    attendanceStatus === "present_offsite"
+  );
+  
+  // Reset form when dialog opens
   React.useEffect(() => {
-    if (open && employee) {
-      setProjectId(employee.projectId?.toString() || "");
-      setLocationId(employee.locationId?.toString() || "");
+    if (open) {
+      setSelectedProject("");
+      setSelectedLocation("");
       setTime(format(new Date(), "HH:mm"));
       setReason("");
       setAttendanceReason("");
-      setIsOffsite(false);
+      setAttendanceStatus("present");
+      setIsFacialCheckIn(true);
+      
+      // Default to the first project if present
+      if (projects.length > 0) {
+        setSelectedProject(projects[0].id.toString());
+      }
     }
-  }, [open, employee]);
+  }, [open, projects]);
+  
+  // Update location options when project changes
+  React.useEffect(() => {
+    if (selectedProject && locations.length > 0) {
+      // Find locations related to the selected project
+      // For this implementation, we're just selecting the first location
+      setSelectedLocation(locations[0]?.id.toString() || "");
+    } else {
+      setSelectedLocation("");
+    }
+  }, [selectedProject, locations]);
+  
+  // Handle attendance reason change
+  const handleAttendanceReasonChange = (value: string) => {
+    setAttendanceReason(value);
+    
+    // Update attendance status based on selected reason
+    const selectedReasonObj = attendanceReasons.find(r => r.value === value);
+    if (selectedReasonObj) {
+      setAttendanceStatus(selectedReasonObj.type);
+    }
+  };
+  
+  // Toggle facial check-in status
+  const handleFacialCheckInToggle = (value: boolean) => {
+    setIsFacialCheckIn(value);
+    if (value) {
+      // Reset attendance reason when switching to facial check-in
+      setAttendanceReason("");
+      setAttendanceStatus("present");
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
-    if (!projectId) {
-      alert("Please select a project");
+    if (!selectedProject || !time) return;
+    
+    // Check if attendance reason is required and provided
+    if (shouldShowAttendanceReason && !attendanceReason) {
+      // Show error or toast message here
       return;
     }
     
-    if (!time) {
-      alert("Please enter check-in time");
-      return;
-    }
-    
-    // If offsite is checked, require an attendance reason
-    if (isOffsite && !attendanceReason && isOffSiteMarkingAvailable) {
-      alert("Please select an attendance reason for off-site check-in");
-      return;
-    }
-
-    onComplete(projectId, locationId, time, reason, isOffsite ? attendanceReason : undefined);
+    onComplete(
+      selectedProject, 
+      selectedLocation, 
+      time,
+      reason,
+      attendanceReason,
+      attendanceStatus
+    );
   };
-
-  if (!employee) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl">Manual Check-in for {employee.name}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" /> Manual Check-In
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="project">Project</Label>
-            <Select value={projectId} onValueChange={setProjectId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select project" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id.toString()}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Select value={locationId} onValueChange={setLocationId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select location" />
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map((location) => (
-                  <SelectItem key={location.id} value={location.id.toString()}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="time">Check-in Time</Label>
-            <div className="relative">
-              <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input 
-                id="time" 
-                type="time" 
-                value={time} 
-                onChange={(e) => setTime(e.target.value)} 
-                className="pl-10"
-              />
+        {employee && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex items-center gap-4 py-2">
+              <div className="h-12 w-12 rounded-full overflow-hidden">
+                <img 
+                  src={employee.imageUrl} 
+                  alt={employee.name} 
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div>
+                <h4 className="font-medium">{employee.name}</h4>
+                <p className="text-sm text-gray-500">ID: {employee.employeeId}</p>
+              </div>
             </div>
-          </div>
-
-          {isOffSiteMarkingAvailable && (
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="offsite"
-                checked={isOffsite}
-                onChange={(e) => setIsOffsite(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="offsite" className="cursor-pointer">Mark as off-site check-in</Label>
-            </div>
-          )}
-
-          {isOffsite && isOffSiteMarkingAvailable && attendanceReasons.length > 0 && (
+            
             <div className="space-y-2">
-              <Label htmlFor="attendanceReason">Attendance Reason <span className="text-red-500">*</span></Label>
-              <Select value={attendanceReason} onValueChange={setAttendanceReason}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select reason" />
+              <Label htmlFor="check-in-method">Check-In Method</Label>
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant={isFacialCheckIn ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => handleFacialCheckInToggle(true)}
+                >
+                  Facial Recognition
+                </Button>
+                <Button 
+                  type="button" 
+                  variant={!isFacialCheckIn ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => handleFacialCheckInToggle(false)}
+                >
+                  Manual Entry
+                </Button>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="project">Project</Label>
+              <Select 
+                value={selectedProject} 
+                onValueChange={setSelectedProject}
+              >
+                <SelectTrigger id="project">
+                  <SelectValue placeholder="Select project" />
                 </SelectTrigger>
                 <SelectContent>
-                  {attendanceReasons.map((reason) => (
-                    <SelectItem key={reason.id} value={reason.id}>
-                      {reason.label}
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id.toString()}>
+                      {project.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          )}
+            
+            {selectedLocation && locations.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <Select 
+                  value={selectedLocation} 
+                  onValueChange={setSelectedLocation}
+                >
+                  <SelectTrigger id="location">
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((location) => (
+                      <SelectItem key={location.id} value={location.id.toString()}>
+                        {location.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="time" className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" /> Check-In Time
+              </Label>
+              <Input 
+                id="time" 
+                type="time" 
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
+            </div>
+            
+            {/* Attendance Reason Dropdown - only for non-facial check-ins */}
+            {!isFacialCheckIn && (
+              <div className="space-y-2">
+                <Label htmlFor="attendance-reason">
+                  Attendance Reason <span className="text-red-500">*</span>
+                </Label>
+                <Select 
+                  value={attendanceReason} 
+                  onValueChange={handleAttendanceReasonChange}
+                >
+                  <SelectTrigger id="attendance-reason">
+                    <SelectValue placeholder="Select a reason" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {attendanceReasons.map((reason) => (
+                      <SelectItem key={reason.value} value={reason.value}>
+                        {reason.label} → {reason.type === "present_offsite" ? "Present (Off-site)" : 
+                                      reason.type === "absent_excused" ? "Absent (Excused)" : 
+                                      "Absent (Unexcused)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">
+                  Required for manual check-ins without face recognition
+                </p>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="reason">Additional Comments (Optional)</Label>
+              <Input 
+                id="reason" 
+                placeholder="Add any additional comments" 
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="reason">Comment (Optional)</Label>
-            <Textarea 
-              id="reason" 
-              placeholder="Enter reason for manual check-in"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              Submit
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end gap-2 pt-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                disabled={!selectedProject || !time || (shouldShowAttendanceReason && !attendanceReason)}
+              >
+                Complete Check-In
+              </Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

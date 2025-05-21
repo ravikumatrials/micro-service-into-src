@@ -27,8 +27,8 @@ interface Employee {
   activeStatus: "Active" | "Inactive";
   entity?: string;
   attendanceDate?: Date; // Added to track the date of attendance
-  attendanceReason?: string; // Added to store attendance reason
-  isOffsite?: boolean; // Added to indicate if check-in was offsite
+  attendanceReason?: string; // Added to track attendance reason
+  attendanceStatus?: string; // Added to track attendance status
 }
 
 interface CheckInTabProps {
@@ -42,11 +42,6 @@ interface CheckInTabProps {
   locations: { id: number; name: string }[];
   selectedDate: Date; // Now required
   dateSelected?: boolean; // New prop to indicate if date has been explicitly selected
-  attendanceReasons?: {
-    id: string;
-    label: string;
-    category: "present-offsite" | "absent";
-  }[];
 }
 
 const CheckInTab = ({ 
@@ -59,8 +54,7 @@ const CheckInTab = ({
   projects,
   locations,
   selectedDate,
-  dateSelected = true, // Default to true since we're auto-selecting today
-  attendanceReasons = []
+  dateSelected = true // Default to true since we're auto-selecting today
 }: CheckInTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -129,7 +123,9 @@ const CheckInTab = ({
         location: "Office",
         locationId: 3,
         imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-        entity: "Tanseeq Engineering Co"
+        entity: "Tanseeq Engineering Co",
+        attendanceReason: "medical",
+        attendanceStatus: "present_offsite"
       },
       {
         id: 4,
@@ -160,7 +156,7 @@ const CheckInTab = ({
         imageUrl: "https://randomuser.me/api/portraits/men/3.jpg",
         entity: "Tanseeq Construction Ltd"
       },
-      // Additional employees with varied states
+      // Additional employees for testing
       {
         id: 6,
         employeeId: "10006",
@@ -181,9 +177,7 @@ const CheckInTab = ({
         category: "Carpenter",
         classification: "Laborer",
         activeStatus: "Active",
-        status: "checkedin",
-        isOffsite: true,
-        attendanceReason: "medical",
+        status: "notcheckedin",
         imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
         entity: "Tanseeq Landscaping LLC"
       },
@@ -212,7 +206,7 @@ const CheckInTab = ({
       return {
         ...emp,
         // If the employee has attendance for this date, show them as checked in
-        status: hasAttendanceForSelectedDate ? "checkedin" : emp.status
+        status: hasAttendanceForSelectedDate ? "checkedin" : "notcheckedin"
       };
     }));
   };
@@ -222,7 +216,7 @@ const CheckInTab = ({
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.employeeId.includes(searchQuery);
     const matchesProject = selectedProject === "all" || (employee.projectId?.toString() === selectedProject);
-    const matchesStatus = selectedStatus === "all" || employee.activeStatus === selectedStatus;
+    const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
     const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
     const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
     const matchesEntity = selectedEntity === "all" || employee.entity === getEntityName(selectedEntity);
@@ -243,6 +237,19 @@ const CheckInTab = ({
     };
     
     return entityMap[entityId as keyof typeof entityMap] || "";
+  };
+
+  // Helper function to get attendance reason label
+  const getAttendanceReasonLabel = (reason: string) => {
+    const reasonMap: { [key: string]: string } = {
+      "medical": "Medical (Present Off-site)",
+      "visa": "Visa (Present Off-site)",
+      "id": "ID (Present Off-site)",
+      "sick": "Sick (Absent Excused)",
+      "casual": "Casual (Absent Unexcused)"
+    };
+    
+    return reasonMap[reason] || reason;
   };
 
   const handleManualCheckIn = (employee: Employee) => {
@@ -270,7 +277,8 @@ const CheckInTab = ({
     locationId: string, 
     time: string,
     reason: string,
-    attendanceReason?: string
+    attendanceReason?: string,
+    attendanceStatus?: string
   ) => {
     setOpenManualDialog(false);
     
@@ -284,16 +292,11 @@ const CheckInTab = ({
       });
     }
     
-    let toastDescription = `Project: ${selectedProjectName}, Date: ${format(selectedDate, "PPP")}`;
+    // Include attendance reason in success message if provided
+    const reasonText = attendanceReason ? ` with reason: ${getAttendanceReasonLabel(attendanceReason)}` : "";
     
-    // Add reason to toast if provided
-    if (attendanceReason) {
-      const reasonLabel = attendanceReasons.find(r => r.id === attendanceReason)?.label || "Unknown";
-      toastDescription += `, Reason: ${reasonLabel} (Off-site)`;
-    }
-    
-    toast.success(`${selectedEmployee?.name} has been manually checked in`, {
-      description: toastDescription
+    toast.success(`${selectedEmployee?.name} has been manually checked in${reasonText}`, {
+      description: `Project: ${selectedProjectName}, Date: ${format(selectedDate, "PPP")}`
     });
     
     // Update the employee's attendance record in our state
@@ -307,7 +310,7 @@ const CheckInTab = ({
                 attendanceDate: selectedDate, 
                 checkedInProject: selectedProjectName,
                 attendanceReason: attendanceReason,
-                isOffsite: !!attendanceReason
+                attendanceStatus: attendanceStatus
               }
             : emp
         )
@@ -315,12 +318,6 @@ const CheckInTab = ({
     }
     
     setSelectedEmployee(null);
-  };
-
-  // Get reason label from ID
-  const getReasonLabel = (reasonId?: string) => {
-    if (!reasonId) return "";
-    return attendanceReasons.find(r => r.id === reasonId)?.label || "";
   };
 
   return (
@@ -381,10 +378,12 @@ const CheckInTab = ({
                     )}
                   </TableCell>
                   <TableCell>
-                    {employee.isOffsite && employee.attendanceReason && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {getReasonLabel(employee.attendanceReason)} (Off-site)
+                    {employee.attendanceReason ? (
+                      <span className="text-sm font-medium">
+                        {getAttendanceReasonLabel(employee.attendanceReason)}
                       </span>
+                    ) : (
+                      <span className="text-sm text-gray-500">-</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -420,8 +419,6 @@ const CheckInTab = ({
         projects={projects}
         locations={locations}
         onComplete={handleManualCheckInComplete}
-        attendanceReasons={attendanceReasons}
-        isOffSiteMarkingAvailable={true}
       />
     </div>
   );

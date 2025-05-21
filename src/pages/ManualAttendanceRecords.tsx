@@ -7,41 +7,9 @@ import { filterRecords, initialFilters, AttendanceFilters } from "@/components/a
 import { mockProjects } from "@/data/mockProjects";
 import { toast } from "@/hooks/use-toast";
 
-// Define types for the attendance reason
-interface AttendanceReason {
-  id: string;
-  label: string;
-  category: "present-offsite" | "absent";
-}
-
-// Define attendance reasons
-export const attendanceReasons: AttendanceReason[] = [
-  { id: "medical", label: "Medical", category: "present-offsite" },
-  { id: "visa", label: "Visa", category: "present-offsite" },
-  { id: "id", label: "ID", category: "present-offsite" },
-  { id: "sick", label: "Sick", category: "absent" },
-  { id: "casual", label: "Casual", category: "absent" },
-];
-
-// Extend the AttendanceRecord type interface (will be used in components)
-export interface ExtendedAttendanceRecord {
-  id: number;
-  employeeId: string;
-  name: string;
-  checkInTime?: string;
-  checkOutTime?: string;
-  status: string;
-  attendanceReason?: string;
-  reasonCategory?: "present-offsite" | "absent";
-  date: Date;
-  project: string;
-  location?: string;
-  // Add any other fields that might be needed
-}
-
 const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
-  const [activeTab, setActiveTab] = useState("check-in"); // Default to check-in tab
+  const [activeTab, setActiveTab] = useState("records");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Default to today's date
   const [dateSelected, setDateSelected] = useState<boolean>(true); // Default to true since we're auto-selecting today
   
@@ -96,14 +64,17 @@ const ManualAttendanceRecords = () => {
       <ManualAttendanceTabs 
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        filteredRecords={filteredRecords as unknown as ExtendedAttendanceRecord[]}
+        filteredRecords={filteredRecords.map(record => ({
+          ...record,
+          // Add attendance reason field to records that don't have it
+          attendanceReason: record.attendanceReason || "-"
+        }))}
         filters={filters}
         projects={mockProjects}
         selectedDate={selectedDate}
         setSelectedDate={handleDateChange}
         dateSelected={dateSelected}
         setDateSelected={setDateSelected}
-        attendanceReasons={attendanceReasons}
       />
     </div>
   );
