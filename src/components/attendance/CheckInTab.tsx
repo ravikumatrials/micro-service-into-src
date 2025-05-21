@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Edit, UserCheck, UserX, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,8 @@ interface Employee {
   activeStatus: "Active" | "Inactive";
   entity?: string;
   attendanceDate?: Date; // Added to track the date of attendance
+  attendanceReason?: string; // Added to store attendance reason
+  isOffsite?: boolean; // Added to indicate if check-in was offsite
 }
 
 interface CheckInTabProps {
@@ -39,6 +42,11 @@ interface CheckInTabProps {
   locations: { id: number; name: string }[];
   selectedDate: Date; // Now required
   dateSelected?: boolean; // New prop to indicate if date has been explicitly selected
+  attendanceReasons?: {
+    id: string;
+    label: string;
+    category: "present-offsite" | "absent";
+  }[];
 }
 
 const CheckInTab = ({ 
@@ -51,7 +59,8 @@ const CheckInTab = ({
   projects,
   locations,
   selectedDate,
-  dateSelected = true // Default to true since we're auto-selecting today
+  dateSelected = true, // Default to true since we're auto-selecting today
+  attendanceReasons = []
 }: CheckInTabProps) => {
   const [openManualDialog, setOpenManualDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -151,7 +160,7 @@ const CheckInTab = ({
         imageUrl: "https://randomuser.me/api/portraits/men/3.jpg",
         entity: "Tanseeq Construction Ltd"
       },
-      // Additional employees for testing
+      // Additional employees with varied states
       {
         id: 6,
         employeeId: "10006",
@@ -172,7 +181,9 @@ const CheckInTab = ({
         category: "Carpenter",
         classification: "Laborer",
         activeStatus: "Active",
-        status: "notcheckedin",
+        status: "checkedin",
+        isOffsite: true,
+        attendanceReason: "medical",
         imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
         entity: "Tanseeq Landscaping LLC"
       },
@@ -201,7 +212,7 @@ const CheckInTab = ({
       return {
         ...emp,
         // If the employee has attendance for this date, show them as checked in
-        status: hasAttendanceForSelectedDate ? "checkedin" : "notcheckedin"
+        status: hasAttendanceForSelectedDate ? "checkedin" : emp.status
       };
     }));
   };
@@ -211,7 +222,7 @@ const CheckInTab = ({
     const matchesSearch = employee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          employee.employeeId.includes(searchQuery);
     const matchesProject = selectedProject === "all" || (employee.projectId?.toString() === selectedProject);
-    const matchesStatus = selectedStatus === "all" || employee.status === selectedStatus;
+    const matchesStatus = selectedStatus === "all" || employee.activeStatus === selectedStatus;
     const matchesClassification = selectedClassification === "all" || employee.classification === selectedClassification;
     const matchesCategory = selectedCategory === "all" || employee.category === selectedCategory;
     const matchesEntity = selectedEntity === "all" || employee.entity === getEntityName(selectedEntity);
@@ -258,7 +269,8 @@ const CheckInTab = ({
     projectId: string, 
     locationId: string, 
     time: string,
-    reason: string
+    reason: string,
+    attendanceReason?: string
   ) => {
     setOpenManualDialog(false);
     
@@ -272,8 +284,16 @@ const CheckInTab = ({
       });
     }
     
+    let toastDescription = `Project: ${selectedProjectName}, Date: ${format(selectedDate, "PPP")}`;
+    
+    // Add reason to toast if provided
+    if (attendanceReason) {
+      const reasonLabel = attendanceReasons.find(r => r.id === attendanceReason)?.label || "Unknown";
+      toastDescription += `, Reason: ${reasonLabel} (Off-site)`;
+    }
+    
     toast.success(`${selectedEmployee?.name} has been manually checked in`, {
-      description: `Project: ${selectedProjectName}, Date: ${format(selectedDate, "PPP")}`
+      description: toastDescription
     });
     
     // Update the employee's attendance record in our state
@@ -281,13 +301,26 @@ const CheckInTab = ({
       setEmployees(current => 
         current.map(emp => 
           emp.id === selectedEmployee.id 
-            ? { ...emp, status: "checkedin", attendanceDate: selectedDate, checkedInProject: selectedProjectName }
+            ? { 
+                ...emp, 
+                status: "checkedin", 
+                attendanceDate: selectedDate, 
+                checkedInProject: selectedProjectName,
+                attendanceReason: attendanceReason,
+                isOffsite: !!attendanceReason
+              }
             : emp
         )
       );
     }
     
     setSelectedEmployee(null);
+  };
+
+  // Get reason label from ID
+  const getReasonLabel = (reasonId?: string) => {
+    if (!reasonId) return "";
+    return attendanceReasons.find(r => r.id === reasonId)?.label || "";
   };
 
   return (
@@ -311,6 +344,7 @@ const CheckInTab = ({
               <TableHead>Classification</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Check-In Status</TableHead>
+              <TableHead>Attendance Reason</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -346,6 +380,13 @@ const CheckInTab = ({
                       </div>
                     )}
                   </TableCell>
+                  <TableCell>
+                    {employee.isOffsite && employee.attendanceReason && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {getReasonLabel(employee.attendanceReason)} (Off-site)
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button 
                       onClick={() => handleManualCheckIn(employee)} 
@@ -362,7 +403,7 @@ const CheckInTab = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={8} className="text-center py-10 text-gray-500">
                   No employees found matching your filters
                 </TableCell>
               </TableRow>
@@ -379,6 +420,8 @@ const CheckInTab = ({
         projects={projects}
         locations={locations}
         onComplete={handleManualCheckInComplete}
+        attendanceReasons={attendanceReasons}
+        isOffSiteMarkingAvailable={true}
       />
     </div>
   );

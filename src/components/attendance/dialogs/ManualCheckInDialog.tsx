@@ -1,262 +1,210 @@
 
-import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Edit, Clock, MapPin, AlertCircle } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import React, { useState } from "react";
 import { format } from "date-fns";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Clock, Calendar } from "lucide-react";
 
 interface Employee {
   id: number;
   name: string;
-  imageUrl: string;
+  employeeId: string;
+  status?: string;
+  project?: string;
+  projectId?: number;
+  location?: string;
+  locationId?: number;
 }
 
 interface ManualCheckInDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   employee: Employee | null;
-  projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];
+  projects: { id: number; name: string }[];
   locations: { id: number; name: string }[];
-  onComplete: (projectId: string, locationId: string, time: string, reason: string) => void;
+  onComplete: (
+    projectId: string, 
+    locationId: string, 
+    time: string,
+    reason: string,
+    attendanceReason?: string
+  ) => void;
+  attendanceReasons?: {
+    id: string;
+    label: string;
+    category: "present-offsite" | "absent";
+  }[];
+  isOffSiteMarkingAvailable?: boolean;
 }
 
-const ManualCheckInDialog = ({
-  open,
-  onOpenChange,
-  employee,
-  projects,
-  locations,
-  onComplete
+const ManualCheckInDialog = ({ 
+  open, 
+  onOpenChange, 
+  employee, 
+  projects, 
+  locations, 
+  onComplete,
+  attendanceReasons = [],
+  isOffSiteMarkingAvailable = true
 }: ManualCheckInDialogProps) => {
-  const [selectedProject, setSelectedProject] = useState("select-project");
-  const [checkInTime, setCheckInTime] = useState("");
+  const [projectId, setProjectId] = useState(employee?.projectId?.toString() || "");
+  const [locationId, setLocationId] = useState(employee?.locationId?.toString() || "");
+  const [time, setTime] = useState(format(new Date(), "HH:mm"));
   const [reason, setReason] = useState("");
-  
-  // Location states
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [assignedLocation, setAssignedLocation] = useState<string | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
-  
-  // Associated location ID for the selected project
-  const [assignedLocationId, setAssignedLocationId] = useState<string>("select-location");
-  
-  const [errors, setErrors] = useState({
-    project: false,
-    time: false,
-    reason: false
-  });
-  
-  // Reset form and initialize when dialog opens
-  useEffect(() => {
-    if (open) {
-      // Set current time as default
-      setCheckInTime(format(new Date(), "HH:mm"));
-      setSelectedProject("select-project");
-      setAssignedLocationId("select-location");
+  const [attendanceReason, setAttendanceReason] = useState("");
+  const [isOffsite, setIsOffsite] = useState(false);
+
+  // Reset form when dialog opens/closes or employee changes
+  React.useEffect(() => {
+    if (open && employee) {
+      setProjectId(employee.projectId?.toString() || "");
+      setLocationId(employee.locationId?.toString() || "");
+      setTime(format(new Date(), "HH:mm"));
       setReason("");
-      setAssignedLocation(null);
-      setLocationError(null);
-      setErrors({
-        project: false,
-        time: false,
-        reason: false
-      });
+      setAttendanceReason("");
+      setIsOffsite(false);
     }
-  }, [open]);
-  
-  // When project changes, fetch assigned location
-  useEffect(() => {
-    if (selectedProject !== "select-project") {
-      fetchAssignedLocation(selectedProject);
-    } else {
-      setAssignedLocation(null);
-      setLocationError(null);
-    }
-  }, [selectedProject]);
-  
-  const fetchAssignedLocation = (projectId: string) => {
-    setIsLoadingLocation(true);
-    setLocationError(null);
-    setAssignedLocation(null);
+  }, [open, employee]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    try {
-      // Find the selected project
-      const selectedProject = projects.find(p => p.id.toString() === projectId);
-      
-      if (selectedProject && selectedProject.coordinates && selectedProject.coordinates.geofenceData) {
-        // If project has assigned coordinates/geofence
-        setIsLoadingLocation(false);
-        setAssignedLocation(`Project Location: ${selectedProject.name} (Geo-Fenced Area)`);
-        
-        // Find a matching location for this project (simplified approach)
-        if (locations.length > 0) {
-          setAssignedLocationId(locations[0].id.toString());
-        }
-      } else {
-        // If project doesn't have assigned coordinates
-        setIsLoadingLocation(false);
-        setLocationError("No location assigned to this project");
-      }
-    } catch (error) {
-      console.error("Error fetching assigned location:", error);
-      setLocationError("Failed to retrieve project location");
-      setIsLoadingLocation(false);
-    }
-  };
-  
-  const handleSubmit = () => {
     // Validation
-    const newErrors = {
-      project: selectedProject === "select-project",
-      time: !checkInTime,
-      reason: !reason
-    };
-    
-    setErrors(newErrors);
-    
-    if (Object.values(newErrors).some(Boolean) || !assignedLocation) {
-      if (!assignedLocation && selectedProject !== "select-project") {
-        setLocationError("Project must have an assigned location to continue");
-      }
+    if (!projectId) {
+      alert("Please select a project");
       return;
     }
     
-    onComplete(selectedProject, assignedLocationId, checkInTime, reason);
+    if (!time) {
+      alert("Please enter check-in time");
+      return;
+    }
+    
+    // If offsite is checked, require an attendance reason
+    if (isOffsite && !attendanceReason && isOffSiteMarkingAvailable) {
+      alert("Please select an attendance reason for off-site check-in");
+      return;
+    }
+
+    onComplete(projectId, locationId, time, reason, isOffsite ? attendanceReason : undefined);
   };
-  
+
+  if (!employee) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center">
-            <Edit className="mr-2 h-6 w-6" />
-            Manual Check-In
-          </DialogTitle>
+          <DialogTitle className="text-xl">Manual Check-in for {employee.name}</DialogTitle>
         </DialogHeader>
-        
-        <div className="py-4 space-y-5">
-          {/* Employee info */}
-          {employee && (
-            <div className="flex items-center space-x-4 mb-6">
-              <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-proscape">
-                <img 
-                  src={employee.imageUrl} 
-                  alt={employee.name}
-                  className="h-full w-full object-cover" 
-                />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">{employee.name}</h3>
-                <p className="text-gray-500">ID: {employee.id}</p>
-              </div>
-            </div>
-          )}
-          
-          {/* Project - First step */}
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="project">Project <span className="text-red-500">*</span></Label>
-            <Select value={selectedProject} onValueChange={setSelectedProject}>
-              <SelectTrigger id="project" className={errors.project ? "border-red-500" : ""}>
+            <Label htmlFor="project">Project</Label>
+            <Select value={projectId} onValueChange={setProjectId}>
+              <SelectTrigger>
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="select-project">Select project</SelectItem>
-                {projects.map(project => (
+                {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id.toString()}>
                     {project.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.project && (
-              <p className="text-red-500 text-sm">Project is required</p>
-            )}
           </div>
-          
-          {/* Location Status Section - only shown after project selection */}
-          {selectedProject !== "select-project" && (
-            <>
-              {isLoadingLocation && (
-                <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-100">
-                  <span className="text-sm text-gray-600">Retrieving assigned location...</span>
-                </div>
-              )}
-              
-              {locationError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-xs">{locationError}</AlertDescription>
-                </Alert>
-              )}
-              
-              {assignedLocation && !locationError && (
-                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                  <div className="flex items-center text-green-700 mb-1">
-                    <MapPin className="h-4 w-4 mr-1 text-green-600" />
-                    <span className="font-medium text-sm">{assignedLocation}</span>
-                  </div>
-                  <p className="text-xs text-green-600">
-                    This assigned location will be saved with the attendance record.
-                  </p>
-                </div>
-              )}
-            </>
+
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Select value={locationId} onValueChange={setLocationId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select location" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map((location) => (
+                  <SelectItem key={location.id} value={location.id.toString()}>
+                    {location.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="time">Check-in Time</Label>
+            <div className="relative">
+              <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input 
+                id="time" 
+                type="time" 
+                value={time} 
+                onChange={(e) => setTime(e.target.value)} 
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          {isOffSiteMarkingAvailable && (
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="offsite"
+                checked={isOffsite}
+                onChange={(e) => setIsOffsite(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="offsite" className="cursor-pointer">Mark as off-site check-in</Label>
+            </div>
           )}
-          
-          {/* Check-in Time */}
+
+          {isOffsite && isOffSiteMarkingAvailable && attendanceReasons.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="attendanceReason">Attendance Reason <span className="text-red-500">*</span></Label>
+              <Select value={attendanceReason} onValueChange={setAttendanceReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  {attendanceReasons.map((reason) => (
+                    <SelectItem key={reason.id} value={reason.id}>
+                      {reason.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Label htmlFor="time" className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              Check-in Time <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="time"
-              type="time"
-              value={checkInTime}
-              onChange={(e) => setCheckInTime(e.target.value)}
-              className={errors.time ? "border-red-500" : ""}
-            />
-            {errors.time && (
-              <p className="text-red-500 text-sm">Check-in time is required</p>
-            )}
-          </div>
-          
-          {/* Reason */}
-          <div className="space-y-2">
-            <Label htmlFor="reason">
-              Reason for Manual Check-In <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="reason"
-              placeholder="Please provide a reason for manual check-in"
-              rows={4}
+            <Label htmlFor="reason">Comment (Optional)</Label>
+            <Textarea 
+              id="reason" 
+              placeholder="Enter reason for manual check-in"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className={errors.reason ? "border-red-500" : ""}
+              rows={3}
             />
-            {errors.reason && (
-              <p className="text-red-500 text-sm">Reason is required</p>
-            )}
           </div>
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSubmit}
-            className="bg-proscape hover:bg-proscape-dark"
-            disabled={isLoadingLocation || (selectedProject !== "select-project" && !assignedLocation)}
-          >
-            Submit Check-In
-          </Button>
-        </DialogFooter>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              Submit
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

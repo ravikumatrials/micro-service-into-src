@@ -27,6 +27,8 @@ interface ReportFiltersProps {
   setStartDate: (value: string) => void;
   endDate: string;
   setEndDate: (value: string) => void;
+  reasonFilter?: string;
+  setReasonFilter?: (value: string) => void;
 }
 
 export function ReportFilters({
@@ -46,6 +48,8 @@ export function ReportFilters({
   setStartDate,
   endDate,
   setEndDate,
+  reasonFilter = "all",
+  setReasonFilter = () => {},
 }: ReportFiltersProps) {
   return (
     <div className="space-y-4 bg-white p-4 rounded-lg border border-gray-200">
@@ -123,7 +127,7 @@ export function ReportFilters({
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Role
@@ -170,6 +174,25 @@ export function ReportFilters({
               <SelectItem value="all">All Methods</SelectItem>
               <SelectItem value="face">Face Recognition</SelectItem>
               <SelectItem value="manual">Manual Entry</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Attendance Reason
+          </label>
+          <Select value={reasonFilter} onValueChange={setReasonFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Reasons" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Reasons</SelectItem>
+              <SelectItem value="medical">Medical (Off-site)</SelectItem>
+              <SelectItem value="visa">Visa (Off-site)</SelectItem>
+              <SelectItem value="id">ID (Off-site)</SelectItem>
+              <SelectItem value="sick">Sick (Excused)</SelectItem>
+              <SelectItem value="casual">Casual (Unexcused)</SelectItem>
             </SelectContent>
           </Select>
         </div>

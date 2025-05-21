@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ManualAttendanceTable from "./ManualAttendanceTable";
 import CheckInTab from "./CheckInTab";
 import CheckOutTab from "./CheckOutTab";
+import AbsenteesTab from "./AbsenteesTab";
 import ExceptionTab from "./ExceptionTab";
 import { AttendanceFilters } from "./AttendanceFilterUtils";
 import { format } from "date-fns";
@@ -12,17 +13,23 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { ExtendedAttendanceRecord, attendanceReasons } from "@/pages/ManualAttendanceRecords";
 
 interface ManualAttendanceTabsProps {
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  filteredRecords: any[];
+  filteredRecords: ExtendedAttendanceRecord[];
   filters: AttendanceFilters;
   projects: { id: number; name: string; coordinates?: { geofenceData: string }; location?: string }[];
   selectedDate: Date;
   setSelectedDate: (date: Date | undefined) => void;
   dateSelected: boolean;
   setDateSelected: React.Dispatch<React.SetStateAction<boolean>>;
+  attendanceReasons: {
+    id: string;
+    label: string;
+    category: "present-offsite" | "absent";
+  }[];
 }
 
 const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
@@ -34,7 +41,8 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
   selectedDate,
   setSelectedDate,
   dateSelected,
-  setDateSelected
+  setDateSelected,
+  attendanceReasons
 }) => {
   // Empty array for locations since we're not using them anymore
   const emptyLocations: { id: number; name: string }[] = [];
@@ -77,15 +85,11 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 w-full mb-4">
-          <TabsTrigger value="records">Attendance Records</TabsTrigger>
           <TabsTrigger value="check-in">Check In</TabsTrigger>
           <TabsTrigger value="check-out">Check Out</TabsTrigger>
+          <TabsTrigger value="absentees">Absentees</TabsTrigger>
           <TabsTrigger value="exceptions">Exceptions</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="records" className="mt-0">
-          <ManualAttendanceTable records={filteredRecords} />
-        </TabsContent>
         
         <TabsContent value="check-in" className="mt-0">
           <CheckInTab 
@@ -99,6 +103,7 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
             locations={emptyLocations}
             selectedDate={selectedDate}
             dateSelected={dateSelected}
+            attendanceReasons={attendanceReasons.filter(reason => reason.category === "present-offsite")}
           />
         </TabsContent>
         
@@ -114,6 +119,22 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
             locations={emptyLocations}
             selectedDate={selectedDate}
             dateSelected={dateSelected}
+          />
+        </TabsContent>
+        
+        <TabsContent value="absentees" className="mt-0">
+          <AbsenteesTab 
+            searchQuery={filters.name || filters.employeeId}
+            selectedProject={filters.project}
+            selectedClassification={filters.classification}
+            selectedCategory={filters.category}
+            selectedStatus={filters.status}
+            selectedEntity={filters.entity}
+            projects={projects}
+            locations={emptyLocations}
+            selectedDate={selectedDate}
+            dateSelected={dateSelected}
+            attendanceReasons={attendanceReasons.filter(reason => reason.category === "absent")}
           />
         </TabsContent>
         
