@@ -7,6 +7,11 @@ import { filterRecords, initialFilters, AttendanceFilters } from "@/components/a
 import { mockProjects } from "@/data/mockProjects";
 import { toast } from "@/hooks/use-toast";
 
+// Define an extended type that includes the attendanceReason property
+type ExtendedAttendanceRecord = ReturnType<typeof filterRecords>[0] & {
+  attendanceReason?: string;
+};
+
 const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
   const [activeTab, setActiveTab] = useState("records");
@@ -46,6 +51,13 @@ const ManualAttendanceRecords = () => {
     }
   };
 
+  // Transform records to include attendanceReason property for all records
+  const extendedRecords: ExtendedAttendanceRecord[] = filteredRecords.map(record => ({
+    ...record,
+    // Add attendance reason field to records that don't have it
+    attendanceReason: record.attendanceReason || "-"
+  }));
+
   return (
     <div className="space-y-5 px-1 pt-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -64,11 +76,7 @@ const ManualAttendanceRecords = () => {
       <ManualAttendanceTabs 
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        filteredRecords={filteredRecords.map(record => ({
-          ...record,
-          // Add attendance reason field to records that don't have it
-          attendanceReason: record.attendanceReason || "-"
-        }))}
+        filteredRecords={extendedRecords}
         filters={filters}
         projects={mockProjects}
         selectedDate={selectedDate}
