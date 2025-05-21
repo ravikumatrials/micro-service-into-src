@@ -56,7 +56,7 @@ const ManualAttendanceRecords = () => {
     ...record,
     // Add attendance reason field to records that don't have it
     attendanceReason: record.attendanceReason || "-"
-  }));
+  })) as ExtendedAttendanceRecord[];  // Use type assertion to ensure TypeScript recognizes the result type
 
   return (
     <div className="space-y-5 px-1 pt-5">
