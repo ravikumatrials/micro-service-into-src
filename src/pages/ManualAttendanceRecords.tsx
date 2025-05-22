@@ -6,6 +6,7 @@ import ManualAttendanceTabs from "@/components/attendance/ManualAttendanceTabs";
 import { filterRecords, initialFilters, AttendanceFilters } from "@/components/attendance/AttendanceFilterUtils";
 import { mockProjects } from "@/data/mockProjects";
 import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button"; // Add this import
 
 const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
