@@ -82,7 +82,7 @@ const menuItems: MenuItem[] = [
   },
   {
     name: "Manual Attendance",
-    path: "/attendance",
+    path: "/manual-attendance", // Updated from '/attendance' to '/manual-attendance'
     icon: <Calendar className="h-5 w-5" />,
     requiredPermission: "Manual Attendance"
   },
