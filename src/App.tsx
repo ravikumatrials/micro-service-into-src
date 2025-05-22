@@ -17,6 +17,7 @@ import Employees from "./pages/master/Employees";
 import Roles from "./pages/master/Roles";
 import Projects from "./pages/master/Projects";
 import NotFound from "./pages/NotFound";
+import ManualAttendanceRecords from "./pages/ManualAttendanceRecords";
 
 // Create a new QueryClient instance inside the component to ensure it's created when React is ready
 const App = () => {
@@ -38,6 +39,11 @@ const App = () => {
             <Route path="/attendance" element={
               <PermissionGuard requiredPermission="Manual Attendance">
                 <Layout><Attendance /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/manual-attendance" element={
+              <PermissionGuard requiredPermission="Manual Attendance">
+                <Layout><ManualAttendanceRecords /></Layout>
               </PermissionGuard>
             } />
             <Route path="/bulk-attendance" element={
