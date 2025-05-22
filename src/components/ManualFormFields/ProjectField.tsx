@@ -10,7 +10,6 @@ interface ProjectFieldProps {
   error?: boolean;
   errorMessage?: string;
   id?: string;
-  label?: string; // Add the label prop
 }
 
 const ProjectField = ({ 
@@ -19,12 +18,11 @@ const ProjectField = ({
   onChange, 
   error = false, 
   errorMessage = "", 
-  id,
-  label = "Project" // Default label if not provided
+  id 
 }: ProjectFieldProps) => (
   <div className="w-full space-y-2">
     <Label htmlFor={id || "project-select"} className="block text-xl font-medium text-gray-700">
-      {label}
+      Project
     </Label>
     <Select
       value={value}
