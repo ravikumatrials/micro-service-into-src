@@ -24,7 +24,6 @@ export interface AttendanceRecord {
   role: string;
   location: string;
   entity: string;
-  reason?: string; // Added reason field
 }
 
 interface ManualAttendanceTableProps {
@@ -45,7 +44,6 @@ const ManualAttendanceTable: React.FC<ManualAttendanceTableProps> = ({
             <TableHead>Category</TableHead>
             <TableHead>Check-In (Project)</TableHead>
             <TableHead>Check-Out (Project)</TableHead>
-            <TableHead>Reason</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,24 +70,11 @@ const ManualAttendanceTable: React.FC<ManualAttendanceTableProps> = ({
                     <span className="text-gray-500">Not checked out</span>
                   )}
                 </TableCell>
-                <TableCell>
-                  {record.reason ? (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      record.reason === "Sick" || record.reason === "Casual" 
-                        ? "bg-red-100 text-red-800" 
-                        : "bg-blue-100 text-blue-800"
-                    }`}>
-                      {record.reason}
-                    </span>
-                  ) : (
-                    <span className="text-gray-500">-</span>
-                  )}
-                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                 No attendance records found
               </TableCell>
             </TableRow>
@@ -130,8 +115,7 @@ export const mockAttendanceRecords: AttendanceRecord[] = [
     checkOutProject: "Bridge Expansion",
     role: "Laborer",
     location: "Site B",
-    entity: "Entity 2",
-    reason: "Medical" // Example of tagged attendance with reason
+    entity: "Entity 2"
   },
   {
     id: "3",
@@ -161,40 +145,7 @@ export const mockAttendanceRecords: AttendanceRecord[] = [
     checkOutProject: "Hospital Wing",
     role: "Senior Technician",
     location: "Site A",
-    entity: "Entity 3",
-    reason: "Sick" // Example of tagged attendance with reason
-  },
-  {
-    id: "5", 
-    employeeId: "10005",
-    employeeName: "Khalid Ahmed",
-    category: "Electrician",
-    classification: "Staff",
-    status: "Active",
-    checkInTime: "",
-    checkInProject: "",
-    checkOutTime: null,
-    checkOutProject: null,
-    role: "Junior Technician",
-    location: "Site B",
-    entity: "Entity 2",
-    reason: "Visa" // Tagged as present with reason
-  },
-  {
-    id: "6", 
-    employeeId: "10006",
-    employeeName: "Aisha Mohammed",
-    category: "Painter",
-    classification: "Laborer",
-    status: "Active",
-    checkInTime: "",
-    checkInProject: "",
-    checkOutTime: null,
-    checkOutProject: null,
-    role: "Team Lead",
-    location: "Site A",
-    entity: "Entity 1",
-    reason: "Casual" // Tagged as absent with reason
+    entity: "Entity 3"
   }
 ];
 

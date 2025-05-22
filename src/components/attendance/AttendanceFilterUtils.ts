@@ -9,7 +9,6 @@ export interface AttendanceFilters {
   status: string;
   project: string;
   entity: string;
-  reason?: string; // Added reason filter
 }
 
 // Initial filter state
@@ -20,8 +19,7 @@ export const initialFilters: AttendanceFilters = {
   classification: "all",
   status: "all",
   project: "all",
-  entity: "all",
-  reason: "all" // Added default reason filter
+  entity: "all"
 };
 
 // Filter attendance records based on filter criteria
@@ -49,16 +47,6 @@ export const filterRecords = (filters: AttendanceFilters) => {
     if (filters.entity !== "all" && record.entity !== filters.entity) {
       return false;
     }
-    // Added reason filter
-    if (filters.reason !== "all" && record.reason !== filters.reason) {
-      return false;
-    }
     return true;
   });
-};
-
-// List of available attendance reasons
-export const attendanceReasons = {
-  present: ["Medical", "Visa", "ID"],
-  absent: ["Sick", "Casual"]
 };
