@@ -40,6 +40,10 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
   // Empty array for locations since we're not using them anymore
   const emptyLocations: { id: number; name: string }[] = [];
 
+  // For debugging
+  console.log("Current active tab:", activeTab);
+  console.log("Available tabs: records, check-in, check-out, exceptions, override-entry");
+
   return (
     <div className="space-y-4">
       {/* Date Picker Component - Now defaults to today's date */}
