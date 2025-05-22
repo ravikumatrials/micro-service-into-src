@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Search, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,8 @@ interface FilterValues {
   category: string;
   status: string;
   project: string;
-  entity: string; // Added entity field
+  entity: string;
+  reason?: string; // Added reason field
 }
 
 interface SharedFilterPanelProps {
@@ -25,6 +27,7 @@ const classificationOptions = ["All", "Laborer", "Staff"];
 const statusOptions = ["All", "Active", "Inactive"];
 const projectOptions = ["All", "Main Building Construction", "Bridge Expansion", "Hospital Wing", "Warehouse Project"];
 const entityOptions = ["All", "Tanseeq Landscaping LLC", "Tanseeq Construction Ltd", "Tanseeq Engineering Co"];
+const reasonOptions = ["All", "Medical", "Visa", "ID", "Sick", "Casual"];  // Added reason options
 
 const SharedFilterPanel: React.FC<SharedFilterPanelProps> = ({
   filters,
@@ -71,7 +74,7 @@ const SharedFilterPanel: React.FC<SharedFilterPanelProps> = ({
           </div>
         </div>
 
-        {/* Entity Filter - New */}
+        {/* Entity Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Entity
@@ -154,6 +157,24 @@ const SharedFilterPanel: React.FC<SharedFilterPanelProps> = ({
             className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
           >
             {projectOptions.map((option) => (
+              <option key={option} value={option === "All" ? "all" : option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Reason Filter - New */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Attendance Reason
+          </label>
+          <select
+            value={filters.reason || "all"}
+            onChange={(e) => setFilters(prev => ({ ...prev, reason: e.target.value }))}
+            className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+          >
+            {reasonOptions.map((option) => (
               <option key={option} value={option === "All" ? "all" : option}>
                 {option}
               </option>

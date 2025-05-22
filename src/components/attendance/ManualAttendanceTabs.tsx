@@ -5,6 +5,7 @@ import ManualAttendanceTable from "./ManualAttendanceTable";
 import CheckInTab from "./CheckInTab";
 import CheckOutTab from "./CheckOutTab";
 import ExceptionTab from "./ExceptionTab";
+import TagAttendanceTab from "./TagAttendanceTab";
 import { AttendanceFilters } from "./AttendanceFilterUtils";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -76,11 +77,12 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 w-full mb-4">
+        <TabsList className="grid grid-cols-5 w-full mb-4">
           <TabsTrigger value="records">Attendance Records</TabsTrigger>
           <TabsTrigger value="check-in">Check In</TabsTrigger>
           <TabsTrigger value="check-out">Check Out</TabsTrigger>
           <TabsTrigger value="exceptions">Exceptions</TabsTrigger>
+          <TabsTrigger value="tag-attendance">Tag Attendance</TabsTrigger>
         </TabsList>
         
         <TabsContent value="records" className="mt-0">
@@ -119,6 +121,21 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
         
         <TabsContent value="exceptions" className="mt-0">
           <ExceptionTab 
+            searchQuery={filters.name || filters.employeeId}
+            selectedProject={filters.project}
+            selectedClassification={filters.classification}
+            selectedCategory={filters.category}
+            selectedStatus={filters.status}
+            selectedEntity={filters.entity}
+            projects={projects}
+            locations={emptyLocations}
+            selectedDate={selectedDate}
+            dateSelected={dateSelected}
+          />
+        </TabsContent>
+
+        <TabsContent value="tag-attendance" className="mt-0">
+          <TagAttendanceTab 
             searchQuery={filters.name || filters.employeeId}
             selectedProject={filters.project}
             selectedClassification={filters.classification}
