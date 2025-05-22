@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import ManualAttendanceFilters from "@/components/attendance/ManualAttendanceFilters";
 import ManualAttendanceTabs from "@/components/attendance/ManualAttendanceTabs";
@@ -46,10 +46,33 @@ const ManualAttendanceRecords = () => {
     }
   };
 
+  // Log to help with debugging
+  useEffect(() => {
+    console.log("ManualAttendanceRecords rendered with activeTab:", activeTab);
+  }, [activeTab]);
+
   return (
     <div className="space-y-5 px-1 pt-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Manual Attendance Records</h1>
+        
+        {/* Tab switcher for direct access */}
+        <div className="flex gap-2">
+          <Button 
+            variant={activeTab === "records" ? "default" : "outline"} 
+            onClick={() => setActiveTab("records")}
+            size="sm"
+          >
+            Records
+          </Button>
+          <Button 
+            variant={activeTab === "override-entry" ? "default" : "outline"} 
+            onClick={() => setActiveTab("override-entry")}
+            size="sm"
+          >
+            Override Entry
+          </Button>
+        </div>
       </div>
       
       {/* Filters Section */}

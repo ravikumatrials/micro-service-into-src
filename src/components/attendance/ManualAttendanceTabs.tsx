@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ManualAttendanceTable from "./ManualAttendanceTable";
 import CheckInTab from "./CheckInTab";
@@ -42,7 +42,15 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
 
   // For debugging
   console.log("Current active tab:", activeTab);
-  console.log("Available tabs: records, check-in, check-out, exceptions, override-entry");
+  
+  // Force tab to be one of the valid options if it's invalid
+  useEffect(() => {
+    const validTabs = ["records", "check-in", "check-out", "exceptions", "override-entry"];
+    if (!validTabs.includes(activeTab)) {
+      console.log("Setting active tab to records as current tab is invalid:", activeTab);
+      setActiveTab("records");
+    }
+  }, [activeTab, setActiveTab]);
 
   return (
     <div className="space-y-4">
