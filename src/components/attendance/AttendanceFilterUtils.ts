@@ -1,52 +1,97 @@
 
-import { mockAttendanceRecords } from "./ManualAttendanceTable";
-
-export interface AttendanceFilters {
-  employeeId: string;
-  name: string;
-  category: string;
-  classification: string;
-  status: string;
-  project: string;
-  entity: string;
-}
-
-// Initial filter state
-export const initialFilters: AttendanceFilters = {
-  employeeId: "",
+// Initial filters
+export const initialFilters = {
   name: "",
-  category: "all",
-  classification: "all",
-  status: "all",
+  employeeId: "",
   project: "all",
-  entity: "all"
+  classification: "all",
+  category: "all",
+  status: "all",
+  entity: "all",
+  attendanceReason: "all"  // Added new filter for attendance reason
 };
 
-// Filter attendance records based on filter criteria
+// Type definition for filters
+export interface AttendanceFilters {
+  name: string;
+  employeeId: string;
+  project: string;
+  classification: string;
+  category: string;
+  status: string;
+  entity: string;
+  attendanceReason?: string;  // Added new filter type for attendance reason
+}
+
+// Mock filtered records for demonstration
 export const filterRecords = (filters: AttendanceFilters) => {
-  return mockAttendanceRecords.filter(record => {
-    if (filters.employeeId && !record.employeeId.includes(filters.employeeId)) {
-      return false;
+  // This would normally filter data from an API or database
+  // For now, returning mock data
+  return [
+    {
+      id: 1,
+      employeeId: "E1001",
+      name: "John Smith",
+      date: "2023-07-01",
+      checkInTime: "08:00 AM",
+      checkOutTime: "05:00 PM",
+      project: "Main Building Construction",
+      location: "Site A",
+      attendanceStatus: "Present",
+      shift: "Day",
+      attendanceReason: "medical"  // Example of attendance reason
+    },
+    {
+      id: 2,
+      employeeId: "E1002",
+      name: "Sarah Johnson",
+      date: "2023-07-01",
+      checkInTime: "08:30 AM",
+      checkOutTime: "04:30 PM",
+      project: "Bridge Expansion Project",
+      location: "Site B",
+      attendanceStatus: "Present",
+      shift: "Day",
+      attendanceReason: undefined
+    },
+    {
+      id: 3,
+      employeeId: "E1003",
+      name: "Michael Brown",
+      date: "2023-07-01",
+      checkInTime: "-",
+      checkOutTime: "-",
+      project: "Main Building Construction",
+      location: "-",
+      attendanceStatus: "Absent",
+      shift: "Day",
+      attendanceReason: "sick"  // Example of attendance reason
+    },
+    {
+      id: 4,
+      employeeId: "E1004",
+      name: "Emily Davis",
+      date: "2023-07-01",
+      checkInTime: "09:15 AM",
+      checkOutTime: "-",
+      project: "Highway Renovation",
+      location: "Site C",
+      attendanceStatus: "Present",
+      shift: "Day",
+      attendanceReason: undefined
+    },
+    {
+      id: 5,
+      employeeId: "E1005",
+      name: "David Wilson",
+      date: "2023-07-01",
+      checkInTime: "08:45 AM",
+      checkOutTime: "05:15 PM",
+      project: "Main Building Construction",
+      location: "Site A",
+      attendanceStatus: "Present",
+      shift: "Day",
+      attendanceReason: "visa"  // Example of attendance reason
     }
-    if (filters.name && !record.employeeName.toLowerCase().includes(filters.name.toLowerCase())) {
-      return false;
-    }
-    if (filters.category !== "all" && record.category !== filters.category) {
-      return false;
-    }
-    if (filters.classification !== "all" && record.classification !== filters.classification) {
-      return false;
-    }
-    if (filters.status !== "all" && record.status !== filters.status) {
-      return false;
-    }
-    if (filters.project !== "all" && !record.checkInProject.includes(filters.project)) {
-      return false;
-    }
-    // Added entity filter
-    if (filters.entity !== "all" && record.entity !== filters.entity) {
-      return false;
-    }
-    return true;
-  });
+  ];
 };

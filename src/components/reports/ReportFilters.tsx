@@ -21,6 +21,8 @@ interface ReportFiltersProps {
   setAttendanceTypeFilter: (value: string) => void;
   entryMethodFilter: string;
   setEntryMethodFilter: (value: string) => void;
+  reasonFilter: string;  // New prop for attendance reason
+  setReasonFilter: (value: string) => void;  // New prop for setting reason
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   startDate: string;
@@ -40,6 +42,8 @@ export function ReportFilters({
   setAttendanceTypeFilter,
   entryMethodFilter,
   setEntryMethodFilter,
+  reasonFilter,
+  setReasonFilter,
   searchTerm,
   setSearchTerm,
   startDate,
@@ -170,6 +174,26 @@ export function ReportFilters({
               <SelectItem value="all">All Methods</SelectItem>
               <SelectItem value="face">Face Recognition</SelectItem>
               <SelectItem value="manual">Manual Entry</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* New Attendance Reason filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Attendance Reason
+          </label>
+          <Select value={reasonFilter} onValueChange={setReasonFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Reasons" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Reasons</SelectItem>
+              <SelectItem value="medical">Medical (Off-site)</SelectItem>
+              <SelectItem value="visa">Visa (Off-site)</SelectItem>
+              <SelectItem value="id">ID (Off-site)</SelectItem>
+              <SelectItem value="sick">Sick (Excused Absence)</SelectItem>
+              <SelectItem value="casual">Casual (Unexcused Absence)</SelectItem>
             </SelectContent>
           </Select>
         </div>

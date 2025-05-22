@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Edit, UserCheck, UserX, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ interface Employee {
   activeStatus: "Active" | "Inactive";
   entity?: string;
   attendanceDate?: Date; // Added to track the date of attendance
+  attendanceReason?: string; // Added to track attendance reason for off-site
 }
 
 interface CheckInTabProps {
@@ -191,7 +193,6 @@ const CheckInTab = ({
     ];
     
     // Update employee status based on the selected date
-    // In a real application, this would come from an API call
     setEmployees(mockEmployees.map(emp => {
       // Check if employee has already been marked for the selected date
       // This is a simplified check - in a real app, this would check against stored attendance records
@@ -258,7 +259,8 @@ const CheckInTab = ({
     projectId: string, 
     locationId: string, 
     time: string,
-    reason: string
+    reason: string,
+    attendanceReason?: string
   ) => {
     setOpenManualDialog(false);
     
@@ -272,8 +274,17 @@ const CheckInTab = ({
       });
     }
     
+    let toastMessage = `Project: ${selectedProjectName}, Date: ${format(selectedDate, "PPP")}`;
+    
+    // Add attendance reason to toast message if provided
+    if (attendanceReason) {
+      const reasonText = attendanceReason === "medical" ? "Medical" : 
+                        attendanceReason === "visa" ? "Visa" : "ID";
+      toastMessage += `, Reason: ${reasonText} (Off-site)`;
+    }
+    
     toast.success(`${selectedEmployee?.name} has been manually checked in`, {
-      description: `Project: ${selectedProjectName}, Date: ${format(selectedDate, "PPP")}`
+      description: toastMessage
     });
     
     // Update the employee's attendance record in our state
@@ -281,7 +292,13 @@ const CheckInTab = ({
       setEmployees(current => 
         current.map(emp => 
           emp.id === selectedEmployee.id 
-            ? { ...emp, status: "checkedin", attendanceDate: selectedDate, checkedInProject: selectedProjectName }
+            ? { 
+                ...emp, 
+                status: "checkedin", 
+                attendanceDate: selectedDate, 
+                checkedInProject: selectedProjectName,
+                attendanceReason: attendanceReason // Store the attendance reason
+              }
             : emp
         )
       );
@@ -337,6 +354,12 @@ const CheckInTab = ({
                         <span>Checked In</span>
                         {employee.checkedInProject && (
                           <span className="ml-1 text-xs text-gray-500">({employee.checkedInProject})</span>
+                        )}
+                        {employee.attendanceReason && (
+                          <span className="ml-1 text-xs text-blue-500">
+                            (Off-site: {employee.attendanceReason === "medical" ? "Medical" : 
+                                        employee.attendanceReason === "visa" ? "Visa" : "ID"})
+                          </span>
                         )}
                       </div>
                     ) : (
