@@ -51,6 +51,9 @@ export function AssignRoleDialog({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Mobile-only roles that don't require login credentials
+  const mobileOnlyRoles = ["Medical Officer", "Camp Boss", "United Emirates Officer"];
+
   // Reset the dialog state when it opens or closes
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -79,7 +82,27 @@ export function AssignRoleDialog({
     }
     
     setError("");
+    
+    // Skip login setup for mobile-only roles
+    if (mobileOnlyRoles.includes(selectedRole)) {
+      handleDirectAssignment();
+      return;
+    }
+    
     setStep(2);
+  };
+
+  // Direct assignment for mobile-only roles
+  const handleDirectAssignment = () => {
+    onAssignRole(selectedRole);
+    
+    toast({
+      title: "Role Assigned Successfully",
+      description: `${employee?.name} has been assigned the role of ${selectedRole}. This is a mobile-only role.`,
+    });
+    
+    resetState();
+    onOpenChange(false);
   };
 
   // Submit the form to assign role and set credentials
@@ -166,11 +189,22 @@ export function AssignRoleDialog({
                     {roles.map((role) => (
                       <SelectItem key={role.name} value={role.name}>
                         {role.name}
+                        {mobileOnlyRoles.includes(role.name) && (
+                          <span className="ml-2 text-xs text-gray-500">(Mobile Only)</span>
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+              
+              {mobileOnlyRoles.includes(selectedRole) && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-sm text-blue-700">
+                    This is a mobile-only role. No web login credentials are required.
+                  </p>
+                </div>
+              )}
               
               {error && (
                 <p className="text-sm text-red-500">{error}</p>
@@ -265,7 +299,7 @@ export function AssignRoleDialog({
                 Cancel
               </Button>
               <Button onClick={handleContinue}>
-                Assign
+                {mobileOnlyRoles.includes(selectedRole) ? "Assign" : "Continue"}
               </Button>
             </>
           ) : (

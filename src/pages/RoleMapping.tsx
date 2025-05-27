@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,19 +35,30 @@ const mockUsers = [
   { id: 1, name: "Sarah Johnson", employeeId: "EMP002", role: "Supervisor", email: "sarah.johnson@example.com", loginMethod: "Email/Password" },
 ];
 
+// Updated mock employees with authentic Muslim names
 const mockEmployees = [
-  { id: 1, name: "John Smith", employeeId: "EMP001", location: "Site A", project: "Project X", entity: "Tanseeq Investment", category: "Carpenter", classification: "Laborer", currentRole: "Labour", email: "john.smith@example.com" },
-  { id: 2, name: "Sarah Johnson", employeeId: "EMP002", location: "Site B", project: "Project Y", entity: "Tanseeq Landscaping LLC", category: "Manager", classification: "Staff", currentRole: "Staff", email: "sarah.johnson@example.com" },
-  { id: 3, name: "Robert Williams", employeeId: "EMP003", location: "Site A", project: "Project X", entity: "Gulf Builders International", category: "Electrician", classification: "Laborer", currentRole: "Labour", email: "robert.williams@example.com" },
-  { id: 4, name: "Emily Davis", employeeId: "EMP004", location: "Site C", project: "Project Z", entity: "Al Maha Projects", category: "Plumber", classification: "Laborer", currentRole: "Labour", email: "emily.davis@example.com" },
-  { id: 5, name: "Michael Brown", employeeId: "EMP005", location: "Site B", project: "Project Y", entity: "Tanseeq Landscaping LLC", category: "Supervisor", classification: "Staff", currentRole: "Staff", email: "michael.brown@example.com" },
+  { id: 1, name: "Ahmed Al-Rashid", employeeId: "EMP001", location: "Site A", project: "Al Noor Tower", entity: "Tanseeq Investment", category: "Carpenter", classification: "Laborer", currentRole: "Labour", email: "ahmed.rashid@example.com" },
+  { id: 2, name: "Mohammed Al-Zahra", employeeId: "EMP002", location: "Site B", project: "Marina Bay", entity: "Tanseeq Landscaping LLC", category: "Manager", classification: "Staff", currentRole: "Staff", email: "mohammed.zahra@example.com" },
+  { id: 3, name: "Omar Hassan", employeeId: "EMP003", location: "Site A", project: "Business Bay", entity: "Gulf Builders International", category: "Electrician", classification: "Laborer", currentRole: "Labour", email: "omar.hassan@example.com" },
+  { id: 4, name: "Abdullah Al-Mansouri", employeeId: "EMP004", location: "Site C", project: "Downtown Plaza", entity: "Al Maha Projects", category: "Plumber", classification: "Laborer", currentRole: "Labour", email: "abdullah.mansouri@example.com" },
+  { id: 5, name: "Khalid Al-Shamsi", employeeId: "EMP005", location: "Site B", project: "Dubai Hills", entity: "Tanseeq Landscaping LLC", category: "Supervisor", classification: "Staff", currentRole: "Staff", email: "khalid.shamsi@example.com" },
+  { id: 6, name: "Rashid Al-Maktoum", employeeId: "EMP006", location: "Site D", project: "Jumeirah Park", entity: "Tanseeq Investment", category: "Foreman", classification: "Laborer", currentRole: "Labour", email: "rashid.maktoum@example.com" },
+  { id: 7, name: "Hassan Al-Qasimi", employeeId: "EMP007", location: "Site C", project: "Emirates Hills", entity: "Gulf Builders International", category: "Mason", classification: "Laborer", currentRole: "Labour", email: "hassan.qasimi@example.com" },
+  { id: 8, name: "Saif Al-Nuaimi", employeeId: "EMP008", location: "Site A", project: "Palm Jumeirah", entity: "Al Maha Projects", category: "Welder", classification: "Laborer", currentRole: "Labour", email: "saif.nuaimi@example.com" },
+  { id: 9, name: "Yousef Al-Falasi", employeeId: "EMP009", location: "Site B", project: "Creek Harbor", entity: "Tanseeq Investment", category: "Technician", classification: "Staff", currentRole: "Staff", email: "yousef.falasi@example.com" },
+  { id: 10, name: "Hamad Al-Thani", employeeId: "EMP010", location: "Site D", project: "City Walk", entity: "Tanseeq Landscaping LLC", category: "Engineer", classification: "Staff", currentRole: "Staff", email: "hamad.thani@example.com" },
 ];
 
+// Updated roles to include new role types
 const mockRoles = [
   { id: 1, name: "Labour" },
   { id: 2, name: "Staff" },
   { id: 3, name: "Super Admin" },
   { id: 4, name: "Report Admin" },
+  { id: 5, name: "Supervisor" },
+  { id: 6, name: "Medical Officer" },
+  { id: 7, name: "Camp Boss" },
+  { id: 8, name: "United Emirates Officer" },
 ];
 
 const RoleMapping = () => {

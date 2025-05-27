@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash, X, Info } from "lucide-react";
@@ -20,9 +19,8 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "@/components/ui/use-toast";
 
-// Updated mock data with separate web and mobile permissions
+// Updated mock data with new roles and separate web and mobile permissions
 const initialRoles = [
-  // System-defined roles will be filtered out from the main display
   { 
     id: 1, 
     code: "LAB", 
@@ -38,7 +36,7 @@ const initialRoles = [
     code: "SUP", 
     name: "Supervisor", 
     description: "Manages workers and can mark their attendance", 
-    webPermissions: ["Dashboard", "Reports"], 
+    webPermissions: ["View Reports"], 
     mobilePermissions: ["Dashboard", "Mark Attendance", "Attendance History"],
     createdAt: "01/01/2023",
     isSystemDefined: false
@@ -48,7 +46,7 @@ const initialRoles = [
     code: "SADM", 
     name: "Super Admin", 
     description: "Has full access to all system functionalities", 
-    webPermissions: ["Dashboard", "Add Employees", "Face Enroll", "Assign Role", "Create Role", "Add Projects", "Manual Attendance", "Bulk Attendance", "Reports"], 
+    webPermissions: ["Manage Employees", "Manage Roles", "Assign Roles", "View Reports", "Export Reports"], 
     mobilePermissions: ["Dashboard", "Face Enroll", "Mark Attendance", "Attendance History"],
     createdAt: "01/01/2023",
     isSystemDefined: false
@@ -58,7 +56,7 @@ const initialRoles = [
     code: "RADM", 
     name: "Report Admin", 
     description: "Can view and export all reports", 
-    webPermissions: ["Dashboard", "Reports"], 
+    webPermissions: ["View Reports", "Export Reports"], 
     mobilePermissions: ["Dashboard", "Attendance History"],
     createdAt: "01/01/2023",
     isSystemDefined: false
@@ -73,26 +71,55 @@ const initialRoles = [
     createdAt: "01/01/2023",
     isSystemDefined: true
   },
+  { 
+    id: 6, 
+    code: "MO", 
+    name: "Medical Officer", 
+    description: "Medical officer responsible for health-related attendance marking", 
+    webPermissions: [], 
+    mobilePermissions: ["Mark Attendance", "Medical Reports"],
+    createdAt: "01/01/2023",
+    isSystemDefined: false
+  },
+  { 
+    id: 7, 
+    code: "CB", 
+    name: "Camp Boss", 
+    description: "Camp supervisor with accommodation-related responsibilities", 
+    webPermissions: [], 
+    mobilePermissions: ["Mark Attendance", "Camp Reports"],
+    createdAt: "01/01/2023",
+    isSystemDefined: false
+  },
+  { 
+    id: 8, 
+    code: "UEO", 
+    name: "United Emirates Officer", 
+    description: "Emirates officer for official documentation and attendance verification", 
+    webPermissions: [], 
+    mobilePermissions: ["Mark Attendance", "Official Reports"],
+    createdAt: "01/01/2023",
+    isSystemDefined: false
+  },
 ];
 
 // Updated lists of all possible permissions separated by platform
 const webPermissions = [
-  "Dashboard",
-  "Add Employees",
-  "Face Enroll",
-  "Assign Role",
-  "Create Role", 
-  "Add Projects",
-  "Manual Attendance",
-  "Bulk Attendance",
-  "Reports"
+  "Manage Employees",
+  "Manage Roles",
+  "Assign Roles",
+  "View Reports",
+  "Export Reports"
 ];
 
 const mobilePermissions = [
   "Dashboard",
   "Face Enroll",
   "Mark Attendance",
-  "Attendance History"
+  "Attendance History",
+  "Medical Reports",
+  "Camp Reports",
+  "Official Reports"
 ];
 
 // System-defined roles that have special behavior and should not be shown in UI
