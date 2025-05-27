@@ -170,12 +170,26 @@ const reportTypes = [
 const Reports = () => {
   const isMobile = useIsMobile();
   const [selectedReport, setSelectedReport] = useState("all");
-  const [filters, setFilters] = useState({
-    dateRange: "today",
-    project: "all",
-    entity: "all",
-    classification: "all"
-  });
+  
+  // Report filter states to match ReportFilters component interface
+  const [projectFilter, setProjectFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [attendanceTypeFilter, setAttendanceTypeFilter] = useState("all");
+  const [entryMethodFilter, setEntryMethodFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Mock stats data for StatCards
+  const mockStats = {
+    present: mockAttendanceData.filter(record => record.status === "Present").length,
+    absent: mockAttendanceData.filter(record => record.status === "Absent").length,
+    avgHours: 8.5,
+    manualEntries: mockAttendanceData.filter(record => record.markedBy !== "Self").length,
+    missedCheckouts: mockAttendanceData.filter(record => record.status === "Exception").length,
+    pendingApprovals: 2
+  };
 
   // Filter data based on selected report type
   const getFilteredData = () => {
@@ -235,7 +249,7 @@ const Reports = () => {
       </div>
 
       {/* Statistics Cards */}
-      <StatCards />
+      <StatCards stats={mockStats} />
 
       {/* Report Type Selection */}
       <Card className="p-4">
@@ -264,7 +278,24 @@ const Reports = () => {
           </div>
 
           {/* Filters */}
-          <ReportFilters filters={filters} setFilters={setFilters} />
+          <ReportFilters
+            projectFilter={projectFilter}
+            setProjectFilter={setProjectFilter}
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
+            roleFilter={roleFilter}
+            setRoleFilter={setRoleFilter}
+            attendanceTypeFilter={attendanceTypeFilter}
+            setAttendanceTypeFilter={setAttendanceTypeFilter}
+            entryMethodFilter={entryMethodFilter}
+            setEntryMethodFilter={setEntryMethodFilter}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+          />
         </div>
       </Card>
 
