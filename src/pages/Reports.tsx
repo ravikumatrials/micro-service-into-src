@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -189,6 +188,26 @@ const statusOptions = [
 // Define which reports are role-specific and should have simplified interface
 const roleSpecificReports = ["medical", "campboss", "ueo"];
 
+// Helper function to determine if project/reason should be hidden
+const shouldHideProjectReason = (status: string, markedBy: string) => {
+  const hiddenStatuses = ["Sick Leave", "Casual Leave", "ID/Visa Verified", "Absent"];
+  const hiddenMarkedBy = ["Medical Officer", "Camp Boss", "United Emirates Officer", "System"];
+  
+  return hiddenStatuses.includes(status) && hiddenMarkedBy.includes(markedBy);
+};
+
+// Helper function to get display value for project/reason
+const getDisplayValue = (originalValue: string, status: string, markedBy: string, isManualReason: boolean = false) => {
+  if (shouldHideProjectReason(status, markedBy)) {
+    // For reason field, show manual entries but hide auto-generated ones
+    if (isManualReason && originalValue && !["Regular Work", "No attendance recorded", "Document verification", "Visa renewal process"].includes(originalValue)) {
+      return originalValue;
+    }
+    return "–";
+  }
+  return originalValue;
+};
+
 const Reports = () => {
   const isMobile = useIsMobile();
   const [selectedReport, setSelectedReport] = useState("all");
@@ -221,9 +240,6 @@ const Reports = () => {
         break;
       case "absent":
         setStatusFilter("Absent");
-        break;
-      case "exception":
-        setStatusFilter("Exception");
         break;
       default:
         setStatusFilter("all");
@@ -425,10 +441,10 @@ const Reports = () => {
                   {!isRoleSpecificReport && (
                     <>
                       <div>
-                        <span className="font-medium">Project:</span> {record.project}
+                        <span className="font-medium">Project:</span> {getDisplayValue(record.project, record.status, record.markedBy)}
                       </div>
                       <div className="col-span-2">
-                        <span className="font-medium">Reason:</span> {record.reason}
+                        <span className="font-medium">Reason:</span> {getDisplayValue(record.reason, record.status, record.markedBy, true)}
                       </div>
                     </>
                   )}
@@ -475,8 +491,8 @@ const Reports = () => {
                   {/* Show Project and Reason cells only for non-role-specific reports */}
                   {!isRoleSpecificReport && (
                     <>
-                      <TableCell>{record.project}</TableCell>
-                      <TableCell>{record.reason}</TableCell>
+                      <TableCell>{getDisplayValue(record.project, record.status, record.markedBy)}</TableCell>
+                      <TableCell>{getDisplayValue(record.reason, record.status, record.markedBy, true)}</TableCell>
                     </>
                   )}
                 </TableRow>
