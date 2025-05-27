@@ -1,18 +1,15 @@
 
 import React, { useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import ManualAttendanceTable from "./ManualAttendanceTable";
 import CheckInTab from "./CheckInTab";
 import CheckOutTab from "./CheckOutTab";
 import ExceptionTab from "./ExceptionTab";
-import OverrideEntryTab from "./OverrideEntryTab";
 import { AttendanceFilters } from "./AttendanceFilterUtils";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 
 interface ManualAttendanceTabsProps {
   activeTab: string;
@@ -45,10 +42,10 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
   
   // Force tab to be one of the valid options if it's invalid
   useEffect(() => {
-    const validTabs = ["records", "check-in", "check-out", "exceptions", "override-entry"];
+    const validTabs = ["check-in", "check-out", "exceptions"];
     if (!validTabs.includes(activeTab)) {
-      console.log("Setting active tab to records as current tab is invalid:", activeTab);
-      setActiveTab("records");
+      console.log("Setting active tab to check-in as current tab is invalid:", activeTab);
+      setActiveTab("check-in");
     }
   }, [activeTab, setActiveTab]);
 
@@ -89,17 +86,11 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 w-full mb-4">
-          <TabsTrigger value="records">Attendance Records</TabsTrigger>
+        <TabsList className="grid grid-cols-3 w-full mb-4">
           <TabsTrigger value="check-in">Check In</TabsTrigger>
           <TabsTrigger value="check-out">Check Out</TabsTrigger>
           <TabsTrigger value="exceptions">Exceptions</TabsTrigger>
-          <TabsTrigger value="override-entry">Override Entry</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="records" className="mt-0">
-          <ManualAttendanceTable records={filteredRecords} />
-        </TabsContent>
         
         <TabsContent value="check-in" className="mt-0">
           <CheckInTab 
@@ -141,20 +132,6 @@ const ManualAttendanceTabs: React.FC<ManualAttendanceTabsProps> = ({
             selectedEntity={filters.entity}
             projects={projects}
             locations={emptyLocations}
-            selectedDate={selectedDate}
-            dateSelected={dateSelected}
-          />
-        </TabsContent>
-
-        <TabsContent value="override-entry" className="mt-0">
-          <OverrideEntryTab 
-            searchQuery={filters.name || filters.employeeId}
-            selectedProject={filters.project}
-            selectedClassification={filters.classification}
-            selectedCategory={filters.category}
-            selectedStatus={filters.status}
-            selectedEntity={filters.entity}
-            projects={projects}
             selectedDate={selectedDate}
             dateSelected={dateSelected}
           />
