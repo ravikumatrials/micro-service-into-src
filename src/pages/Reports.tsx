@@ -1,12 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, FileText, Calendar, Users, Clock, AlertTriangle, UserX, UserCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReportFilters } from "@/components/reports/ReportFilters";
-import { StatCards } from "@/components/reports/StatCards";
 import {
   Select,
   SelectContent,
@@ -36,8 +35,7 @@ const mockAttendanceData = [
     checkOutTime: "17:00",
     status: "Present",
     markedBy: "Supervisor",
-    reason: null,
-    project: "Al Noor Tower"
+    timestamp: "2024-01-15 07:00:00"
   },
   {
     id: 2,
@@ -49,8 +47,7 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Exception",
     markedBy: "Self",
-    reason: "Forgot to check out",
-    project: "Marina Bay"
+    timestamp: "2024-01-15 07:15:00"
   },
   {
     id: 3,
@@ -60,10 +57,9 @@ const mockAttendanceData = [
     date: "2024-01-15",
     checkInTime: null,
     checkOutTime: null,
-    status: "Sick",
+    status: "Sick Leave",
     markedBy: "Medical Officer",
-    reason: "Medical Leave",
-    project: "Business Bay"
+    timestamp: "2024-01-15 08:00:00"
   },
   {
     id: 4,
@@ -73,10 +69,9 @@ const mockAttendanceData = [
     date: "2024-01-15",
     checkInTime: null,
     checkOutTime: null,
-    status: "Present",
+    status: "ID/Visa Verified",
     markedBy: "United Emirates Officer",
-    reason: "Official Duty",
-    project: "Downtown Plaza"
+    timestamp: "2024-01-15 09:00:00"
   },
   {
     id: 5,
@@ -86,10 +81,9 @@ const mockAttendanceData = [
     date: "2024-01-15",
     checkInTime: null,
     checkOutTime: null,
-    status: "Casual",
+    status: "Casual Leave",
     markedBy: "Camp Boss",
-    reason: "Personal Leave",
-    project: "Dubai Hills"
+    timestamp: "2024-01-15 08:30:00"
   },
   {
     id: 6,
@@ -101,8 +95,7 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Absent",
     markedBy: "System",
-    reason: "No attendance recorded",
-    project: "Jumeirah Park"
+    timestamp: "2024-01-15 23:59:59"
   },
   {
     id: 7,
@@ -114,8 +107,7 @@ const mockAttendanceData = [
     checkOutTime: "18:00",
     status: "Present",
     markedBy: "Self",
-    reason: null,
-    project: "Emirates Hills"
+    timestamp: "2024-01-15 08:00:00"
   },
   {
     id: 8,
@@ -125,10 +117,9 @@ const mockAttendanceData = [
     date: "2024-01-15",
     checkInTime: null,
     checkOutTime: null,
-    status: "Visa/ID",
+    status: "ID/Visa Verified",
     markedBy: "United Emirates Officer",
-    reason: "Visa processing",
-    project: "Palm Jumeirah"
+    timestamp: "2024-01-15 10:00:00"
   },
   {
     id: 9,
@@ -140,8 +131,7 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Exception",
     markedBy: "Self",
-    reason: "Emergency exit",
-    project: "Creek Harbor"
+    timestamp: "2024-01-15 07:30:00"
   },
   {
     id: 10,
@@ -151,10 +141,9 @@ const mockAttendanceData = [
     date: "2024-01-15",
     checkInTime: null,
     checkOutTime: null,
-    status: "Sick",
+    status: "Sick Leave",
     markedBy: "Medical Officer",
-    reason: "Health checkup",
-    project: "City Walk"
+    timestamp: "2024-01-15 09:30:00"
   }
 ];
 
@@ -167,9 +156,20 @@ const reportTypes = [
   { value: "exception", label: "Exception Report", icon: AlertTriangle }
 ];
 
+const statusOptions = [
+  { value: "all", label: "All Status" },
+  { value: "Present", label: "Present" },
+  { value: "Absent", label: "Absent" },
+  { value: "Sick Leave", label: "Sick Leave" },
+  { value: "Casual Leave", label: "Casual Leave" },
+  { value: "ID/Visa Verified", label: "ID/Visa Verified" },
+  { value: "Exception", label: "Exception" }
+];
+
 const Reports = () => {
   const isMobile = useIsMobile();
   const [selectedReport, setSelectedReport] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   
   // Report filter states to match ReportFilters component interface
   const [projectFilter, setProjectFilter] = useState("all");
@@ -181,32 +181,66 @@ const Reports = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Mock stats data for StatCards
-  const mockStats = {
-    present: mockAttendanceData.filter(record => record.status === "Present").length,
-    absent: mockAttendanceData.filter(record => record.status === "Absent").length,
-    avgHours: 8.5,
-    manualEntries: mockAttendanceData.filter(record => record.markedBy !== "Self").length,
-    missedCheckouts: mockAttendanceData.filter(record => record.status === "Exception").length,
-    pendingApprovals: 2
-  };
+  // Set smart defaults based on report type
+  useEffect(() => {
+    switch (selectedReport) {
+      case "campboss":
+        setStatusFilter("Casual Leave");
+        break;
+      case "medical":
+        setStatusFilter("Sick Leave");
+        break;
+      case "ueo":
+        setStatusFilter("ID/Visa Verified");
+        break;
+      case "absent":
+        setStatusFilter("Absent");
+        break;
+      case "exception":
+        setStatusFilter("Exception");
+        break;
+      default:
+        setStatusFilter("all");
+    }
+  }, [selectedReport]);
 
-  // Filter data based on selected report type
+  // Filter data based on selected report type and status
   const getFilteredData = () => {
+    let filtered = [...mockAttendanceData];
+
+    // Filter by report type
     switch (selectedReport) {
       case "medical":
-        return mockAttendanceData.filter(record => record.markedBy === "Medical Officer");
+        filtered = filtered.filter(record => record.markedBy === "Medical Officer");
+        break;
       case "campboss":
-        return mockAttendanceData.filter(record => record.markedBy === "Camp Boss");
+        filtered = filtered.filter(record => record.markedBy === "Camp Boss");
+        break;
       case "ueo":
-        return mockAttendanceData.filter(record => record.markedBy === "United Emirates Officer");
+        filtered = filtered.filter(record => record.markedBy === "United Emirates Officer");
+        break;
       case "absent":
-        return mockAttendanceData.filter(record => record.status === "Absent");
+        filtered = filtered.filter(record => record.status === "Absent");
+        break;
       case "exception":
-        return mockAttendanceData.filter(record => record.status === "Exception");
-      default:
-        return mockAttendanceData;
+        filtered = filtered.filter(record => record.status === "Exception");
+        break;
     }
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(record => record.status === statusFilter);
+    }
+
+    // Filter by search term if provided
+    if (searchTerm) {
+      filtered = filtered.filter(record => 
+        record.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
   };
 
   const filteredData = getFilteredData();
@@ -225,11 +259,11 @@ const Reports = () => {
         return "bg-green-100 text-green-800 border-green-200";
       case "Absent":
         return "bg-red-100 text-red-800 border-red-200";
-      case "Sick":
+      case "Sick Leave":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "Casual":
+      case "Casual Leave":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Visa/ID":
+      case "ID/Visa Verified":
         return "bg-purple-100 text-purple-800 border-purple-200";
       case "Exception":
         return "bg-orange-100 text-orange-800 border-orange-200";
@@ -248,10 +282,7 @@ const Reports = () => {
         </Button>
       </div>
 
-      {/* Statistics Cards */}
-      <StatCards stats={mockStats} />
-
-      {/* Report Type Selection */}
+      {/* Report Type Selection and Filters */}
       <Card className="p-4">
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
@@ -275,9 +306,27 @@ const Reports = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status
+              </label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Filters */}
+          {/* Additional Filters */}
           <ReportFilters
             projectFilter={projectFilter}
             setProjectFilter={setProjectFilter}
@@ -330,7 +379,7 @@ const Reports = () => {
                     <span className="font-medium">Date:</span> {record.date}
                   </div>
                   <div>
-                    <span className="font-medium">Project:</span> {record.project}
+                    <span className="font-medium">Timestamp:</span> {record.timestamp}
                   </div>
                   <div>
                     <span className="font-medium">Check In:</span> {record.checkInTime || "N/A"}
@@ -338,14 +387,6 @@ const Reports = () => {
                   <div>
                     <span className="font-medium">Check Out:</span> {record.checkOutTime || "N/A"}
                   </div>
-                  <div className="col-span-2">
-                    <span className="font-medium">Marked By:</span> {record.markedBy}
-                  </div>
-                  {record.reason && (
-                    <div className="col-span-2">
-                      <span className="font-medium">Reason:</span> {record.reason}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
@@ -360,9 +401,7 @@ const Reports = () => {
                 <TableHead>Check In</TableHead>
                 <TableHead>Check Out</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Marked By</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Project</TableHead>
+                <TableHead>Timestamp</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -378,9 +417,7 @@ const Reports = () => {
                       {record.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{record.markedBy}</TableCell>
-                  <TableCell>{record.reason || "N/A"}</TableCell>
-                  <TableCell>{record.project}</TableCell>
+                  <TableCell>{record.timestamp}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -390,7 +427,7 @@ const Reports = () => {
         {filteredData.length === 0 && (
           <div className="p-8 text-center text-gray-500">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No records found for the selected report type</p>
+            <p>No records found for the selected filters</p>
           </div>
         )}
       </Card>
