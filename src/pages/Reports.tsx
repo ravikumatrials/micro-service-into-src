@@ -35,7 +35,9 @@ const mockAttendanceData = [
     checkOutTime: "17:00",
     status: "Present",
     markedBy: "Supervisor",
-    timestamp: "2024-01-15 07:00:00"
+    timestamp: "2024-01-15 07:00:00",
+    project: "Main Building Construction",
+    reason: "Regular Work"
   },
   {
     id: 2,
@@ -47,7 +49,9 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Exception",
     markedBy: "Self",
-    timestamp: "2024-01-15 07:15:00"
+    timestamp: "2024-01-15 07:15:00",
+    project: "Highway Project",
+    reason: "Forgot to check out"
   },
   {
     id: 3,
@@ -59,7 +63,9 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Sick Leave",
     markedBy: "Medical Officer",
-    timestamp: "2024-01-15 08:00:00"
+    timestamp: "2024-01-15 08:00:00",
+    project: "Bridge Construction",
+    reason: "Fever and flu symptoms"
   },
   {
     id: 4,
@@ -71,7 +77,9 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "ID/Visa Verified",
     markedBy: "United Emirates Officer",
-    timestamp: "2024-01-15 09:00:00"
+    timestamp: "2024-01-15 09:00:00",
+    project: "Main Building Construction",
+    reason: "Document verification"
   },
   {
     id: 5,
@@ -83,7 +91,9 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Casual Leave",
     markedBy: "Camp Boss",
-    timestamp: "2024-01-15 08:30:00"
+    timestamp: "2024-01-15 08:30:00",
+    project: "Highway Project",
+    reason: "Family emergency"
   },
   {
     id: 6,
@@ -95,7 +105,9 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Absent",
     markedBy: "System",
-    timestamp: "2024-01-15 23:59:59"
+    timestamp: "2024-01-15 23:59:59",
+    project: "Bridge Construction",
+    reason: "No attendance recorded"
   },
   {
     id: 7,
@@ -107,7 +119,9 @@ const mockAttendanceData = [
     checkOutTime: "18:00",
     status: "Present",
     markedBy: "Self",
-    timestamp: "2024-01-15 08:00:00"
+    timestamp: "2024-01-15 08:00:00",
+    project: "Main Building Construction",
+    reason: "Regular Work"
   },
   {
     id: 8,
@@ -119,7 +133,9 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "ID/Visa Verified",
     markedBy: "United Emirates Officer",
-    timestamp: "2024-01-15 10:00:00"
+    timestamp: "2024-01-15 10:00:00",
+    project: "Highway Project",
+    reason: "Visa renewal process"
   },
   {
     id: 9,
@@ -131,7 +147,9 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Exception",
     markedBy: "Self",
-    timestamp: "2024-01-15 07:30:00"
+    timestamp: "2024-01-15 07:30:00",
+    project: "Bridge Construction",
+    reason: "Equipment malfunction"
   },
   {
     id: 10,
@@ -143,7 +161,9 @@ const mockAttendanceData = [
     checkOutTime: null,
     status: "Sick Leave",
     markedBy: "Medical Officer",
-    timestamp: "2024-01-15 09:30:00"
+    timestamp: "2024-01-15 09:30:00",
+    project: "Main Building Construction",
+    reason: "Medical treatment required"
   }
 ];
 
@@ -166,6 +186,9 @@ const statusOptions = [
   { value: "Exception", label: "Exception" }
 ];
 
+// Define which reports are role-specific and should have simplified interface
+const roleSpecificReports = ["medical", "campboss", "ueo"];
+
 const Reports = () => {
   const isMobile = useIsMobile();
   const [selectedReport, setSelectedReport] = useState("all");
@@ -180,6 +203,9 @@ const Reports = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  // Check if current report is role-specific
+  const isRoleSpecificReport = roleSpecificReports.includes(selectedReport);
 
   // Set smart defaults based on report type
   useEffect(() => {
@@ -307,44 +333,49 @@ const Reports = () => {
               </Select>
             </div>
             
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status
-              </label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Status filter - only show for role-specific reports */}
+            {isRoleSpecificReport && (
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
-          {/* Additional Filters */}
-          <ReportFilters
-            projectFilter={projectFilter}
-            setProjectFilter={setProjectFilter}
-            locationFilter={locationFilter}
-            setLocationFilter={setLocationFilter}
-            roleFilter={roleFilter}
-            setRoleFilter={setRoleFilter}
-            attendanceTypeFilter={attendanceTypeFilter}
-            setAttendanceTypeFilter={setAttendanceTypeFilter}
-            entryMethodFilter={entryMethodFilter}
-            setEntryMethodFilter={setEntryMethodFilter}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            startDate={startDate}
-            setStartDate={setStartDate}
-            endDate={endDate}
-            setEndDate={setEndDate}
-          />
+          {/* Additional Filters - only show for non-role-specific reports */}
+          {!isRoleSpecificReport && (
+            <ReportFilters
+              projectFilter={projectFilter}
+              setProjectFilter={setProjectFilter}
+              locationFilter={locationFilter}
+              setLocationFilter={setLocationFilter}
+              roleFilter={roleFilter}
+              setRoleFilter={setRoleFilter}
+              attendanceTypeFilter={attendanceTypeFilter}
+              setAttendanceTypeFilter={setAttendanceTypeFilter}
+              entryMethodFilter={entryMethodFilter}
+              setEntryMethodFilter={setEntryMethodFilter}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
+            />
+          )}
         </div>
       </Card>
 
@@ -387,6 +418,20 @@ const Reports = () => {
                   <div>
                     <span className="font-medium">Check Out:</span> {record.checkOutTime || "N/A"}
                   </div>
+                  <div>
+                    <span className="font-medium">Marked By:</span> {record.markedBy}
+                  </div>
+                  {/* Show Project and Reason only for non-role-specific reports */}
+                  {!isRoleSpecificReport && (
+                    <>
+                      <div>
+                        <span className="font-medium">Project:</span> {record.project}
+                      </div>
+                      <div className="col-span-2">
+                        <span className="font-medium">Reason:</span> {record.reason}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
@@ -401,7 +446,15 @@ const Reports = () => {
                 <TableHead>Check In</TableHead>
                 <TableHead>Check Out</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Marked By</TableHead>
                 <TableHead>Timestamp</TableHead>
+                {/* Show Project and Reason columns only for non-role-specific reports */}
+                {!isRoleSpecificReport && (
+                  <>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Reason</TableHead>
+                  </>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -417,7 +470,15 @@ const Reports = () => {
                       {record.status}
                     </Badge>
                   </TableCell>
+                  <TableCell>{record.markedBy}</TableCell>
                   <TableCell>{record.timestamp}</TableCell>
+                  {/* Show Project and Reason cells only for non-role-specific reports */}
+                  {!isRoleSpecificReport && (
+                    <>
+                      <TableCell>{record.project}</TableCell>
+                      <TableCell>{record.reason}</TableCell>
+                    </>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
