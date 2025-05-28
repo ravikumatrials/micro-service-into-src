@@ -37,6 +37,18 @@ const attendanceTypeOptions = [
   "Check-In / Check-Out"
 ];
 
+// Available roles from the Roles master
+const availableRoles = [
+  { id: 1, name: "Labour" },
+  { id: 2, name: "Supervisor" },
+  { id: 3, name: "Super Admin" },
+  { id: 4, name: "Report Admin" },
+  { id: 5, name: "Staff" },
+  { id: 6, name: "Medical Officer" },
+  { id: 7, name: "Camp Boss" },
+  { id: 8, name: "United Emirates Officer" }
+];
+
 export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }: RoleAttendanceLogicFormProps) {
   const [formData, setFormData] = useState({
     roleName: "",
@@ -96,13 +108,21 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="roleName">Role Name *</Label>
-                <Input
-                  id="roleName"
-                  value={formData.roleName}
-                  onChange={(e) => handleInputChange("roleName", e.target.value)}
-                  placeholder="Enter role name"
-                  required
-                />
+                <Select 
+                  value={formData.roleName} 
+                  onValueChange={(value) => handleInputChange("roleName", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableRoles.map((role) => (
+                      <SelectItem key={role.id} value={role.name}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
