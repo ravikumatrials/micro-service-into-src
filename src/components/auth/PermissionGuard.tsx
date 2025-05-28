@@ -14,7 +14,8 @@ const getUserPermissions = () => {
     "Face Enroll", 
     "Manage Roles", 
     "Role Mapping", 
-    "Manage Users"
+    "Manage Users",
+    "Attendance Role Logic"
   ];
 };
 
