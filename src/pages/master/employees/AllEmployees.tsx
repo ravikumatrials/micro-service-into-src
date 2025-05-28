@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -67,7 +66,8 @@ const initialEmployees = [
     contactNumber: "+971 50 123 4567",
     email: "ahmed.almansouri@tanseeq.ae",
     faceEnrolled: true,
-    status: "Active" 
+    status: "Active", 
+    loginEnabled: true 
   },
   { 
     id: 2, 
@@ -80,7 +80,8 @@ const initialEmployees = [
     contactNumber: "+971 52 234 5678",
     email: "fatima.alhashimi@tanseeq.ae",
     faceEnrolled: true,
-    status: "Active" 
+    status: "Active", 
+    loginEnabled: true 
   },
   { 
     id: 3, 
@@ -93,7 +94,8 @@ const initialEmployees = [
     contactNumber: "+971 55 345 6789",
     email: "mohammed.alfarsi@almaha.ae",
     faceEnrolled: false,
-    status: "Active" 
+    status: "Active", 
+    loginEnabled: false 
   },
   { 
     id: 4, 
@@ -106,7 +108,8 @@ const initialEmployees = [
     contactNumber: "+971 54 456 7890",
     email: "aisha.alblooshi@gulfbuilders.ae",
     faceEnrolled: true,
-    status: "Active" 
+    status: "Active", 
+    loginEnabled: true 
   },
   { 
     id: 5, 
@@ -119,7 +122,8 @@ const initialEmployees = [
     contactNumber: "+971 56 567 8901",
     email: "yusuf.alqasimi@zenith.ae",
     faceEnrolled: true,
-    status: "Active" 
+    status: "Active", 
+    loginEnabled: true 
   },
   { 
     id: 6, 
@@ -132,7 +136,8 @@ const initialEmployees = [
     contactNumber: "+971 50 678 9012",
     email: "mariam.alzaabi@tanseeq.ae",
     faceEnrolled: false,
-    status: "Inactive" 
+    status: "Inactive", 
+    loginEnabled: false 
   },
   { 
     id: 7, 
@@ -145,7 +150,8 @@ const initialEmployees = [
     contactNumber: "+971 52 789 0123",
     email: "khalid.almansoori@tanseeq.ae",
     faceEnrolled: true,
-    status: "Active" 
+    status: "Active", 
+    loginEnabled: true 
   },
   { 
     id: 8, 
@@ -158,7 +164,8 @@ const initialEmployees = [
     contactNumber: "+971 55 890 1234",
     email: "omar.alshamsi@almaha.ae",
     faceEnrolled: false,
-    status: "Active" 
+    status: "Active", 
+    loginEnabled: false 
   },
 ];
 
@@ -331,6 +338,7 @@ const AllEmployees = () => {
                 <TableHead>Classification</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Assigned Roles</TableHead>
+                <TableHead>Login Status</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -358,6 +366,17 @@ const AllEmployees = () => {
                       ) : (
                         <span className="text-sm text-gray-500">No Roles Assigned</span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        className={
+                          employee.loginEnabled 
+                            ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                            : "bg-red-100 text-red-800 hover:bg-red-200"
+                        }
+                      >
+                        {employee.loginEnabled ? "✅ Login Enabled" : "❌ Not Enabled"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge 
@@ -402,7 +421,7 @@ const AllEmployees = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-6 text-gray-500">
+                  <TableCell colSpan={9} className="text-center py-6 text-gray-500">
                     No employees found matching the search criteria
                   </TableCell>
                 </TableRow>

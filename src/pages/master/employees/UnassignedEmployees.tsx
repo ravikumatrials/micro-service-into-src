@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -10,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { MultiRoleAssignDialog } from "@/components/role-mapping/MultiRoleAssignDialog";
+import { RoleSelectionModal } from "@/components/role-mapping/RoleSelectionModal";
 import { SetupLoginModal } from "@/components/password-management/SetupLoginModal";
 import { toast } from "@/hooks/use-toast";
 import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
@@ -104,9 +103,10 @@ const UnassignedEmployees = () => {
   const [entityFilter, setEntityFilter] = useState("all");
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   
+  const [roleSelectionOpen, setRoleSelectionOpen] = useState(false);
   const [setupLoginOpen, setSetupLoginOpen] = useState(false);
-  const [roleAssignOpen, setRoleAssignOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
 
   // Filter to show only employees with no assigned roles
@@ -142,64 +142,44 @@ const UnassignedEmployees = () => {
 
   const handleAssignRoles = (employee) => {
     setSelectedEmployee(employee);
-    
-    // Check if employee has login enabled
-    if (!employee.loginEnabled) {
-      // First show login setup modal
-      setSetupLoginOpen(true);
-    } else {
-      // Directly show role assignment modal
-      setRoleAssignOpen(true);
-    }
+    setRoleSelectionOpen(true);
   };
 
-  const handleLoginSetup = (loginData: { loginId: string; password: string }) => {
-    if (!selectedEmployee) return;
-    
-    // Update employee with login enabled status
-    const updatedEmployees = employees.map(emp => 
-      emp.id === selectedEmployee.id 
-        ? {...emp, loginEnabled: true, loginId: loginData.loginId} 
-        : emp
-    );
-    setEmployees(updatedEmployees);
-    
-    // Update selected employee for role assignment
-    setSelectedEmployee(prev => ({...prev, loginEnabled: true, loginId: loginData.loginId}));
-    
-    toast({
-      title: "Login Setup Complete",
-      description: `Login credentials created for ${selectedEmployee.name}. Now assign roles.`,
-    });
-    
-    setSetupLoginOpen(false);
-    
-    // Show role assignment modal next
-    setRoleAssignOpen(true);
+  const handleRoleSelectionContinue = (roles: string[]) => {
+    setSelectedRoles(roles);
+    setRoleSelectionOpen(false);
+    setSetupLoginOpen(true);
   };
 
-  const handleRolesAssigned = (roles: string[]) => {
+  const handleLoginSetup = (loginData: { loginId: string; password: string; roles: string[] }) => {
     if (!selectedEmployee) return;
     
-    // Update employee roles
+    // Update employee with login enabled status and assigned roles
     const updatedEmployees = employees.map(emp => 
       emp.id === selectedEmployee.id 
-        ? {...emp, assignedRoles: roles} 
+        ? {
+            ...emp, 
+            loginEnabled: true, 
+            loginId: loginData.loginId,
+            assignedRoles: loginData.roles
+          } 
         : emp
     );
     
-    // Remove employee from unassigned list if they now have roles
+    // Remove employee from unassigned list since they now have roles
     const filteredEmployees = updatedEmployees.filter(emp => 
       !emp.assignedRoles || emp.assignedRoles.length === 0
     );
     setEmployees(filteredEmployees);
     
     toast({
-      title: "Roles Assigned",
-      description: `${selectedEmployee.name} has been assigned ${roles.length} role(s) and moved to Assigned Employees.`,
+      title: "Employee Setup Complete",
+      description: `Login credentials created and ${loginData.roles.length} role(s) assigned to ${selectedEmployee.name}. Employee moved to Assigned Employees.`,
     });
     
-    setRoleAssignOpen(false);
+    setSetupLoginOpen(false);
+    setSelectedRoles([]);
+    setSelectedEmployee(null);
   };
 
   return (
@@ -318,7 +298,7 @@ const UnassignedEmployees = () => {
                             : "bg-red-100 text-red-800 hover:bg-red-200"
                         }
                       >
-                        {employee.loginEnabled ? "Login Enabled" : "Not Enabled"}
+                        {employee.loginEnabled ? "✅ Login Enabled" : "❌ Not Enabled"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -345,7 +325,7 @@ const UnassignedEmployees = () => {
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{employee.loginEnabled ? "Assign Roles" : "Setup Login & Assign Roles"}</p>
+                              <p>Assign Roles & Setup Login</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -396,19 +376,20 @@ const UnassignedEmployees = () => {
         </div>
       </Card>
 
+      <RoleSelectionModal
+        open={roleSelectionOpen}
+        onOpenChange={setRoleSelectionOpen}
+        employee={selectedEmployee}
+        availableRoles={availableRoles}
+        onContinue={handleRoleSelectionContinue}
+      />
+
       <SetupLoginModal
         open={setupLoginOpen}
         onOpenChange={setSetupLoginOpen}
         employee={selectedEmployee}
+        selectedRoles={selectedRoles}
         onLoginSetup={handleLoginSetup}
-      />
-
-      <MultiRoleAssignDialog
-        open={roleAssignOpen}
-        onOpenChange={setRoleAssignOpen}
-        employee={selectedEmployee}
-        availableRoles={availableRoles}
-        onAssignRoles={handleRolesAssigned}
       />
       
       <EmployeeDetailModal

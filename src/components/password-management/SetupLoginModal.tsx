@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -18,15 +19,18 @@ type SetupLoginModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   employee: any;
-  onLoginSetup: (loginData: { loginId: string; password: string }) => void;
+  selectedRoles: string[];
+  onLoginSetup: (loginData: { loginId: string; password: string; roles: string[] }) => void;
 };
 
 export function SetupLoginModal({ 
   open, 
   onOpenChange, 
   employee, 
+  selectedRoles,
   onLoginSetup 
 }: SetupLoginModalProps) {
+  const [loginMethod, setLoginMethod] = useState("employeeId");
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,10 +42,22 @@ export function SetupLoginModal({
     if (!loginId.trim()) {
       toast({
         title: "Validation Error",
-        description: "Email or Employee ID is required.",
+        description: `${loginMethod === "email" ? "Email" : "Employee ID"} is required.`,
         variant: "destructive"
       });
       return;
+    }
+
+    if (loginMethod === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(loginId)) {
+        toast({
+          title: "Validation Error",
+          description: "Please enter a valid email address.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     if (!password) {
@@ -71,15 +87,13 @@ export function SetupLoginModal({
       return;
     }
 
-    // Simulate checking for unique login ID (in real app, check against database)
-    // For demo purposes, we'll assume it's unique
-    
-    onLoginSetup({ loginId, password });
+    onLoginSetup({ loginId, password, roles: selectedRoles });
     
     // Reset form
     setLoginId("");
     setPassword("");
     setConfirmPassword("");
+    setLoginMethod("employeeId");
   };
 
   return (
@@ -89,17 +103,40 @@ export function SetupLoginModal({
           <DialogTitle>Setup Login for Employee</DialogTitle>
           <DialogDescription>
             Create login credentials for {employee?.name} (Employee ID: {employee?.employeeId})
+            <br />
+            Selected Roles: {selectedRoles?.join(", ")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="space-y-3">
+            <Label>Login With *</Label>
+            <RadioGroup value={loginMethod} onValueChange={setLoginMethod}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="employeeId" id="employeeId" />
+                <Label htmlFor="employeeId">Employee ID</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="email" id="email" />
+                <Label htmlFor="email">Email</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="loginId">Email or Employee ID *</Label>
+            <Label htmlFor="loginId">
+              {loginMethod === "email" ? "Email Address" : "Employee ID"} *
+            </Label>
             <Input
               id="loginId"
+              type={loginMethod === "email" ? "email" : "text"}
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
-              placeholder="Enter email or employee ID for login"
+              placeholder={
+                loginMethod === "email" 
+                  ? "Enter email address for login" 
+                  : "Enter employee ID for login"
+              }
             />
           </div>
 
@@ -152,7 +189,7 @@ export function SetupLoginModal({
             type="button" 
             onClick={handleSubmit}
           >
-            Setup Login
+            Setup Login & Assign Roles
           </Button>
         </DialogFooter>
       </DialogContent>
