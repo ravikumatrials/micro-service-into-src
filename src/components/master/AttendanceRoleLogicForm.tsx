@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,7 @@ import { availableRoles } from "@/utils/roleUtils";
 
 const formSchema = z.object({
   roleName: z.string().min(1, "Role name is required"),
+  attendanceType: z.string().min(1, "Attendance type is required"),
   defaultStatus: z.string().min(1, "Default status is required"),
   requireComment: z.boolean(),
 });
@@ -41,7 +43,7 @@ interface AttendanceRoleLogicFormProps {
   onClose: () => void;
   onSave: (data: FormData) => void;
   editingItem?: any;
-  statusOptions: string[];
+  attendanceTypeOptions: string[];
 }
 
 export const AttendanceRoleLogicForm = ({
@@ -49,27 +51,56 @@ export const AttendanceRoleLogicForm = ({
   onClose,
   onSave,
   editingItem,
-  statusOptions,
+  attendanceTypeOptions,
 }: AttendanceRoleLogicFormProps) => {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       roleName: "",
+      attendanceType: "",
       defaultStatus: "",
       requireComment: false,
     },
   });
 
+  const watchedAttendanceType = form.watch("attendanceType");
+
+  // Auto-fill default status based on attendance type
+  useEffect(() => {
+    if (watchedAttendanceType && !editingItem) {
+      let autoStatus = "";
+      switch (watchedAttendanceType) {
+        case "General Attendance":
+          autoStatus = "Present";
+          break;
+        case "Mark Sick Leave":
+          autoStatus = "Sick Leave";
+          break;
+        case "Mark Casual Leave":
+          autoStatus = "Casual Leave";
+          break;
+        case "ID/Visa Verification":
+          autoStatus = "ID/Visa Verified";
+          break;
+      }
+      if (autoStatus) {
+        form.setValue("defaultStatus", autoStatus);
+      }
+    }
+  }, [watchedAttendanceType, form, editingItem]);
+
   useEffect(() => {
     if (editingItem) {
       form.reset({
         roleName: editingItem.roleName,
+        attendanceType: editingItem.attendanceType,
         defaultStatus: editingItem.defaultStatus,
         requireComment: editingItem.requireComment,
       });
     } else {
       form.reset({
         roleName: "",
+        attendanceType: "",
         defaultStatus: "",
         requireComment: false,
       });
@@ -91,7 +122,7 @@ export const AttendanceRoleLogicForm = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {editingItem ? "Edit Attendance Role Logic" : "Add New Attendance Role Logic"}
+            {editingItem ? "Edit Attendance Rule" : "Add New Attendance Rule"}
           </DialogTitle>
         </DialogHeader>
 
@@ -124,24 +155,44 @@ export const AttendanceRoleLogicForm = ({
 
             <FormField
               control={form.control}
-              name="defaultStatus"
+              name="attendanceType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Default Status</FormLabel>
+                  <FormLabel>Attendance Type</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select default status" />
+                        <SelectValue placeholder="Select attendance type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {statusOptions.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
+                      {attendanceTypeOptions.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="defaultStatus"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Default Status</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter default status" 
+                      {...field}
+                    />
+                  </FormControl>
+                  <div className="text-xs text-muted-foreground">
+                    Auto-filled based on attendance type, but you can override
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -173,7 +224,7 @@ export const AttendanceRoleLogicForm = ({
                 Cancel
               </Button>
               <Button type="submit">
-                {editingItem ? "Update Configuration" : "Add Configuration"}
+                {editingItem ? "Update Rule" : "Add Rule"}
               </Button>
             </div>
           </form>
