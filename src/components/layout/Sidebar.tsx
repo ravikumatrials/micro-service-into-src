@@ -44,7 +44,8 @@ const getUserPermissions = () => {
     "Face Enroll", 
     "Manage Roles", 
     "Role Mapping", 
-    "Manage Users"
+    "Manage Users",
+    "Attendance Role Logic"
   ];
 };
 
@@ -64,10 +65,6 @@ const menuItems: MenuItem[] = [
         path: "/master/employees",
         requiredPermission: "Manage Employees"
       },
-      // Removed the employee submenu items:
-      // - All Employees
-      // - Unassigned Employees
-      // - Assigned Employees
       {
         name: "Roles",
         path: "/master/roles",
@@ -77,6 +74,11 @@ const menuItems: MenuItem[] = [
         name: "Projects",
         path: "/master/projects",
         requiredPermission: "Manage Projects"
+      },
+      {
+        name: "Attendance Role Logic",
+        path: "/master/attendance-role-logic",
+        requiredPermission: "Attendance Role Logic"
       }
     ]
   },
