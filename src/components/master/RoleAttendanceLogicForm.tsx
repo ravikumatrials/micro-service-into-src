@@ -29,12 +29,10 @@ type RoleAttendanceLogicFormProps = {
 };
 
 const attendanceTypeOptions = [
+  "Present",
   "Sick Leave",
   "Casual Leave", 
-  "Present",
-  "Check-In",
-  "Check-Out",
-  "Check-In / Check-Out"
+  "Present (Visa/ID)"
 ];
 
 // Available roles from the Roles master
@@ -55,7 +53,6 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
     attendanceType: "",
     projectRequired: true,
     locationRequired: true,
-    autoSubmit: false,
     requiresComment: false,
     defaultCommentLabel: "",
     description: ""
@@ -70,7 +67,6 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
         attendanceType: "",
         projectRequired: true,
         locationRequired: true,
-        autoSubmit: false,
         requiresComment: false,
         defaultCommentLabel: "",
         description: ""
@@ -80,6 +76,12 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.roleName || !formData.attendanceType) {
+      return;
+    }
+    
     onSave(formData);
   };
 
@@ -111,6 +113,7 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
                 <Select 
                   value={formData.roleName} 
                   onValueChange={(value) => handleInputChange("roleName", value)}
+                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
@@ -130,6 +133,7 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
                 <Select 
                   value={formData.attendanceType} 
                   onValueChange={(value) => handleInputChange("attendanceType", value)}
+                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select attendance type" />
@@ -176,15 +180,6 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
               </div>
 
               <div className="flex items-center justify-between">
-                <Label htmlFor="autoSubmit">Auto Submit</Label>
-                <Switch
-                  id="autoSubmit"
-                  checked={formData.autoSubmit}
-                  onCheckedChange={(checked) => handleInputChange("autoSubmit", checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
                 <Label htmlFor="requiresComment">Requires Comment</Label>
                 <Switch
                   id="requiresComment"
@@ -211,7 +206,7 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={!formData.roleName || !formData.attendanceType}>
               {editingItem ? "Update Logic" : "Create Logic"}
             </Button>
           </DialogFooter>

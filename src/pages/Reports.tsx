@@ -74,7 +74,7 @@ const mockAttendanceData = [
     date: "2024-01-15",
     checkInTime: null,
     checkOutTime: null,
-    status: "ID/Visa Verified",
+    status: "Present (Visa/ID)",
     markedBy: "United Emirates Officer",
     timestamp: "2024-01-15 09:00:00",
     project: "Main Building Construction",
@@ -130,7 +130,7 @@ const mockAttendanceData = [
     date: "2024-01-15",
     checkInTime: null,
     checkOutTime: null,
-    status: "ID/Visa Verified",
+    status: "Present (Visa/ID)",
     markedBy: "United Emirates Officer",
     timestamp: "2024-01-15 10:00:00",
     project: "Highway Project",
@@ -181,7 +181,7 @@ const statusOptions = [
   { value: "Absent", label: "Absent" },
   { value: "Sick Leave", label: "Sick Leave" },
   { value: "Casual Leave", label: "Casual Leave" },
-  { value: "ID/Visa Verified", label: "ID/Visa Verified" },
+  { value: "Present (Visa/ID)", label: "Present (Visa/ID)" },
   { value: "Exception", label: "Exception" }
 ];
 
@@ -236,7 +236,7 @@ const Reports = () => {
         setStatusFilter("Sick Leave");
         break;
       case "ueo":
-        setStatusFilter("ID/Visa Verified");
+        setStatusFilter("Present (Visa/ID)");
         break;
       case "absent":
         setStatusFilter("Absent");
@@ -305,7 +305,7 @@ const Reports = () => {
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "Casual Leave":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "ID/Visa Verified":
+      case "Present (Visa/ID)":
         return "bg-purple-100 text-purple-800 border-purple-200";
       case "Exception":
         return "bg-orange-100 text-orange-800 border-orange-200";

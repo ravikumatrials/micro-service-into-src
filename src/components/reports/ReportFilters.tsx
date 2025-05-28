@@ -1,4 +1,3 @@
-
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -151,9 +150,12 @@ export function ReportFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="full-day">Full Day</SelectItem>
-              <SelectItem value="half-day">Half Day</SelectItem>
-              <SelectItem value="absent">Absent</SelectItem>
+              <SelectItem value="Present">Present</SelectItem>
+              <SelectItem value="Absent">Absent</SelectItem>
+              <SelectItem value="Sick Leave">Sick Leave</SelectItem>
+              <SelectItem value="Casual Leave">Casual Leave</SelectItem>
+              <SelectItem value="Present (Visa/ID)">Present (Visa/ID)</SelectItem>
+              <SelectItem value="Exception">Exception</SelectItem>
             </SelectContent>
           </Select>
         </div>

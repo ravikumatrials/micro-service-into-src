@@ -1,4 +1,3 @@
-
 import { mockAttendanceRecords } from "./ManualAttendanceTable";
 
 export interface AttendanceFilters {
@@ -22,6 +21,17 @@ export const initialFilters: AttendanceFilters = {
   entity: "all"
 };
 
+// Updated status options to match the new attendance types
+export const statusOptions = [
+  { value: "all", label: "All Status" },
+  { value: "Present", label: "Present" },
+  { value: "Absent", label: "Absent" },
+  { value: "Sick Leave", label: "Sick Leave" },
+  { value: "Casual Leave", label: "Casual Leave" },
+  { value: "Present (Visa/ID)", label: "Present (Visa/ID)" },
+  { value: "Exception", label: "Exception" }
+];
+
 // Filter attendance records based on filter criteria
 export const filterRecords = (filters: AttendanceFilters) => {
   return mockAttendanceRecords.filter(record => {
@@ -43,7 +53,6 @@ export const filterRecords = (filters: AttendanceFilters) => {
     if (filters.project !== "all" && !record.checkInProject.includes(filters.project)) {
       return false;
     }
-    // Added entity filter
     if (filters.entity !== "all" && record.entity !== filters.entity) {
       return false;
     }

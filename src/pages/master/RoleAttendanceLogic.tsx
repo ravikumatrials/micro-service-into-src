@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,13 +33,12 @@ const defaultRoleLogicData = [
   {
     id: 1,
     roleName: "Supervisor",
-    attendanceType: "Check-In / Check-Out",
+    attendanceType: "Present",
     projectRequired: true,
     locationRequired: true,
-    autoSubmit: false,
     requiresComment: false,
     defaultCommentLabel: "",
-    description: "Standard check-in and check-out for supervisors"
+    description: "Standard attendance for supervisors"
   },
   {
     id: 2,
@@ -46,7 +46,6 @@ const defaultRoleLogicData = [
     attendanceType: "Sick Leave",
     projectRequired: false,
     locationRequired: false,
-    autoSubmit: true,
     requiresComment: true,
     defaultCommentLabel: "Enter sick leave reason",
     description: "Medical officer sick leave approval"
@@ -57,7 +56,6 @@ const defaultRoleLogicData = [
     attendanceType: "Casual Leave",
     projectRequired: false,
     locationRequired: false,
-    autoSubmit: true,
     requiresComment: true,
     defaultCommentLabel: "Enter casual leave reason",
     description: "Camp boss casual leave management"
@@ -65,10 +63,9 @@ const defaultRoleLogicData = [
   {
     id: 4,
     roleName: "United Emirates Officer",
-    attendanceType: "Present",
+    attendanceType: "Present (Visa/ID)",
     projectRequired: false,
     locationRequired: false,
-    autoSubmit: true,
     requiresComment: true,
     defaultCommentLabel: "Enter ID/Visa status",
     description: "UAE officer presence verification"
@@ -157,7 +154,7 @@ const RoleAttendanceLogic = () => {
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "Casual Leave":
         return "bg-orange-100 text-orange-800 border-orange-200";
-      case "Check-In / Check-Out":
+      case "Present (Visa/ID)":
         return "bg-blue-100 text-blue-800 border-blue-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
@@ -239,10 +236,6 @@ const RoleAttendanceLogic = () => {
                     <span className="ml-2">{config.locationRequired ? "Yes" : "No"}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Auto Submit:</span>
-                    <span className="ml-2">{config.autoSubmit ? "Yes" : "No"}</span>
-                  </div>
-                  <div>
                     <span className="font-medium">Requires Comment:</span>
                     <span className="ml-2">{config.requiresComment ? "Yes" : "No"}</span>
                   </div>
@@ -258,7 +251,6 @@ const RoleAttendanceLogic = () => {
                 <TableHead>Attendance Type</TableHead>
                 <TableHead>Project Required</TableHead>
                 <TableHead>Location Required</TableHead>
-                <TableHead>Auto Submit</TableHead>
                 <TableHead>Requires Comment</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -277,9 +269,6 @@ const RoleAttendanceLogic = () => {
                   </TableCell>
                   <TableCell>
                     <Switch checked={config.locationRequired} disabled />
-                  </TableCell>
-                  <TableCell>
-                    <Switch checked={config.autoSubmit} disabled />
                   </TableCell>
                   <TableCell>
                     <Switch checked={config.requiresComment} disabled />
