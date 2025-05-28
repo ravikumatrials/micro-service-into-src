@@ -18,7 +18,7 @@ import Roles from "./pages/master/Roles";
 import Projects from "./pages/master/Projects";
 import NotFound from "./pages/NotFound";
 import ManualAttendanceRecords from "./pages/ManualAttendanceRecords";
-import AttendanceRoleLogicTest from "./pages/master/AttendanceRoleLogicTest";
+import AttendanceRoleLogic from "./pages/master/AttendanceRoleLogic";
 
 // Create a new QueryClient instance inside the component to ensure it's created when React is ready
 const App = () => {
@@ -79,7 +79,7 @@ const App = () => {
             } />
             <Route path="/master/attendance-role-logic" element={
               <PermissionGuard requiredPermission="Attendance Role Logic">
-                <Layout><AttendanceRoleLogicTest /></Layout>
+                <Layout><AttendanceRoleLogic /></Layout>
               </PermissionGuard>
             } />
             
