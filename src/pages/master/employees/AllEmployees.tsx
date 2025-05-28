@@ -338,7 +338,6 @@ const AllEmployees = () => {
                 <TableHead>Classification</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Assigned Roles</TableHead>
-                <TableHead>Login Status</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -366,17 +365,6 @@ const AllEmployees = () => {
                       ) : (
                         <span className="text-sm text-gray-500">No Roles Assigned</span>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge 
-                        className={
-                          employee.loginEnabled 
-                            ? "bg-green-100 text-green-800 hover:bg-green-200" 
-                            : "bg-red-100 text-red-800 hover:bg-red-200"
-                        }
-                      >
-                        {employee.loginEnabled ? "✅ Login Enabled" : "❌ Not Enabled"}
-                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge 
@@ -421,7 +409,7 @@ const AllEmployees = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-6 text-gray-500">
+                  <TableCell colSpan={8} className="text-center py-6 text-gray-500">
                     No employees found matching the search criteria
                   </TableCell>
                 </TableRow>
