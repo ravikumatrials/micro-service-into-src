@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -177,19 +176,6 @@ const RoleAttendanceLogic = () => {
           Add Role Logic
         </Button>
       </div>
-
-      {/* Form Section */}
-      <Card className="p-6">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">Add or Edit Role Attendance Logic</h2>
-          <p className="text-sm text-gray-600">Define attendance rules and behavior for each role</p>
-        </div>
-        
-        <div className="text-center py-8 text-gray-500">
-          <Plus className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>Click "Add Role Logic" to create new attendance rules</p>
-        </div>
-      </Card>
 
       {/* Data Table Section */}
       <Card className="p-0 overflow-hidden">
