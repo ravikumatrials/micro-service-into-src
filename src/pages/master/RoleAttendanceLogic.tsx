@@ -178,6 +178,18 @@ const RoleAttendanceLogic = () => {
         </Button>
       </div>
 
+      {/* Form Section */}
+      <Card className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">Add or Edit Role Attendance Logic</h2>
+        </div>
+        <div className="text-center text-gray-500 py-8">
+          <Plus className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>Click "Add Role Logic" to configure attendance behavior for a role</p>
+        </div>
+      </Card>
+
+      {/* Table Section */}
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
@@ -246,12 +258,6 @@ const RoleAttendanceLogic = () => {
                     <span className="font-medium">Requires Comment:</span>
                     <span className="ml-2">{config.requiresComment ? "Yes" : "No"}</span>
                   </div>
-                  {config.defaultCommentLabel && (
-                    <div>
-                      <span className="font-medium">Comment Label:</span>
-                      <span className="ml-2 text-gray-700">{config.defaultCommentLabel}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
@@ -266,7 +272,6 @@ const RoleAttendanceLogic = () => {
                 <TableHead>Location Req.</TableHead>
                 <TableHead>Auto Submit</TableHead>
                 <TableHead>Requires Comment</TableHead>
-                <TableHead>Comment Label</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -290,9 +295,6 @@ const RoleAttendanceLogic = () => {
                   </TableCell>
                   <TableCell>
                     <Switch checked={config.requiresComment} disabled />
-                  </TableCell>
-                  <TableCell className="text-gray-700 max-w-[150px] truncate">
-                    {config.defaultCommentLabel || "N/A"}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
