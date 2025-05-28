@@ -28,14 +28,6 @@ type RoleAttendanceLogicFormProps = {
   editingItem?: any;
 };
 
-// Available attendance types from the Attendance Type master
-const availableAttendanceTypes = [
-  { id: 1, name: "Present" },
-  { id: 2, name: "Sick Leave" },
-  { id: 3, name: "Casual Leave" },
-  { id: 4, name: "Present (Visa/ID)" }
-];
-
 // Available roles from the Roles master
 const availableRoles = [
   { id: 1, name: "Labour" },
@@ -46,6 +38,14 @@ const availableRoles = [
   { id: 6, name: "Medical Officer" },
   { id: 7, name: "Camp Boss" },
   { id: 8, name: "United Emirates Officer" }
+];
+
+// Attendance types from the Attendance Type master
+const attendanceTypes = [
+  { id: 1, attendanceTypeName: "Present" },
+  { id: 2, attendanceTypeName: "Sick Leave" },
+  { id: 3, attendanceTypeName: "Casual Leave" },
+  { id: 4, attendanceTypeName: "Present (Visa/ID)" }
 ];
 
 export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }: RoleAttendanceLogicFormProps) {
@@ -140,9 +140,9 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
                     <SelectValue placeholder="Select attendance type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableAttendanceTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.name}>
-                        {type.name}
+                    {attendanceTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.attendanceTypeName}>
+                        {type.attendanceTypeName}
                       </SelectItem>
                     ))}
                   </SelectContent>
