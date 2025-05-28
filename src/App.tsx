@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import Employees from "./pages/master/Employees";
 import Roles from "./pages/master/Roles";
 import Projects from "./pages/master/Projects";
+import AttendanceType from "./pages/master/AttendanceType";
 import NotFound from "./pages/NotFound";
 import ManualAttendanceRecords from "./pages/ManualAttendanceRecords";
 import RoleAttendanceLogic from "./pages/master/RoleAttendanceLogic";
@@ -75,6 +76,11 @@ const App = () => {
             <Route path="/master/projects" element={
               <PermissionGuard requiredPermission="Manage Projects">
                 <Layout><Projects /></Layout>
+              </PermissionGuard>
+            } />
+            <Route path="/master/attendance-type" element={
+              <PermissionGuard requiredPermission="Manage Attendance Types">
+                <Layout><AttendanceType /></Layout>
               </PermissionGuard>
             } />
             <Route path="/master/role-attendance-logic" element={
