@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,7 +18,7 @@ import Roles from "./pages/master/Roles";
 import Projects from "./pages/master/Projects";
 import NotFound from "./pages/NotFound";
 import ManualAttendanceRecords from "./pages/ManualAttendanceRecords";
-import AttendanceRoleLogic from "./pages/master/AttendanceRoleLogic";
+import RoleAttendanceLogic from "./pages/master/RoleAttendanceLogic";
 
 // Create a new QueryClient instance inside the component to ensure it's created when React is ready
 const App = () => {
@@ -76,9 +77,9 @@ const App = () => {
                 <Layout><Projects /></Layout>
               </PermissionGuard>
             } />
-            <Route path="/master/attendance-role-logic" element={
+            <Route path="/master/role-attendance-logic" element={
               <PermissionGuard requiredPermission="Attendance Role Logic">
-                <Layout><AttendanceRoleLogic /></Layout>
+                <Layout><RoleAttendanceLogic /></Layout>
               </PermissionGuard>
             } />
             

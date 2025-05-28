@@ -76,8 +76,8 @@ const menuItems: MenuItem[] = [
         requiredPermission: "Manage Projects"
       },
       {
-        name: "Attendance Role Logic",
-        path: "/master/attendance-role-logic",
+        name: "Role Attendance Logic",
+        path: "/master/role-attendance-logic",
         requiredPermission: "Attendance Role Logic"
       }
     ]
