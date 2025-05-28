@@ -28,43 +28,36 @@ import { toast } from "@/hooks/use-toast";
 import { AttendanceRoleLogicForm } from "@/components/master/AttendanceRoleLogicForm";
 import { Switch } from "@/components/ui/switch";
 
-// Mock data for attendance role logic configurations
+// Updated mock data for attendance role logic configurations
 const mockRoleLogicData = [
   {
     id: 1,
     roleName: "Medical Officer",
-    attendanceType: "Mark Sick Leave",
     defaultStatus: "Sick Leave",
     requireComment: true,
-    autoProjectAssign: false,
   },
   {
     id: 2,
     roleName: "Camp Boss",
-    attendanceType: "Mark Casual Leave",
     defaultStatus: "Casual Leave",
     requireComment: true,
-    autoProjectAssign: false,
   },
   {
     id: 3,
     roleName: "United Emirates Officer",
-    attendanceType: "ID/Visa Verification",
     defaultStatus: "Present",
-    requireComment: false,
-    autoProjectAssign: true,
+    requireComment: true,
   },
   {
     id: 4,
     roleName: "Supervisor",
-    attendanceType: "Manual Attendance",
-    defaultStatus: "Present",
+    defaultStatus: "General Attendance",
     requireComment: false,
-    autoProjectAssign: true,
   },
 ];
 
-const statusOptions = ["Present", "Sick Leave", "Casual Leave", "Absent", "Exception"];
+// Updated status options
+const statusOptions = ["Present", "Sick Leave", "Casual Leave", "General Attendance"];
 
 const AttendanceRoleLogic = () => {
   const isMobile = useIsMobile();
@@ -83,30 +76,57 @@ const AttendanceRoleLogic = () => {
   };
 
   const handleDelete = (id: number) => {
+    const deletedItem = roleLogicData.find(item => item.id === id);
     setRoleLogicData(prev => prev.filter(item => item.id !== id));
     toast({
       title: "Configuration Deleted",
-      description: "Attendance role logic configuration has been removed.",
+      description: `Role logic configuration for ${deletedItem?.roleName} has been removed.`,
     });
   };
 
   const handleSave = (data: any) => {
     if (editingItem) {
+      // Check for duplicate role (excluding current item)
+      const isDuplicate = roleLogicData.some(
+        item => item.roleName === data.roleName && item.id !== editingItem.id
+      );
+      
+      if (isDuplicate) {
+        toast({
+          title: "Duplicate Role",
+          description: `Configuration for ${data.roleName} already exists.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Update existing item
       setRoleLogicData(prev => 
         prev.map(item => item.id === editingItem.id ? { ...data, id: editingItem.id } : item)
       );
       toast({
-        title: "Configuration Updated",
-        description: "Attendance role logic has been updated successfully.",
+        title: "Role Logic Updated",
+        description: `Role logic updated for ${data.roleName}`,
       });
     } else {
+      // Check for duplicate role
+      const isDuplicate = roleLogicData.some(item => item.roleName === data.roleName);
+      
+      if (isDuplicate) {
+        toast({
+          title: "Duplicate Role",
+          description: `Configuration for ${data.roleName} already exists.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Add new item
       const newItem = { ...data, id: Math.max(...roleLogicData.map(r => r.id)) + 1 };
       setRoleLogicData(prev => [...prev, newItem]);
       toast({
-        title: "Configuration Added",
-        description: "New attendance role logic has been added successfully.",
+        title: "Role Logic Added",
+        description: `Role logic updated for ${data.roleName}`,
       });
     }
     setIsFormOpen(false);
@@ -121,10 +141,8 @@ const AttendanceRoleLogic = () => {
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "Casual Leave":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Absent":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "Exception":
-        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "General Attendance":
+        return "bg-purple-100 text-purple-800 border-purple-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -160,7 +178,6 @@ const AttendanceRoleLogic = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium text-gray-900">{config.roleName}</h3>
-                    <p className="text-sm text-gray-500">{config.attendanceType}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleEdit(config)}>
@@ -200,10 +217,6 @@ const AttendanceRoleLogic = () => {
                     <span className="font-medium">Require Comment:</span>
                     <span className="ml-2">{config.requireComment ? "Yes" : "No"}</span>
                   </div>
-                  <div className="col-span-2">
-                    <span className="font-medium">Auto Project Assign:</span>
-                    <span className="ml-2">{config.autoProjectAssign ? "Yes" : "No"}</span>
-                  </div>
                 </div>
               </div>
             ))}
@@ -213,10 +226,8 @@ const AttendanceRoleLogic = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Role Name</TableHead>
-                <TableHead>Attendance Type</TableHead>
                 <TableHead>Default Status</TableHead>
                 <TableHead>Require Comment</TableHead>
-                <TableHead>Auto Project Assign</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -224,7 +235,6 @@ const AttendanceRoleLogic = () => {
               {roleLogicData.map((config) => (
                 <TableRow key={config.id}>
                   <TableCell className="font-medium">{config.roleName}</TableCell>
-                  <TableCell>{config.attendanceType}</TableCell>
                   <TableCell>
                     <Badge className={getStatusBadgeColor(config.defaultStatus)}>
                       {config.defaultStatus}
@@ -232,9 +242,6 @@ const AttendanceRoleLogic = () => {
                   </TableCell>
                   <TableCell>
                     <Switch checked={config.requireComment} disabled />
-                  </TableCell>
-                  <TableCell>
-                    <Switch checked={config.autoProjectAssign} disabled />
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
