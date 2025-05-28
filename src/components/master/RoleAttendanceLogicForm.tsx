@@ -28,11 +28,12 @@ type RoleAttendanceLogicFormProps = {
   editingItem?: any;
 };
 
-const attendanceTypeOptions = [
-  "Present",
-  "Sick Leave",
-  "Casual Leave", 
-  "Present (Visa/ID)"
+// Available attendance types from the Attendance Type master
+const availableAttendanceTypes = [
+  { id: 1, name: "Present" },
+  { id: 2, name: "Sick Leave" },
+  { id: 3, name: "Casual Leave" },
+  { id: 4, name: "Present (Visa/ID)" }
 ];
 
 // Available roles from the Roles master
@@ -139,9 +140,9 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
                     <SelectValue placeholder="Select attendance type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {attendanceTypeOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
+                    {availableAttendanceTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.name}>
+                        {type.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
