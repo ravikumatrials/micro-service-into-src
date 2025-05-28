@@ -151,7 +151,7 @@ const UnassignedEmployees = () => {
     setSetupLoginOpen(true);
   };
 
-  const handleLoginSetup = (loginData: { loginId: string; password: string; roles: string[] }) => {
+  const handleLoginSetup = (loginData: { loginId: string; password: string; roles: string[]; loginMethod: string }) => {
     if (!selectedEmployee) return;
     
     // Update employee with login enabled status and assigned roles
@@ -161,6 +161,7 @@ const UnassignedEmployees = () => {
             ...emp, 
             loginEnabled: true, 
             loginId: loginData.loginId,
+            loginMethod: loginData.loginMethod,
             assignedRoles: loginData.roles
           } 
         : emp

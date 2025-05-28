@@ -11,15 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type RoleSelectionModalProps = {
   open: boolean;
@@ -38,9 +32,11 @@ export function RoleSelectionModal({
 }: RoleSelectionModalProps) {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
-  const handleAddRole = (roleToAdd: string) => {
-    if (roleToAdd && !selectedRoles.includes(roleToAdd)) {
-      setSelectedRoles([...selectedRoles, roleToAdd]);
+  const handleRoleToggle = (role: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRoles([...selectedRoles, role]);
+    } else {
+      setSelectedRoles(selectedRoles.filter(r => r !== role));
     }
   };
 
@@ -77,27 +73,27 @@ export function RoleSelectionModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Assigned Roles *</Label>
-            <Select onValueChange={handleAddRole}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a role to add" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableRoles
-                  .filter(role => !selectedRoles.includes(role))
-                  .map((role) => (
-                  <SelectItem key={role} value={role}>
+          <div className="space-y-3">
+            <Label>Available Roles *</Label>
+            <div className="space-y-2">
+              {availableRoles.map((role) => (
+                <div key={role} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={role}
+                    checked={selectedRoles.includes(role)}
+                    onCheckedChange={(checked) => handleRoleToggle(role, !!checked)}
+                  />
+                  <Label htmlFor={role} className="text-sm font-normal cursor-pointer">
                     {role}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
 
           {selectedRoles.length > 0 && (
             <div className="space-y-2">
-              <Label>Selected Roles:</Label>
+              <Label>Selected Roles ({selectedRoles.length}):</Label>
               <div className="flex flex-wrap gap-2">
                 {selectedRoles.map((role) => (
                   <Badge key={role} className="bg-blue-100 text-blue-800 hover:bg-blue-200">
@@ -125,7 +121,7 @@ export function RoleSelectionModal({
             onClick={handleContinue}
             disabled={selectedRoles.length === 0}
           >
-            Continue
+            Next
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -20,7 +20,7 @@ type SetupLoginModalProps = {
   onOpenChange: (open: boolean) => void;
   employee: any;
   selectedRoles: string[];
-  onLoginSetup: (loginData: { loginId: string; password: string; roles: string[] }) => void;
+  onLoginSetup: (loginData: { loginId: string; password: string; roles: string[]; loginMethod: string }) => void;
 };
 
 export function SetupLoginModal({ 
@@ -87,7 +87,12 @@ export function SetupLoginModal({
       return;
     }
 
-    onLoginSetup({ loginId, password, roles: selectedRoles });
+    onLoginSetup({ 
+      loginId, 
+      password, 
+      roles: selectedRoles, 
+      loginMethod 
+    });
     
     // Reset form
     setLoginId("");
@@ -110,15 +115,15 @@ export function SetupLoginModal({
 
         <div className="space-y-4">
           <div className="space-y-3">
-            <Label>Login With *</Label>
+            <Label>Choose Login Method *</Label>
             <RadioGroup value={loginMethod} onValueChange={setLoginMethod}>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="employeeId" id="employeeId" />
-                <Label htmlFor="employeeId">Employee ID</Label>
+                <RadioGroupItem value="email" id="email" />
+                <Label htmlFor="email">Use Email</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="email" id="email" />
-                <Label htmlFor="email">Email</Label>
+                <RadioGroupItem value="employeeId" id="employeeId" />
+                <Label htmlFor="employeeId">Use Employee ID</Label>
               </div>
             </RadioGroup>
           </div>
