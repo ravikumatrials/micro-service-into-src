@@ -39,7 +39,7 @@ import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDial
 import { useToast } from "@/hooks/use-toast";
 import { updateEmployeeRole, availableRoles } from "@/utils/roleUtils";
 
-// Updated mock data to include login method and ensuring all have roles assigned
+// Updated mock data to include assigned roles from Role Attendance Logic
 const USERS = [
   { 
     employeeId: "EMP001", 
@@ -49,6 +49,7 @@ const USERS = [
     classification: "Laborer",
     status: "Active",
     role: "Supervisor", 
+    assignedRoles: ["Supervisor"],
     assignedBy: "Admin User", 
     assignmentDate: "2025-03-15",
     email: "john.smith@tanseeq.ae",
@@ -63,6 +64,7 @@ const USERS = [
     classification: "Staff",
     status: "Active",
     role: "Admin", 
+    assignedRoles: ["Medical Officer", "Camp Boss"],
     assignedBy: "Admin User", 
     assignmentDate: "2025-02-20",
     email: "emily.davis@tanseeq.ae",
@@ -77,6 +79,7 @@ const USERS = [
     classification: "Laborer",
     status: "Inactive",
     role: "Clerk", 
+    assignedRoles: ["United Emirates Officer"],
     assignedBy: "Jane Doe", 
     assignmentDate: "2025-01-10",
     email: "michael.brown@tanseeq.ae",
@@ -91,6 +94,7 @@ const USERS = [
     classification: "Laborer",
     status: "Active",
     role: "Supervisor", 
+    assignedRoles: ["Supervisor", "Safety Officer"],
     assignedBy: "Admin User", 
     assignmentDate: "2025-04-05",
     email: "david.lee@tanseeq.ae",
@@ -458,6 +462,7 @@ const Users = () => {
                 <TableHead>Classification</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Assigned Roles</TableHead>
                 <TableHead>Login Method</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -491,6 +496,18 @@ const Users = () => {
                       >
                         {user.role}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {user.assignedRoles.map((assignedRole, index) => (
+                          <Badge 
+                            key={index}
+                            className="bg-purple-100 text-purple-800 text-xs"
+                          >
+                            {assignedRole}
+                          </Badge>
+                        ))}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {user.loginMethod ? (
@@ -571,7 +588,7 @@ const Users = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-6 text-gray-500">
+                  <TableCell colSpan={10} className="text-center py-6 text-gray-500">
                     No users found with the specified criteria.
                   </TableCell>
                 </TableRow>
@@ -602,6 +619,18 @@ const Users = () => {
                   {selectedUser?.role}
                 </Badge>
               </p>
+              
+              <p className="text-sm font-medium">Assigned Roles:</p>
+              <div className="flex flex-wrap gap-1">
+                {selectedUser?.assignedRoles.map((assignedRole, index) => (
+                  <Badge 
+                    key={index}
+                    className="bg-purple-100 text-purple-800 text-xs"
+                  >
+                    {assignedRole}
+                  </Badge>
+                ))}
+              </div>
               
               <p className="text-sm font-medium">Entity:</p>
               <p className="text-sm">{selectedUser?.entity}</p>

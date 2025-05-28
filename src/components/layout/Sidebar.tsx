@@ -12,7 +12,8 @@ import {
   ChevronRight,
   ChevronLeft,
   Briefcase,
-  CheckCircle
+  CheckCircle,
+  UserCog
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -45,7 +46,7 @@ const getUserPermissions = () => {
     "Manage Roles", 
     "Role Mapping", 
     "Manage Users",
-    "Attendance Role Logic"
+    "Role Attendance Logic"
   ];
 };
 
@@ -76,9 +77,14 @@ const menuItems: MenuItem[] = [
         requiredPermission: "Manage Projects"
       },
       {
-        name: "Attendance Role Logic",
-        path: "/master/attendance-role-logic",
-        requiredPermission: "Attendance Role Logic"
+        name: "Role Attendance Logic",
+        path: "/master/role-attendance-logic",
+        requiredPermission: "Role Attendance Logic"
+      },
+      {
+        name: "Users",
+        path: "/master/users",
+        requiredPermission: "Manage Users"
       }
     ]
   },
@@ -270,7 +276,7 @@ export function Sidebar() {
           )}
         </div>
       </div>
-      <div className={`transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`} />
+      <div className="transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}" />
     </div>
   );
 }
