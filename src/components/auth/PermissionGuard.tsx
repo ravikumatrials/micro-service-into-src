@@ -15,7 +15,7 @@ const getUserPermissions = () => {
     "Manage Roles", 
     "Role Mapping", 
     "Manage Users",
-    "Role Attendance Logic"
+    "Attendance Role Logic"
   ];
 };
 

@@ -25,60 +25,37 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { RoleAttendanceLogicForm } from "@/components/master/RoleAttendanceLogicForm";
+import { AttendanceRoleLogicForm } from "@/components/master/AttendanceRoleLogicForm";
 import { Switch } from "@/components/ui/switch";
 
-// Default role entries as specified
-const defaultRoleLogicData = [
+// Mock data for attendance role logic configurations
+const mockRoleLogicData = [
   {
     id: 1,
-    roleName: "Supervisor",
-    attendanceType: "Check-In / Check-Out",
-    projectRequired: true,
-    locationRequired: true,
-    autoSubmit: false,
-    requiresComment: false,
-    defaultCommentLabel: "",
-    description: "Standard supervisor attendance with full location and project tracking"
+    roleName: "Medical Officer",
+    attendanceStatus: "Sick Leave",
+    commentRequired: true,
+    defaultReason: "Employee has fever",
   },
   {
     id: 2,
-    roleName: "Medical Officer",
-    attendanceType: "Sick Leave",
-    projectRequired: false,
-    locationRequired: false,
-    autoSubmit: true,
-    requiresComment: true,
-    defaultCommentLabel: "Enter sick leave reason",
-    description: "Medical officer can mark employees as sick leave"
+    roleName: "Camp Boss",
+    attendanceStatus: "Casual Leave",
+    commentRequired: true,
+    defaultReason: "Off for personal reason",
   },
   {
     id: 3,
-    roleName: "Camp Boss",
-    attendanceType: "Casual Leave",
-    projectRequired: false,
-    locationRequired: false,
-    autoSubmit: true,
-    requiresComment: true,
-    defaultCommentLabel: "Enter casual leave reason",
-    description: "Camp boss can approve casual leave requests"
-  },
-  {
-    id: 4,
     roleName: "United Emirates Officer",
-    attendanceType: "Present",
-    projectRequired: false,
-    locationRequired: false,
-    autoSubmit: true,
-    requiresComment: true,
-    defaultCommentLabel: "Enter ID/Visa status",
-    description: "UAE officer verifies employee ID and visa status"
-  }
+    attendanceStatus: "Present",
+    commentRequired: false,
+    defaultReason: "ID Verified",
+  },
 ];
 
-const RoleAttendanceLogic = () => {
+const AttendanceRoleLogic = () => {
   const isMobile = useIsMobile();
-  const [roleLogicData, setRoleLogicData] = useState(defaultRoleLogicData);
+  const [roleLogicData, setRoleLogicData] = useState(mockRoleLogicData);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
@@ -96,7 +73,7 @@ const RoleAttendanceLogic = () => {
     const deletedItem = roleLogicData.find(item => item.id === id);
     setRoleLogicData(prev => prev.filter(item => item.id !== id));
     toast({
-      title: "Role Logic Deleted",
+      title: "Logic Deleted",
       description: `Attendance logic for ${deletedItem?.roleName} has been removed.`,
     });
   };
@@ -122,7 +99,7 @@ const RoleAttendanceLogic = () => {
         prev.map(item => item.id === editingItem.id ? { ...data, id: editingItem.id } : item)
       );
       toast({
-        title: "Role Logic Updated",
+        title: "Logic Updated",
         description: `Attendance logic updated for ${data.roleName}`,
       });
     } else {
@@ -142,7 +119,7 @@ const RoleAttendanceLogic = () => {
       const newItem = { ...data, id: Math.max(...roleLogicData.map(r => r.id)) + 1 };
       setRoleLogicData(prev => [...prev, newItem]);
       toast({
-        title: "Role Logic Added",
+        title: "Logic Added",
         description: `Attendance logic created for ${data.roleName}`,
       });
     }
@@ -150,16 +127,14 @@ const RoleAttendanceLogic = () => {
     setEditingItem(null);
   };
 
-  const getAttendanceTypeBadgeColor = (type: string) => {
-    switch (type) {
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
       case "Present":
         return "bg-green-100 text-green-800 border-green-200";
       case "Sick Leave":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "Casual Leave":
         return "bg-orange-100 text-orange-800 border-orange-200";
-      case "Check-In / Check-Out":
-        return "bg-blue-100 text-blue-800 border-blue-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -169,33 +144,21 @@ const RoleAttendanceLogic = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Role Attendance Logic</h1>
-          <p className="text-gray-600 mt-1">Configure attendance behavior and requirements for different user roles</p>
+          <h1 className="text-2xl font-bold text-gray-800">Attendance Role Logic</h1>
+          <p className="text-gray-600 mt-1">Configure automatic attendance behavior for different roles in the mobile application</p>
         </div>
         <Button onClick={handleAddNew} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          Add Role Logic
+          Add Logic
         </Button>
       </div>
 
-      {/* Form Section */}
-      <Card className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">Add or Edit Role Attendance Logic</h2>
-        </div>
-        <div className="text-center text-gray-500 py-8">
-          <Plus className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>Click "Add Role Logic" to configure attendance behavior for a role</p>
-        </div>
-      </Card>
-
-      {/* Table Section */}
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-800">Role Logic Configuration</h2>
             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              {roleLogicData.length} roles configured
+              {roleLogicData.length} configurations
             </Badge>
           </div>
         </div>
@@ -220,9 +183,9 @@ const RoleAttendanceLogic = () => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Role Logic</AlertDialogTitle>
+                          <AlertDialogTitle>Delete Logic</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this role attendance logic? This action cannot be undone.
+                            Are you sure you want to delete this attendance logic? This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -237,26 +200,18 @@ const RoleAttendanceLogic = () => {
                 </div>
                 <div className="space-y-2 text-sm">
                   <div>
-                    <span className="font-medium">Attendance Type:</span>
-                    <Badge className={`ml-2 ${getAttendanceTypeBadgeColor(config.attendanceType)}`}>
-                      {config.attendanceType}
+                    <span className="font-medium">Attendance Status:</span>
+                    <Badge className={`ml-2 ${getStatusBadgeColor(config.attendanceStatus)}`}>
+                      {config.attendanceStatus}
                     </Badge>
                   </div>
                   <div>
-                    <span className="font-medium">Project Required:</span>
-                    <span className="ml-2">{config.projectRequired ? "Yes" : "No"}</span>
+                    <span className="font-medium">Comment Required:</span>
+                    <span className="ml-2">{config.commentRequired ? "Yes" : "No"}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Location Required:</span>
-                    <span className="ml-2">{config.locationRequired ? "Yes" : "No"}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Auto Submit:</span>
-                    <span className="ml-2">{config.autoSubmit ? "Yes" : "No"}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Requires Comment:</span>
-                    <span className="ml-2">{config.requiresComment ? "Yes" : "No"}</span>
+                    <span className="font-medium">Default Reason:</span>
+                    <span className="ml-2 text-gray-700">{config.defaultReason || "N/A"}</span>
                   </div>
                 </div>
               </div>
@@ -267,11 +222,9 @@ const RoleAttendanceLogic = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Role Name</TableHead>
-                <TableHead>Attendance Type</TableHead>
-                <TableHead>Project Req.</TableHead>
-                <TableHead>Location Req.</TableHead>
-                <TableHead>Auto Submit</TableHead>
-                <TableHead>Requires Comment</TableHead>
+                <TableHead>Attendance Status</TableHead>
+                <TableHead>Comment Required</TableHead>
+                <TableHead>Default Reason</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -280,22 +233,14 @@ const RoleAttendanceLogic = () => {
                 <TableRow key={config.id}>
                   <TableCell className="font-medium">{config.roleName}</TableCell>
                   <TableCell>
-                    <Badge className={getAttendanceTypeBadgeColor(config.attendanceType)}>
-                      {config.attendanceType}
+                    <Badge className={getStatusBadgeColor(config.attendanceStatus)}>
+                      {config.attendanceStatus}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Switch checked={config.projectRequired} disabled />
+                    <Switch checked={config.commentRequired} disabled />
                   </TableCell>
-                  <TableCell>
-                    <Switch checked={config.locationRequired} disabled />
-                  </TableCell>
-                  <TableCell>
-                    <Switch checked={config.autoSubmit} disabled />
-                  </TableCell>
-                  <TableCell>
-                    <Switch checked={config.requiresComment} disabled />
-                  </TableCell>
+                  <TableCell className="text-gray-700">{config.defaultReason || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(config)}>
@@ -309,9 +254,9 @@ const RoleAttendanceLogic = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Role Logic</AlertDialogTitle>
+                            <AlertDialogTitle>Delete Logic</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete this role attendance logic? This action cannot be undone.
+                              Are you sure you want to delete this attendance logic? This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -333,13 +278,13 @@ const RoleAttendanceLogic = () => {
         {roleLogicData.length === 0 && (
           <div className="p-8 text-center text-gray-500">
             <Plus className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No role attendance logic configured</p>
-            <p className="text-sm">Click "Add Role Logic" to get started</p>
+            <p>No attendance logic configurations found</p>
+            <p className="text-sm">Click "Add Logic" to get started</p>
           </div>
         )}
       </Card>
 
-      <RoleAttendanceLogicForm
+      <AttendanceRoleLogicForm
         isOpen={isFormOpen}
         onClose={() => {
           setIsFormOpen(false);
@@ -352,4 +297,4 @@ const RoleAttendanceLogic = () => {
   );
 };
 
-export default RoleAttendanceLogic;
+export default AttendanceRoleLogic;
