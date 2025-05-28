@@ -31,9 +31,9 @@ import { availableRoles } from "@/utils/roleUtils";
 
 const formSchema = z.object({
   roleName: z.string().min(1, "Role name is required"),
-  attendanceType: z.string().min(1, "Attendance type is required"),
-  defaultStatus: z.string().min(1, "Default status is required"),
-  requireComment: z.boolean(),
+  attendanceStatus: z.string().min(1, "Attendance status is required"),
+  commentRequired: z.boolean(),
+  defaultReason: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -43,66 +43,40 @@ interface AttendanceRoleLogicFormProps {
   onClose: () => void;
   onSave: (data: FormData) => void;
   editingItem?: any;
-  attendanceTypeOptions: string[];
 }
+
+const attendanceStatusOptions = ["Present", "Sick Leave", "Casual Leave"];
 
 export const AttendanceRoleLogicForm = ({
   isOpen,
   onClose,
   onSave,
   editingItem,
-  attendanceTypeOptions,
 }: AttendanceRoleLogicFormProps) => {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       roleName: "",
-      attendanceType: "",
-      defaultStatus: "",
-      requireComment: false,
+      attendanceStatus: "",
+      commentRequired: false,
+      defaultReason: "",
     },
   });
-
-  const watchedAttendanceType = form.watch("attendanceType");
-
-  // Auto-fill default status based on attendance type
-  useEffect(() => {
-    if (watchedAttendanceType && !editingItem) {
-      let autoStatus = "";
-      switch (watchedAttendanceType) {
-        case "General Attendance":
-          autoStatus = "Present";
-          break;
-        case "Mark Sick Leave":
-          autoStatus = "Sick Leave";
-          break;
-        case "Mark Casual Leave":
-          autoStatus = "Casual Leave";
-          break;
-        case "ID/Visa Verification":
-          autoStatus = "ID/Visa Verified";
-          break;
-      }
-      if (autoStatus) {
-        form.setValue("defaultStatus", autoStatus);
-      }
-    }
-  }, [watchedAttendanceType, form, editingItem]);
 
   useEffect(() => {
     if (editingItem) {
       form.reset({
         roleName: editingItem.roleName,
-        attendanceType: editingItem.attendanceType,
-        defaultStatus: editingItem.defaultStatus,
-        requireComment: editingItem.requireComment,
+        attendanceStatus: editingItem.attendanceStatus,
+        commentRequired: editingItem.commentRequired,
+        defaultReason: editingItem.defaultReason || "",
       });
     } else {
       form.reset({
         roleName: "",
-        attendanceType: "",
-        defaultStatus: "",
-        requireComment: false,
+        attendanceStatus: "",
+        commentRequired: false,
+        defaultReason: "",
       });
     }
   }, [editingItem, form]);
@@ -122,7 +96,7 @@ export const AttendanceRoleLogicForm = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {editingItem ? "Edit Attendance Rule" : "Add New Attendance Rule"}
+            {editingItem ? "Edit Attendance Logic" : "Add New Attendance Logic"}
           </DialogTitle>
         </DialogHeader>
 
@@ -141,7 +115,9 @@ export const AttendanceRoleLogicForm = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {availableRoles.map((role) => (
+                      {availableRoles
+                        .filter(role => role.name !== "Supervisor") // Exclude Supervisor as mentioned
+                        .map((role) => (
                         <SelectItem key={role.id} value={role.name}>
                           {role.name}
                         </SelectItem>
@@ -155,20 +131,20 @@ export const AttendanceRoleLogicForm = ({
 
             <FormField
               control={form.control}
-              name="attendanceType"
+              name="attendanceStatus"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Attendance Type</FormLabel>
+                  <FormLabel>Attendance Status</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select attendance type" />
+                        <SelectValue placeholder="Select attendance status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {attendanceTypeOptions.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
+                      {attendanceStatusOptions.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -180,33 +156,13 @@ export const AttendanceRoleLogicForm = ({
 
             <FormField
               control={form.control}
-              name="defaultStatus"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Default Status</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter default status" 
-                      {...field}
-                    />
-                  </FormControl>
-                  <div className="text-xs text-muted-foreground">
-                    Auto-filled based on attendance type, but you can override
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="requireComment"
+              name="commentRequired"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                   <div className="space-y-0.5">
-                    <FormLabel>Require Comment</FormLabel>
+                    <FormLabel>Comment Required</FormLabel>
                     <div className="text-sm text-muted-foreground">
-                      Force users to enter a comment when marking attendance
+                      Require users to enter a comment when marking attendance
                     </div>
                   </div>
                   <FormControl>
@@ -219,12 +175,32 @@ export const AttendanceRoleLogicForm = ({
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="defaultReason"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Default Reason (Optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter default reason or comment" 
+                      {...field}
+                    />
+                  </FormControl>
+                  <div className="text-xs text-muted-foreground">
+                    This will be pre-filled when capturing attendance
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit">
-                {editingItem ? "Update Rule" : "Add Rule"}
+                {editingItem ? "Update Logic" : "Add Logic"}
               </Button>
             </div>
           </form>

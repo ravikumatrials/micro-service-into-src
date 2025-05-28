@@ -28,40 +28,30 @@ import { toast } from "@/hooks/use-toast";
 import { AttendanceRoleLogicForm } from "@/components/master/AttendanceRoleLogicForm";
 import { Switch } from "@/components/ui/switch";
 
-// Updated mock data for attendance role logic configurations
+// Mock data for attendance role logic configurations
 const mockRoleLogicData = [
   {
     id: 1,
-    roleName: "Supervisor",
-    attendanceType: "General Attendance",
-    defaultStatus: "Present",
-    requireComment: false,
+    roleName: "Medical Officer",
+    attendanceStatus: "Sick Leave",
+    commentRequired: true,
+    defaultReason: "Employee has fever",
   },
   {
     id: 2,
-    roleName: "Medical Officer",
-    attendanceType: "Mark Sick Leave",
-    defaultStatus: "Sick Leave",
-    requireComment: true,
+    roleName: "Camp Boss",
+    attendanceStatus: "Casual Leave",
+    commentRequired: true,
+    defaultReason: "Off for personal reason",
   },
   {
     id: 3,
-    roleName: "Camp Boss",
-    attendanceType: "Mark Casual Leave",
-    defaultStatus: "Casual Leave",
-    requireComment: true,
-  },
-  {
-    id: 4,
     roleName: "United Emirates Officer",
-    attendanceType: "ID/Visa Verification",
-    defaultStatus: "ID/Visa Verified",
-    requireComment: true,
+    attendanceStatus: "Present",
+    commentRequired: false,
+    defaultReason: "ID Verified",
   },
 ];
-
-// Updated attendance type options
-const attendanceTypeOptions = ["General Attendance", "Mark Sick Leave", "Mark Casual Leave", "ID/Visa Verification"];
 
 const AttendanceRoleLogic = () => {
   const isMobile = useIsMobile();
@@ -83,8 +73,8 @@ const AttendanceRoleLogic = () => {
     const deletedItem = roleLogicData.find(item => item.id === id);
     setRoleLogicData(prev => prev.filter(item => item.id !== id));
     toast({
-      title: "Rule Deleted",
-      description: `Attendance rule for ${deletedItem?.roleName} has been removed.`,
+      title: "Logic Deleted",
+      description: `Attendance logic for ${deletedItem?.roleName} has been removed.`,
     });
   };
 
@@ -98,7 +88,7 @@ const AttendanceRoleLogic = () => {
       if (isDuplicate) {
         toast({
           title: "Duplicate Role",
-          description: `Rule for ${data.roleName} already exists.`,
+          description: `Logic for ${data.roleName} already exists.`,
           variant: "destructive",
         });
         return;
@@ -109,8 +99,8 @@ const AttendanceRoleLogic = () => {
         prev.map(item => item.id === editingItem.id ? { ...data, id: editingItem.id } : item)
       );
       toast({
-        title: "Rule Updated",
-        description: `Attendance rule updated for ${data.roleName}`,
+        title: "Logic Updated",
+        description: `Attendance logic updated for ${data.roleName}`,
       });
     } else {
       // Check for duplicate role
@@ -119,7 +109,7 @@ const AttendanceRoleLogic = () => {
       if (isDuplicate) {
         toast({
           title: "Duplicate Role",
-          description: `Rule for ${data.roleName} already exists.`,
+          description: `Logic for ${data.roleName} already exists.`,
           variant: "destructive",
         });
         return;
@@ -129,24 +119,22 @@ const AttendanceRoleLogic = () => {
       const newItem = { ...data, id: Math.max(...roleLogicData.map(r => r.id)) + 1 };
       setRoleLogicData(prev => [...prev, newItem]);
       toast({
-        title: "Rule Added",
-        description: `Attendance rule created for ${data.roleName}`,
+        title: "Logic Added",
+        description: `Attendance logic created for ${data.roleName}`,
       });
     }
     setIsFormOpen(false);
     setEditingItem(null);
   };
 
-  const getAttendanceTypeBadgeColor = (type: string) => {
-    switch (type) {
-      case "General Attendance":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Mark Sick Leave":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "Mark Casual Leave":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "ID/Visa Verification":
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case "Present":
         return "bg-green-100 text-green-800 border-green-200";
+      case "Sick Leave":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "Casual Leave":
+        return "bg-orange-100 text-orange-800 border-orange-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -157,20 +145,20 @@ const AttendanceRoleLogic = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Attendance Role Logic</h1>
-          <p className="text-gray-600 mt-1">Define how attendance is marked for different roles in the mobile application</p>
+          <p className="text-gray-600 mt-1">Configure automatic attendance behavior for different roles in the mobile application</p>
         </div>
         <Button onClick={handleAddNew} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          Add Rule
+          Add Logic
         </Button>
       </div>
 
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-800">Role Rules</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Role Logic Configuration</h2>
             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              {roleLogicData.length} rules
+              {roleLogicData.length} configurations
             </Badge>
           </div>
         </div>
@@ -195,9 +183,9 @@ const AttendanceRoleLogic = () => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Rule</AlertDialogTitle>
+                          <AlertDialogTitle>Delete Logic</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this attendance rule? This action cannot be undone.
+                            Are you sure you want to delete this attendance logic? This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -212,18 +200,18 @@ const AttendanceRoleLogic = () => {
                 </div>
                 <div className="space-y-2 text-sm">
                   <div>
-                    <span className="font-medium">Attendance Type:</span>
-                    <Badge className={`ml-2 ${getAttendanceTypeBadgeColor(config.attendanceType)}`}>
-                      {config.attendanceType}
+                    <span className="font-medium">Attendance Status:</span>
+                    <Badge className={`ml-2 ${getStatusBadgeColor(config.attendanceStatus)}`}>
+                      {config.attendanceStatus}
                     </Badge>
                   </div>
                   <div>
-                    <span className="font-medium">Default Status:</span>
-                    <span className="ml-2 text-gray-700">{config.defaultStatus}</span>
+                    <span className="font-medium">Comment Required:</span>
+                    <span className="ml-2">{config.commentRequired ? "Yes" : "No"}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Require Comment:</span>
-                    <span className="ml-2">{config.requireComment ? "Yes" : "No"}</span>
+                    <span className="font-medium">Default Reason:</span>
+                    <span className="ml-2 text-gray-700">{config.defaultReason || "N/A"}</span>
                   </div>
                 </div>
               </div>
@@ -234,9 +222,9 @@ const AttendanceRoleLogic = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Role Name</TableHead>
-                <TableHead>Attendance Type</TableHead>
-                <TableHead>Default Status</TableHead>
-                <TableHead>Require Comment</TableHead>
+                <TableHead>Attendance Status</TableHead>
+                <TableHead>Comment Required</TableHead>
+                <TableHead>Default Reason</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -245,14 +233,14 @@ const AttendanceRoleLogic = () => {
                 <TableRow key={config.id}>
                   <TableCell className="font-medium">{config.roleName}</TableCell>
                   <TableCell>
-                    <Badge className={getAttendanceTypeBadgeColor(config.attendanceType)}>
-                      {config.attendanceType}
+                    <Badge className={getStatusBadgeColor(config.attendanceStatus)}>
+                      {config.attendanceStatus}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-gray-700">{config.defaultStatus}</TableCell>
                   <TableCell>
-                    <Switch checked={config.requireComment} disabled />
+                    <Switch checked={config.commentRequired} disabled />
                   </TableCell>
+                  <TableCell className="text-gray-700">{config.defaultReason || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(config)}>
@@ -266,9 +254,9 @@ const AttendanceRoleLogic = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Rule</AlertDialogTitle>
+                            <AlertDialogTitle>Delete Logic</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete this attendance rule? This action cannot be undone.
+                              Are you sure you want to delete this attendance logic? This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -290,8 +278,8 @@ const AttendanceRoleLogic = () => {
         {roleLogicData.length === 0 && (
           <div className="p-8 text-center text-gray-500">
             <Plus className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No attendance rules found</p>
-            <p className="text-sm">Click "Add Rule" to get started</p>
+            <p>No attendance logic configurations found</p>
+            <p className="text-sm">Click "Add Logic" to get started</p>
           </div>
         )}
       </Card>
@@ -304,7 +292,6 @@ const AttendanceRoleLogic = () => {
         }}
         onSave={handleSave}
         editingItem={editingItem}
-        attendanceTypeOptions={attendanceTypeOptions}
       />
     </div>
   );

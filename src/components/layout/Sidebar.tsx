@@ -84,7 +84,7 @@ const menuItems: MenuItem[] = [
   },
   {
     name: "Manual Attendance",
-    path: "/manual-attendance", // Updated from '/attendance' to '/manual-attendance'
+    path: "/manual-attendance",
     icon: <Calendar className="h-5 w-5" />,
     requiredPermission: "Manual Attendance"
   },
@@ -98,7 +98,7 @@ const menuItems: MenuItem[] = [
     name: "Attendance History",
     path: "/attendance-history",
     icon: <Calendar className="h-5 w-5" />,
-    hidden: true // Hide from the sidebar but keep the route active
+    hidden: true
   },
   {
     name: "Reports",
