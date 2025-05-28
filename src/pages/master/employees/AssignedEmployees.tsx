@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "@/hooks/use-toast";
 import { ResetPasswordDialog } from "@/components/role-mapping/ResetPasswordDialog";
 import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
-import { UpdateRoleDialog } from "@/components/role-mapping/UpdateRoleDialog";
+import { MultiRoleUpdateDialog } from "@/components/role-mapping/MultiRoleUpdateDialog";
 
 // Sample entities for dummy data
 const entities = [
@@ -41,97 +41,98 @@ const categories = [
 // Sample classifications
 const classifications = ["Laborer", "Staff"];
 
-// Mock data for assigned employees (employees with a role)
+// Available roles from Role Master
+const availableRoles = [
+  "Labour",
+  "Supervisor", 
+  "Super Admin",
+  "Report Admin",
+  "Staff",
+  "Medical Officer",
+  "Camp Boss",
+  "United Emirates Officer"
+];
+
+// Mock data for assigned employees (employees with roles)
 const initialEmployees = [
   { 
     id: 1, 
     name: "Ibrahim Al-Mazrouei", 
     employeeId: "EMP001", 
-    role: "Supervisor", 
+    assignedRoles: ["Supervisor"], 
     category: "Supervisor",
     classification: "Staff",
     entity: "Tanseeq Investment",
     contactNumber: "+971 50 123 4567",
     email: "ibrahim.almazrouei@tanseeq.ae",
-    loginMethod: "Employee ID", // Restricted to allowed values
+    loginMethod: "Employee ID",
     status: "Active" 
   },
   { 
     id: 2, 
     name: "Fatima Al-Hashimi", 
     employeeId: "EMP002", 
-    role: "Admin", 
+    assignedRoles: ["Super Admin", "Report Admin"], 
     category: "Supervisor",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 234 5678",
     email: "fatima.alhashimi@tanseeq.ae",
-    loginMethod: "Email ID", // Restricted to allowed values
+    loginMethod: "Email ID",
     status: "Active" 
   },
   { 
     id: 3, 
     name: "Mohammed Al-Farsi", 
     employeeId: "EMP003", 
-    role: "Project Manager", 
+    assignedRoles: ["Medical Officer"], 
     category: "Manager",
     classification: "Staff",
     entity: "Al Maha Projects",
     contactNumber: "+971 55 345 6789",
     email: "mohammed.alfarsi@almaha.ae",
-    loginMethod: "Employee ID", // Restricted to allowed values
+    loginMethod: "Employee ID",
     status: "Active" 
   },
   { 
     id: 4, 
     name: "Aisha Al-Blooshi", 
     employeeId: "EMP004", 
-    role: "HR Manager", 
+    assignedRoles: ["Camp Boss", "Supervisor"], 
     category: "Manager",
     classification: "Staff",
     entity: "Gulf Builders International",
     contactNumber: "+971 54 456 7890",
     email: "aisha.alblooshi@gulfbuilders.ae",
-    loginMethod: "Email ID", // Restricted to allowed values
+    loginMethod: "Email ID",
     status: "Active" 
   },
   { 
     id: 5, 
     name: "Yusuf Al-Qasimi", 
     employeeId: "EMP005", 
-    role: "Report Admin", 
+    assignedRoles: ["United Emirates Officer"], 
     category: "Engineer",
     classification: "Staff",
     entity: "Zenith Infrastructure",
     contactNumber: "+971 56 567 8901",
     email: "yusuf.alqasimi@zenith.ae",
-    loginMethod: "Email ID", // Restricted to allowed values
+    loginMethod: "Email ID",
     status: "Active" 
   },
   { 
     id: 7, 
     name: "Khalid Al-Mansoori", 
     employeeId: "EMP007", 
-    role: "Super Admin", 
+    assignedRoles: ["Super Admin"], 
     category: "Manager",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
     contactNumber: "+971 52 789 0123",
     email: "khalid.almansoori@tanseeq.ae",
-    loginMethod: "Employee ID", // Restricted to allowed values
+    loginMethod: "Employee ID",
     status: "Active" 
   }
-];
-
-const mockRoles = [
-  { id: 1, name: "Labour" },
-  { id: 2, name: "Staff" },
-  { id: 3, name: "Super Admin" },
-  { id: 4, name: "Report Admin" },
-  { id: 5, name: "HR Manager" },
-  { id: 6, name: "Project Manager" },
-  { id: 7, name: "Supervisor" },
-  { id: 8, name: "Admin" },
 ];
 
 const AssignedEmployees = () => {
@@ -150,23 +151,24 @@ const AssignedEmployees = () => {
   const [employeeForPasswordReset, setEmployeeForPasswordReset] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
 
-  // Get unique list of roles, excluding "Labour" and "Staff"
+  // Get unique list of roles from all assigned employees
   const roles = Array.from(
-    new Set(employees.map(emp => emp.role))
-  ).filter(role => role !== "Labour" && role !== "Staff" && Boolean(role));
+    new Set(employees.flatMap(emp => emp.assignedRoles || []))
+  ).filter(Boolean);
 
+  // Filter to show only employees with assigned roles
   const filteredEmployees = employees.filter((employee) => {
-    // Filter out employees with "Labour" or "Staff" roles
-    if (employee.role === "Labour" || employee.role === "Staff") {
-      return false;
-    }
+    // First check if employee has roles assigned
+    const hasRoles = employee.assignedRoles && employee.assignedRoles.length > 0;
+    
+    if (!hasRoles) return false;
     
     const searchMatch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
     const roleMatch =
       roleFilter === "all" ||
-      employee.role === roleFilter;
+      (employee.assignedRoles && employee.assignedRoles.includes(roleFilter));
     const statusMatch = 
       statusFilter === "all" || 
       employee.status.toLowerCase() === statusFilter.toLowerCase();
@@ -185,7 +187,7 @@ const AssignedEmployees = () => {
     setViewModalOpen(true);
   };
 
-  const handleUpdateRole = (employee) => {
+  const handleUpdateRoles = (employee) => {
     setSelectedEmployee(employee);
     setUpdateRoleDialogOpen(true);
   };
@@ -195,29 +197,29 @@ const AssignedEmployees = () => {
     setResetPasswordDialogOpen(true);
   };
 
-  const handleRoleAssigned = (role: string) => {
+  const handleRolesAssigned = (roles: string[]) => {
     if (!selectedEmployee) return;
     
-    // If role is "Labour" or "Staff", employee should not be in Assigned Employees
-    if (role === "Labour" || role === "Staff") {
+    // If no roles assigned, employee should be moved to unassigned
+    if (!roles || roles.length === 0) {
       toast({
-        title: "Role Assignment Note",
-        description: `Employee will be moved to Unassigned Employees with role "${role}".`,
+        title: "Roles Removed",
+        description: `${selectedEmployee.name} will be moved to Unassigned Employees.`,
       });
     }
     
-    // Update employee role
+    // Update employee roles
     const updatedEmployees = employees.map(emp => 
       emp.id === selectedEmployee.id 
-        ? {...emp, role} 
+        ? {...emp, assignedRoles: roles} 
         : emp
     );
     
     setEmployees(updatedEmployees);
     
     toast({
-      title: "Role Updated",
-      description: `${selectedEmployee.name}'s role has been updated to ${role}.`,
+      title: "Roles Updated",
+      description: `${selectedEmployee.name}'s roles have been updated.`,
     });
   };
 
@@ -226,7 +228,7 @@ const AssignedEmployees = () => {
     setRemoveRoleDialogOpen(true);
   };
 
-  const handleRemoveRole = () => {
+  const handleRemoveAllRoles = () => {
     if (!employeeToRemoveRole) return;
     
     // Remove employee from assigned employees list
@@ -234,7 +236,7 @@ const AssignedEmployees = () => {
     setEmployees(updatedEmployees);
     
     toast({
-      title: "Role Removed",
+      title: "All Roles Removed",
       description: `${employeeToRemoveRole.name} has been removed from Assigned Employees.`,
     });
     
@@ -331,7 +333,7 @@ const AssignedEmployees = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Entity</TableHead>
                 <TableHead>Classification</TableHead>
-                <TableHead>Role</TableHead>
+                <TableHead>Assigned Roles</TableHead>
                 <TableHead>Login Method</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -348,12 +350,15 @@ const AssignedEmployees = () => {
                     </TableCell>
                     <TableCell>{employee.classification}</TableCell>
                     <TableCell>
-                      <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                        {employee.role}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {employee.assignedRoles && employee.assignedRoles.map((role, index) => (
+                          <Badge key={index} className="bg-green-100 text-green-800 hover:bg-green-200">
+                            {role}
+                          </Badge>
+                        ))}
+                      </div>
                     </TableCell>
                     <TableCell>
-                      {/* Restricted to only Email ID or Employee ID */}
                       {employee.loginMethod ? employee.loginMethod : "-"}
                     </TableCell>
                     <TableCell>
@@ -373,14 +378,14 @@ const AssignedEmployees = () => {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <button 
-                                onClick={() => handleUpdateRole(employee)}
+                                onClick={() => handleUpdateRoles(employee)}
                                 className="text-blue-500 hover:text-blue-700 p-1"
                               >
                                 <UserCog className="h-4 w-4" />
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Update Role</p>
+                              <p>Update Roles</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -447,13 +452,13 @@ const AssignedEmployees = () => {
         </div>
       </Card>
 
-      <UpdateRoleDialog
+      <MultiRoleUpdateDialog
         open={updateRoleDialogOpen}
         onOpenChange={setUpdateRoleDialogOpen}
         employee={selectedEmployee}
-        roles={mockRoles}
-        onAssignRole={handleRoleAssigned}
-        onRemoveRole={() => openRemoveRoleDialog(selectedEmployee)}
+        availableRoles={availableRoles}
+        onUpdateRoles={handleRolesAssigned}
+        onRemoveAllRoles={() => openRemoveRoleDialog(selectedEmployee)}
       />
 
       <ResetPasswordDialog
@@ -474,8 +479,8 @@ const AssignedEmployees = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemoveRole} className="bg-red-500 hover:bg-red-600">
-              Remove Role
+            <AlertDialogAction onClick={handleRemoveAllRoles} className="bg-red-500 hover:bg-red-600">
+              Remove All Roles
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

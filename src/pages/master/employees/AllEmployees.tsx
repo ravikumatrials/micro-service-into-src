@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -41,16 +42,25 @@ const categories = [
 // Sample classifications
 const classifications = ["Laborer", "Staff"];
 
-// System-defined roles that should not be shown in UI
-const systemDefinedRoles = ["Labour", "Staff"];
+// Available roles from Role Master
+const availableRoles = [
+  "Labour",
+  "Supervisor", 
+  "Super Admin",
+  "Report Admin",
+  "Staff",
+  "Medical Officer",
+  "Camp Boss",
+  "United Emirates Officer"
+];
 
-// Mock data for all employees
+// Mock data for all employees with assignedRoles as array
 const initialEmployees = [
   { 
     id: 1, 
     name: "Ahmed Al-Mansouri", 
     employeeId: "EMP001", 
-    role: "", // No user-assigned role (only classification)
+    assignedRoles: [], // No roles assigned
     category: "Laborer",
     classification: "Laborer",
     entity: "Tanseeq Investment",
@@ -63,7 +73,7 @@ const initialEmployees = [
     id: 2, 
     name: "Fatima Al-Hashimi", 
     employeeId: "EMP002", 
-    role: "Supervisor", // User-assigned role
+    assignedRoles: ["Supervisor", "Report Admin"], // Multiple roles
     category: "Supervisor",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
@@ -76,7 +86,7 @@ const initialEmployees = [
     id: 3, 
     name: "Mohammed Al-Farsi", 
     employeeId: "EMP003", 
-    role: "", // No user-assigned role (only classification)
+    assignedRoles: [], // No roles assigned
     category: "Laborer",
     classification: "Laborer",
     entity: "Al Maha Projects",
@@ -89,7 +99,7 @@ const initialEmployees = [
     id: 4, 
     name: "Aisha Al-Blooshi", 
     employeeId: "EMP004", 
-    role: "Report Admin", // User-assigned role
+    assignedRoles: ["Medical Officer"], // Single role
     category: "Driver",
     classification: "Staff",
     entity: "Gulf Builders International",
@@ -102,7 +112,7 @@ const initialEmployees = [
     id: 5, 
     name: "Yusuf Al-Qasimi", 
     employeeId: "EMP005", 
-    role: "Site Manager", // User-assigned role
+    assignedRoles: ["Camp Boss", "Supervisor"], // Multiple roles
     category: "Engineer",
     classification: "Staff",
     entity: "Zenith Infrastructure",
@@ -115,7 +125,7 @@ const initialEmployees = [
     id: 6, 
     name: "Mariam Al-Zaabi", 
     employeeId: "EMP006", 
-    role: "", // No user-assigned role
+    assignedRoles: [], // No roles assigned
     category: "Consultant",
     classification: "Staff",
     entity: "Tanseeq Investment",
@@ -128,7 +138,7 @@ const initialEmployees = [
     id: 7, 
     name: "Khalid Al-Mansoori", 
     employeeId: "EMP007", 
-    role: "Super Admin", // User-assigned role
+    assignedRoles: ["Super Admin"], // Single role
     category: "Manager",
     classification: "Staff",
     entity: "Tanseeq Landscaping LLC",
@@ -141,7 +151,7 @@ const initialEmployees = [
     id: 8, 
     name: "Omar Al-Shamsi", 
     employeeId: "EMP008", 
-    role: "", // No user-assigned role
+    assignedRoles: [], // No roles assigned
     category: "Laborer",
     classification: "Laborer",
     entity: "Al Maha Projects",
@@ -159,6 +169,7 @@ const AllEmployees = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
   const [classificationFilter, setClassificationFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const navigate = useNavigate();
   const [isTanseeqModalOpen, setIsTanseeqModalOpen] = useState(false);
@@ -182,8 +193,11 @@ const AllEmployees = () => {
     const classificationMatch = 
       classificationFilter === "all" || 
       employee.classification === classificationFilter;
+    const roleMatch = 
+      roleFilter.length === 0 || 
+      employee.assignedRoles.some(role => roleFilter.includes(role));
 
-    return searchMatch && statusMatch && categoryMatch && entityMatch && classificationMatch;
+    return searchMatch && statusMatch && categoryMatch && entityMatch && classificationMatch && roleMatch;
   });
 
   const handleEmployeeView = (employee) => {
@@ -196,20 +210,17 @@ const AllEmployees = () => {
     setIsFaceModalOpen(true);
   };
 
-  // Update the handleTanseeqImport function to ensure roles match classifications
   const handleTanseeqImport = (newEmployees) => {
     const maxId = Math.max(...employees.map(e => e.id));
     
     const employeesToAdd = newEmployees.map((emp, index) => {
-      // Determine role based on classification
       const classification = classifications[Math.floor(Math.random() * classifications.length)];
-      const role = classification === "Laborer" ? "Labour" : "Staff";
       
       return {
         id: maxId + index + 1,
         name: emp.name,
         employeeId: emp.employeeId,
-        role: role, // Set role based on classification
+        assignedRoles: [], // New employees start with no roles
         category: categories[Math.floor(Math.random() * categories.length)],
         entity: entities[Math.floor(Math.random() * entities.length)],
         contactNumber: "+971 5" + Math.floor(Math.random() * 10) + " " + 
@@ -225,10 +236,8 @@ const AllEmployees = () => {
     setEmployees([...employees, ...employeesToAdd]);
   };
 
-  // Helper function to determine if role should be displayed
-  const shouldDisplayRole = (role) => {
-    // Only show user-assigned roles
-    return role && !systemDefinedRoles.includes(role) && role !== "";
+  const handleRoleFilterChange = (selectedRoles) => {
+    setRoleFilter(selectedRoles);
   };
 
   return (
@@ -321,7 +330,7 @@ const AllEmployees = () => {
                 <TableHead>Entity</TableHead>
                 <TableHead>Classification</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Role</TableHead>
+                <TableHead>Assigned Roles</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -338,13 +347,16 @@ const AllEmployees = () => {
                     <TableCell>{employee.classification}</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>
-                      {/* Updated Role display to show "No Role" instead of dash */}
-                      {shouldDisplayRole(employee.role) ? (
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                          {employee.role}
-                        </Badge>
+                      {employee.assignedRoles && employee.assignedRoles.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {employee.assignedRoles.map((role, index) => (
+                            <Badge key={index} className="bg-green-100 text-green-800 hover:bg-green-200">
+                              {role}
+                            </Badge>
+                          ))}
+                        </div>
                       ) : (
-                        <span className="text-sm text-gray-500">No Role</span>
+                        <span className="text-sm text-gray-500">No Roles Assigned</span>
                       )}
                     </TableCell>
                     <TableCell>

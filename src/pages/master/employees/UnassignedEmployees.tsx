@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -10,9 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AssignRoleDialog } from "@/components/role-mapping/AssignRoleDialog";
-import { SetLoginCredentialsDialog } from "@/components/role-mapping/SetLoginCredentialsDialog";
+import { MultiRoleAssignDialog } from "@/components/role-mapping/MultiRoleAssignDialog";
 import { toast } from "@/hooks/use-toast";
 import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
 
@@ -42,13 +39,25 @@ const categories = [
 // Sample classifications
 const classifications = ["Laborer", "Staff"];
 
-// Mock data for unassigned employees (employees without a role)
+// Available roles from Role Master
+const availableRoles = [
+  "Labour",
+  "Supervisor", 
+  "Super Admin",
+  "Report Admin",
+  "Staff",
+  "Medical Officer",
+  "Camp Boss",
+  "United Emirates Officer"
+];
+
+// Mock data for employees (will be filtered to show only unassigned)
 const initialEmployees = [
   { 
     id: 6, 
     name: "Mariam Al-Zaabi", 
     employeeId: "EMP006", 
-    role: "", // Removed role based on classification
+    assignedRoles: [], // No roles assigned
     category: "Consultant",
     classification: "Staff",
     entity: "Tanseeq Investment",
@@ -60,7 +69,7 @@ const initialEmployees = [
     id: 8, 
     name: "Omar Al-Shamsi", 
     employeeId: "EMP008", 
-    role: "", // Removed role based on classification
+    assignedRoles: [], // No roles assigned
     category: "Laborer",
     classification: "Laborer",
     entity: "Al Maha Projects",
@@ -72,7 +81,7 @@ const initialEmployees = [
     id: 9, 
     name: "Layla Al-Balushi", 
     employeeId: "EMP009", 
-    role: "", // Removed role based on classification
+    assignedRoles: [], // No roles assigned
     category: "Electrician",
     classification: "Laborer",
     entity: "Tanseeq Investment",
@@ -80,13 +89,6 @@ const initialEmployees = [
     email: "layla.albalushi@tanseeq.ae",
     status: "Active" 
   },
-];
-
-const mockRoles = [
-  { id: 1, name: "Supervisor" },
-  { id: 2, name: "Report Admin" },
-  { id: 3, name: "Super Admin" },
-  { id: 4, name: "Site Manager" },
 ];
 
 const UnassignedEmployees = () => {
@@ -99,11 +101,15 @@ const UnassignedEmployees = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
-  const [employeeForCredentials, setEmployeeForCredentials] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
 
+  // Filter to show only employees with no assigned roles
   const filteredEmployees = employees.filter((employee) => {
+    // First check if employee has no roles assigned
+    const hasNoRoles = !employee.assignedRoles || employee.assignedRoles.length === 0;
+    
+    if (!hasNoRoles) return false;
+    
     const searchMatch = 
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
@@ -128,39 +134,33 @@ const UnassignedEmployees = () => {
     setViewModalOpen(true);
   };
 
-  const handleAssignRole = (employee) => {
+  const handleAssignRoles = (employee) => {
     setSelectedEmployee(employee);
     setDialogOpen(true);
   };
 
-  const handleRoleAssigned = (role: string) => {
+  const handleRolesAssigned = (roles: string[]) => {
     if (!selectedEmployee) return;
     
-    // Update employee role
+    // Update employee roles
     const updatedEmployees = employees.map(emp => 
       emp.id === selectedEmployee.id 
-        ? {...emp, role} 
+        ? {...emp, assignedRoles: roles} 
         : emp
     );
     
-    // Remove employee from list (as they now have a role and would move to Assigned Employees)
-    const filteredEmployees = updatedEmployees.filter(emp => emp.role === "Labour" || emp.role === "Staff");
+    // Remove employee from unassigned list if they now have roles
+    const filteredEmployees = updatedEmployees.filter(emp => 
+      !emp.assignedRoles || emp.assignedRoles.length === 0
+    );
     setEmployees(filteredEmployees);
     
     toast({
-      title: "Role Assigned",
-      description: `${selectedEmployee.name} has been assigned the role of ${role}.`,
+      title: "Roles Assigned",
+      description: `${selectedEmployee.name} has been assigned ${roles.length} role(s).`,
     });
     
-    // Close the dialog - no longer opening credentials dialog
     setDialogOpen(false);
-  };
-
-  const handleCredentialsDialogClose = (open: boolean) => {
-    setCredentialsDialogOpen(open);
-    if (!open) {
-      setDialogOpen(false);
-    }
   };
 
   return (
@@ -247,7 +247,7 @@ const UnassignedEmployees = () => {
                 <TableHead>Entity</TableHead>
                 <TableHead>Classification</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Role</TableHead> 
+                <TableHead>Assigned Roles</TableHead> 
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -264,11 +264,10 @@ const UnassignedEmployees = () => {
                     <TableCell>{employee.classification}</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>
-                      {/* Display "No Role" for all unassigned employees */}
                       <Badge 
                         className="bg-gray-100 text-gray-800 hover:bg-gray-200"
                       >
-                        No Role
+                        No Roles Assigned
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -288,14 +287,14 @@ const UnassignedEmployees = () => {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <button 
-                                onClick={() => handleAssignRole(employee)}
+                                onClick={() => handleAssignRoles(employee)}
                                 className="text-green-500 hover:text-green-700 p-1"
                               >
                                 <UserPlus className="h-4 w-4" />
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Assign Role</p>
+                              <p>Assign Roles</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -346,18 +345,12 @@ const UnassignedEmployees = () => {
         </div>
       </Card>
 
-      <AssignRoleDialog
+      <MultiRoleAssignDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         employee={selectedEmployee}
-        roles={mockRoles}
-        onAssignRole={handleRoleAssigned}
-      />
-
-      <SetLoginCredentialsDialog
-        open={credentialsDialogOpen}
-        onOpenChange={handleCredentialsDialogClose}
-        employee={employeeForCredentials}
+        availableRoles={availableRoles}
+        onAssignRoles={handleRolesAssigned}
       />
       
       <EmployeeDetailModal
