@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,6 +12,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { AttendanceTypeViewModal } from "./AttendanceTypeViewModal";
+import { AttendanceTypeFormModal } from "./AttendanceTypeFormModal";
+import { DeleteAttendanceTypeDialog } from "./DeleteAttendanceTypeDialog";
 
 // Mock data for attendance types
 const mockAttendanceTypes = [
@@ -47,22 +51,57 @@ const mockAttendanceTypes = [
 ];
 
 export default function AttendanceType() {
+  const navigate = useNavigate();
   const [attendanceTypes, setAttendanceTypes] = useState(mockAttendanceTypes);
+  const [viewItem, setViewItem] = useState(null);
+  const [editItem, setEditItem] = useState(null);
+  const [deleteItem, setDeleteItem] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const handleAdd = () => {
-    console.log("Add new attendance type");
+    setShowAddForm(true);
   };
 
   const handleView = (id: number) => {
-    console.log("View attendance type:", id);
+    const item = attendanceTypes.find(item => item.id === id);
+    setViewItem(item);
   };
 
   const handleEdit = (id: number) => {
-    console.log("Edit attendance type:", id);
+    const item = attendanceTypes.find(item => item.id === id);
+    setEditItem(item);
   };
 
   const handleDelete = (id: number) => {
-    console.log("Delete attendance type:", id);
+    const item = attendanceTypes.find(item => item.id === id);
+    setDeleteItem(item);
+  };
+
+  const confirmDelete = () => {
+    if (deleteItem) {
+      setAttendanceTypes(prev => prev.filter(item => item.id !== deleteItem.id));
+      setDeleteItem(null);
+    }
+  };
+
+  const handleSave = (data: any, isEdit: boolean) => {
+    if (isEdit && editItem) {
+      setAttendanceTypes(prev => 
+        prev.map(item => 
+          item.id === editItem.id 
+            ? { ...item, ...data }
+            : item
+        )
+      );
+      setEditItem(null);
+    } else {
+      const newItem = {
+        id: Math.max(...attendanceTypes.map(item => item.id)) + 1,
+        ...data
+      };
+      setAttendanceTypes(prev => [...prev, newItem]);
+      setShowAddForm(false);
+    }
   };
 
   return (
@@ -135,6 +174,28 @@ export default function AttendanceType() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Modals */}
+      <AttendanceTypeViewModal 
+        item={viewItem} 
+        onClose={() => setViewItem(null)} 
+      />
+      
+      <AttendanceTypeFormModal 
+        item={editItem} 
+        isOpen={showAddForm || !!editItem}
+        onClose={() => {
+          setEditItem(null);
+          setShowAddForm(false);
+        }}
+        onSave={handleSave}
+      />
+      
+      <DeleteAttendanceTypeDialog 
+        item={deleteItem}
+        onCancel={() => setDeleteItem(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }
