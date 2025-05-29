@@ -40,12 +40,12 @@ const availableRoles = [
   { id: 8, name: "United Emirates Officer" }
 ];
 
-// Attendance types from the Attendance Type master
+// Static attendance types (no longer linked to master)
 const attendanceTypes = [
-  { id: 1, attendanceTypeName: "Present" },
-  { id: 2, attendanceTypeName: "Sick Leave" },
-  { id: 3, attendanceTypeName: "Casual Leave" },
-  { id: 4, attendanceTypeName: "Present (Visa/ID)" }
+  "Present",
+  "Sick Leave", 
+  "Casual Leave",
+  "Present (Visa/ID)"
 ];
 
 export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }: RoleAttendanceLogicFormProps) {
@@ -141,8 +141,8 @@ export function RoleAttendanceLogicForm({ isOpen, onClose, onSave, editingItem }
                   </SelectTrigger>
                   <SelectContent>
                     {attendanceTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.attendanceTypeName}>
-                        {type.attendanceTypeName}
+                      <SelectItem key={type} value={type}>
+                        {type}
                       </SelectItem>
                     ))}
                   </SelectContent>
