@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation, Navigate } from "react-router-dom";
 import { 
@@ -45,7 +46,8 @@ const getUserPermissions = () => {
     "Manage Roles", 
     "Role Mapping", 
     "Manage Users",
-    "Attendance Role Logic"
+    "Attendance Role Logic",
+    "Manage Attendance Types"
   ];
 };
 
@@ -74,6 +76,11 @@ const menuItems: MenuItem[] = [
         name: "Projects",
         path: "/master/projects",
         requiredPermission: "Manage Projects"
+      },
+      {
+        name: "Attendance Type",
+        path: "/master/attendance-type",
+        requiredPermission: "Manage Attendance Types"
       },
       {
         name: "Role Attendance Logic",
