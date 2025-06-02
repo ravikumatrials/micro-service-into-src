@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,9 +12,9 @@ import Dashboard from "./Component_Dashabord/pages/Dashboard";
 import Profile from "./Component_Dashabord/pages/Profile";
 
 // Attendance microservice imports
-import ManualAttendanceRecords from "./Component_Folder/pages/ManualAttendance";
-import BulkAttendance from "./Component_Folder/pages/BulkAttendance";
-import AttendanceHistory from "./Component_Folder/pages/AttendanceHistory";
+import ManualAttendanceRecords from "./Component_attendence/pages/ManualAttendance";
+import BulkAttendance from "./Component_attendence/pages/BulkAttendance";
+import AttendanceHistory from "./Component_attendence/pages/AttendanceHistory";
 
 // Master microservice imports
 import Employees from "./Component_master/pages/Employees";
