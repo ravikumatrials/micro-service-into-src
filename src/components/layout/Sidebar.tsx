@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Navigate } from "react-router-dom";
 import { 
   Home, 
   Settings, 
@@ -13,9 +13,7 @@ import {
   ChevronLeft,
   Briefcase,
   CheckCircle,
-  Tag,
-  BarChart3,
-  Database
+  Tag
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -34,7 +32,9 @@ type MenuItem = {
   requiredPermission?: string;
 };
 
+// Mock function to get current user permissions - in a real app, this would come from an auth context
 const getUserPermissions = () => {
+  // For testing, return Super Admin permissions
   return [
     "Manual Attendance", 
     "View Reports", 
@@ -53,40 +53,14 @@ const getUserPermissions = () => {
 const menuItems: MenuItem[] = [
   {
     name: "Dashboard",
-    path: "/core/dashboard",
+    path: "/dashboard",
     icon: <Home className="h-5 w-5" />
   },
   {
-    name: "Attendance Service",
-    path: "/attendance",
-    icon: <Calendar className="h-5 w-5" />,
-    subMenus: [
-      {
-        name: "Manual Attendance",
-        path: "/attendance/manual",
-        requiredPermission: "Manual Attendance"
-      },
-      {
-        name: "Bulk Attendance",
-        path: "/attendance/bulk",
-        requiredPermission: "Manual Attendance"
-      },
-      {
-        name: "Attendance History",
-        path: "/attendance/history"
-      }
-    ]
-  },
-  {
-    name: "Master Service",
+    name: "Master",
     path: "/master",
-    icon: <Database className="h-5 w-5" />,
+    icon: <Settings className="h-5 w-5" />,
     subMenus: [
-      {
-        name: "Dashboard",
-        path: "/master/dashboard",
-        requiredPermission: "Manage Employees"
-      },
       {
         name: "Employees",
         path: "/master/employees",
@@ -115,9 +89,27 @@ const menuItems: MenuItem[] = [
     ]
   },
   {
-    name: "Report Service",
-    path: "/report/reports",
-    icon: <BarChart3 className="h-5 w-5" />,
+    name: "Manual Attendance",
+    path: "/manual-attendance",
+    icon: <Calendar className="h-5 w-5" />,
+    requiredPermission: "Manual Attendance"
+  },
+  {
+    name: "Bulk Attendance",
+    path: "/bulk-attendance",
+    icon: <CheckCircle className="h-5 w-5" />,
+    requiredPermission: "Manual Attendance"
+  },
+  {
+    name: "Attendance History",
+    path: "/attendance-history",
+    icon: <Calendar className="h-5 w-5" />,
+    hidden: true
+  },
+  {
+    name: "Reports",
+    path: "/reports",
+    icon: <FileText className="h-5 w-5" />,
     requiredPermission: "View Reports"
   },
   {
@@ -129,7 +121,7 @@ const menuItems: MenuItem[] = [
 
 export function Sidebar() {
   const location = useLocation();
-  const [expanded, setExpanded] = useState<string | null>("Master Service");
+  const [expanded, setExpanded] = useState<string | null>("Master");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const userPermissions = getUserPermissions();
 
@@ -141,23 +133,36 @@ export function Sidebar() {
     setIsCollapsed(!isCollapsed);
   };
 
+  // Filter and transform menu items
   const processedMenuItems = menuItems
     .filter(item => !item.hidden)
     .filter(item => !item.requiredPermission || userPermissions.includes(item.requiredPermission))
     .map(item => {
       if (item.subMenus) {
-        const organizedSubMenus = item.subMenus.filter(
-          subItem => !subItem.requiredPermission || userPermissions.includes(subItem.requiredPermission)
-        );
+        // Special handling for Master menu to show nested structure for Employees
+        if (item.name === "Master") {
+          // Filter and organize submenus
+          const organizedSubMenus = item.subMenus.filter(
+            subItem => !subItem.requiredPermission || userPermissions.includes(subItem.requiredPermission)
+          );
+          
+          return {
+            ...item,
+            subMenus: organizedSubMenus
+          };
+        }
         
+        // General filtering for other menu items
         return {
           ...item,
-          subMenus: organizedSubMenus
+          subMenus: item.subMenus.filter(
+            subItem => !subItem.requiredPermission || userPermissions.includes(subItem.requiredPermission)
+          )
         };
       }
       return item;
     })
-    .filter(item => !item.subMenus || item.subMenus.length > 0);
+    .filter(item => !item.subMenus || item.subMenus.length > 0); // Hide parent menus with no visible children
 
   return (
     <div className="relative">
