@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Home, Settings, Users, Calendar, FileText, User, ChevronDown, ChevronRight, ChevronLeft, Briefcase, CheckCircle, Tag, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Home, Settings, Users, Calendar, FileText, User, ChevronDown, ChevronRight, ChevronLeft, Briefcase, CheckCircle, Tag, Menu, X, LogOut } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 // Mock function to get current user permissions - in a real app, this would come from an auth context
 const getUserPermissions = () => {
@@ -91,6 +92,7 @@ const menuItems: MenuItem[] = [{
 
 export function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState<string | null>("Master");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -111,6 +113,12 @@ export function Sidebar() {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    navigate("/login");
+    toast.success("Successfully signed out");
+    closeMobileMenu();
   };
 
   // Filter and transform menu items
@@ -195,7 +203,7 @@ export function Sidebar() {
             )}
           </div>
 
-          <div className="py-4 h-full overflow-y-auto">
+          <div className="py-4 h-full overflow-y-auto pb-20">
             <nav>
               <ul className="space-y-1 px-2">
                 {processedMenuItems.map(item => (
@@ -275,30 +283,50 @@ export function Sidebar() {
             </nav>
           </div>
 
-          <div className="absolute bottom-0 w-full p-4 border-t border-sidebar-border">
+          <div className="absolute bottom-0 w-full border-t border-sidebar-border">
             {(!isCollapsed || isMobile) && (
-              <div className="flex items-center text-white">
-                <User className="h-5 w-5 mr-2" />
-                <div>
-                  <p className="text-sm font-medium">Super Admin</p>
-                  <p className="text-xs opacity-70">John Doe</p>
+              <div className="p-4 space-y-2">
+                <div className="flex items-center text-white">
+                  <User className="h-5 w-5 mr-2" />
+                  <div>
+                    <p className="text-sm font-medium">Super Admin</p>
+                    <p className="text-xs opacity-70">John Doe</p>
+                  </div>
                 </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
+                >
+                  <LogOut className="h-5 w-5 mr-2" />
+                  <span>Logout</span>
+                </button>
               </div>
             )}
             {(isCollapsed && !isMobile) && (
-              <div className="flex justify-center">
-                <User className="h-5 w-5 text-white" />
+              <div className="p-4 space-y-2">
+                <div className="flex justify-center">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleLogout}
+                    className="p-2 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
+                    title="Logout"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Main content margin */}
+        {/* Spacer for main content */}
         <div className={`
           transition-all duration-300
           ${isMobile 
-            ? 'ml-0' 
-            : `${isCollapsed ? 'ml-16' : 'ml-64'}`
+            ? 'w-0' 
+            : `${isCollapsed ? 'w-16' : 'w-64'}`
           }
         `} />
       </div>
