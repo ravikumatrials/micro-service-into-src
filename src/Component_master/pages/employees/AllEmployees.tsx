@@ -12,8 +12,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import EmployeeActionsCell from "../../master/EmployeeActionsCell";
-import FaceEnrollmentModal from "../../master/FaceEnrollmentModal";
+import EmployeeActionsCell from "../../components/EmployeeActionsCell";
+import FaceEnrollmentModal from "../../components/FaceEnrollmentModal";
 import { EmployeeDetailModal } from "@/components/employees/EmployeeDetailModal";
 
 // Sample entities for dummy data
