@@ -154,7 +154,7 @@ export function Sidebar() {
                           {item.icon}
                           {!isCollapsed && <div className="flex items-center ml-3">
                               <span>{item.name}</span>
-                              {item.microservice}
+                              
                             </div>}
                         </div>
                         {!isCollapsed && (expanded === item.name ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />)}
@@ -171,7 +171,7 @@ export function Sidebar() {
                       {item.icon}
                       {!isCollapsed && <div className="flex items-center ml-3">
                           <span>{item.name}</span>
-                          {item.microservice}
+                          
                         </div>}
                     </Link>}
                 </li>)}
