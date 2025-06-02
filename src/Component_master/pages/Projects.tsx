@@ -1,15 +1,14 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus, Search, Filter, Grid, List } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ProjectTable from "./ProjectTable";
-import ProjectCardMobile from "./ProjectCardMobile";
-import ProjectViewModal from "./ProjectViewModal";
-import AssignLocationModal from "./AssignLocationModal";
-import ImportProjectsModal from "./ImportProjectsModal";
-import TanseeqProjectsImportModal from "./TanseeqProjectsImportModal";
+import ProjectTable from "../components/ProjectTable";
+import ProjectCardMobile from "../components/ProjectCardMobile";
+import ProjectViewModal from "../components/ProjectViewModal";
+import AssignLocationModal from "../components/AssignLocationModal";
+import ImportProjectsModal from "../components/ImportProjectsModal";
+import TanseeqProjectsImportModal from "../components/TanseeqProjectsImportModal";
 
 // Mock data for projects
 const mockProjects = [

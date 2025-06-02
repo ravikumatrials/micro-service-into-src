@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,9 +11,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
-import { AttendanceTypeViewModal } from "./AttendanceTypeViewModal";
-import { AttendanceTypeFormModal } from "./AttendanceTypeFormModal";
-import { DeleteAttendanceTypeDialog } from "./DeleteAttendanceTypeDialog";
+import { AttendanceTypeViewModal } from "../components/AttendanceTypeViewModal";
+import { AttendanceTypeFormModal } from "../components/AttendanceTypeFormModal";
+import { DeleteAttendanceTypeDialog } from "../components/DeleteAttendanceTypeDialog";
 
 // Mock data for attendance types
 const mockAttendanceTypes = [
