@@ -1,16 +1,19 @@
+
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Navigate } from "react-router-dom";
 import { 
   Home, 
   Settings, 
+  Users, 
   Calendar, 
   FileText, 
   User, 
   ChevronDown, 
   ChevronRight,
   ChevronLeft,
+  Briefcase,
   CheckCircle,
-  BarChart3
+  Tag
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -54,27 +57,6 @@ const menuItems: MenuItem[] = [
     icon: <Home className="h-5 w-5" />
   },
   {
-    name: "Attendance",
-    path: "/attendance",
-    icon: <Calendar className="h-5 w-5" />,
-    subMenus: [
-      {
-        name: "Manual Attendance",
-        path: "/attendance/manual",
-        requiredPermission: "Manual Attendance"
-      },
-      {
-        name: "Bulk Upload",
-        path: "/attendance/bulk",
-        requiredPermission: "Manual Attendance"
-      },
-      {
-        name: "Attendance History",
-        path: "/attendance/history"
-      }
-    ]
-  },
-  {
     name: "Master",
     path: "/master",
     icon: <Settings className="h-5 w-5" />,
@@ -107,9 +89,27 @@ const menuItems: MenuItem[] = [
     ]
   },
   {
+    name: "Manual Attendance",
+    path: "/manual-attendance",
+    icon: <Calendar className="h-5 w-5" />,
+    requiredPermission: "Manual Attendance"
+  },
+  {
+    name: "Bulk Attendance",
+    path: "/bulk-attendance",
+    icon: <CheckCircle className="h-5 w-5" />,
+    requiredPermission: "Manual Attendance"
+  },
+  {
+    name: "Attendance History",
+    path: "/attendance-history",
+    icon: <Calendar className="h-5 w-5" />,
+    hidden: true
+  },
+  {
     name: "Reports",
-    path: "/report/dashboard",
-    icon: <BarChart3 className="h-5 w-5" />,
+    path: "/reports",
+    icon: <FileText className="h-5 w-5" />,
     requiredPermission: "View Reports"
   },
   {
@@ -139,7 +139,9 @@ export function Sidebar() {
     .filter(item => !item.requiredPermission || userPermissions.includes(item.requiredPermission))
     .map(item => {
       if (item.subMenus) {
+        // Special handling for Master menu to show nested structure for Employees
         if (item.name === "Master") {
+          // Filter and organize submenus
           const organizedSubMenus = item.subMenus.filter(
             subItem => !subItem.requiredPermission || userPermissions.includes(subItem.requiredPermission)
           );
@@ -150,6 +152,7 @@ export function Sidebar() {
           };
         }
         
+        // General filtering for other menu items
         return {
           ...item,
           subMenus: item.subMenus.filter(
@@ -159,7 +162,7 @@ export function Sidebar() {
       }
       return item;
     })
-    .filter(item => !item.subMenus || item.subMenus.length > 0);
+    .filter(item => !item.subMenus || item.subMenus.length > 0); // Hide parent menus with no visible children
 
   return (
     <div className="relative">
