@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Edit, User, Lock, Camera, Save, X, Eye, EyeOff } from "lucide-react";
@@ -89,7 +88,7 @@ const Profile = () => {
     toast.success("Password updated successfully");
   };
   
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setUserData({
       ...userData,

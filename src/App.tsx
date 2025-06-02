@@ -7,10 +7,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import { PermissionGuard } from "./components/auth/PermissionGuard";
 
-// Core microservice imports
-import Login from "./Component_Dashabord/pages/Login";
-import Dashboard from "./Component_Dashabord/pages/Dashboard";
-import Profile from "./Component_Dashabord/pages/Profile";
+// Core microservice imports - now using the correct Component_Dashboard folder
+import Login from "./Component_Dashboard/pages/Login";
+import Dashboard from "./Component_Dashboard/pages/Dashboard";
+import Profile from "./Component_Dashboard/pages/Profile";
 
 // Attendance microservice imports
 import ManualAttendanceRecords from "./Component_attendence/pages/ManualAttendance";
