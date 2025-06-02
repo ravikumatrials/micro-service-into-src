@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, Settings, Users, Calendar, FileText, User, ChevronDown, ChevronRight, ChevronLeft, Briefcase, CheckCircle, Tag, Menu, X, LogOut } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 
@@ -203,121 +204,132 @@ export function Sidebar() {
             )}
           </div>
 
-          <div className="py-4 h-full overflow-y-auto pb-20">
-            <nav>
-              <ul className="space-y-1 px-2">
-                {processedMenuItems.map(item => (
-                  <li key={item.name}>
-                    {item.subMenus ? (
-                      <div>
-                        <button 
-                          onClick={() => toggleSubmenu(item.name)} 
+          <div className="flex flex-col h-full">
+            <ScrollArea className="flex-1 py-4">
+              <nav>
+                <ul className="space-y-1 px-2">
+                  {processedMenuItems.map(item => (
+                    <li key={item.name}>
+                      {item.subMenus ? (
+                        <div>
+                          <button 
+                            onClick={() => toggleSubmenu(item.name)} 
+                            className={`
+                              flex items-center w-full px-3 py-2 text-sidebar-foreground 
+                              hover:bg-sidebar-accent rounded-md transition-colors
+                              ${expanded === item.name ? 'bg-sidebar-accent' : ''} 
+                              ${(isCollapsed && !isMobile) ? 'justify-center' : 'justify-between'}
+                            `}
+                          >
+                            <div className="flex items-center">
+                              {item.icon}
+                              {(!isCollapsed || isMobile) && (
+                                <div className="flex items-center ml-3">
+                                  <span>{item.name}</span>
+                                </div>
+                              )}
+                            </div>
+                            {(!isCollapsed || isMobile) && (
+                              expanded === item.name ? 
+                                <ChevronDown className="h-4 w-4" /> : 
+                                <ChevronRight className="h-4 w-4" />
+                            )}
+                          </button>
+                          {expanded === item.name && (!isCollapsed || isMobile) && (
+                            <ul className="pl-8 mt-1 space-y-1">
+                              {item.subMenus.map(subItem => (
+                                <li key={subItem.name}>
+                                  <Link 
+                                    to={subItem.path} 
+                                    onClick={isMobile ? closeMobileMenu : undefined}
+                                    className={`
+                                      flex items-center px-3 py-2 text-sm rounded-md transition-colors
+                                      ${location.pathname === subItem.path ? 
+                                        'bg-sidebar-primary text-sidebar-primary-foreground' : 
+                                        'text-sidebar-foreground hover:bg-sidebar-accent'
+                                      }
+                                    `}
+                                  >
+                                    {subItem.icon}
+                                    <span className="ml-2">{subItem.name}</span>
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ) : (
+                        <Link 
+                          to={item.path} 
+                          onClick={isMobile ? closeMobileMenu : undefined}
                           className={`
-                            flex items-center w-full px-3 py-2 text-sidebar-foreground 
-                            hover:bg-sidebar-accent rounded-md transition-colors
-                            ${expanded === item.name ? 'bg-sidebar-accent' : ''} 
-                            ${(isCollapsed && !isMobile) ? 'justify-center' : 'justify-between'}
+                            flex items-center px-3 py-2 rounded-md transition-colors
+                            ${location.pathname === item.path ? 
+                              'bg-sidebar-primary text-sidebar-primary-foreground' : 
+                              'text-sidebar-foreground hover:bg-sidebar-accent'
+                            } 
+                            ${(isCollapsed && !isMobile) ? 'justify-center' : ''}
                           `}
                         >
-                          <div className="flex items-center">
-                            {item.icon}
-                            {(!isCollapsed || isMobile) && (
-                              <div className="flex items-center ml-3">
-                                <span>{item.name}</span>
-                              </div>
-                            )}
-                          </div>
+                          {item.icon}
                           {(!isCollapsed || isMobile) && (
-                            expanded === item.name ? 
-                              <ChevronDown className="h-4 w-4" /> : 
-                              <ChevronRight className="h-4 w-4" />
+                            <div className="flex items-center ml-3">
+                              <span>{item.name}</span>
+                            </div>
                           )}
-                        </button>
-                        {expanded === item.name && (!isCollapsed || isMobile) && (
-                          <ul className="pl-8 mt-1 space-y-1">
-                            {item.subMenus.map(subItem => (
-                              <li key={subItem.name}>
-                                <Link 
-                                  to={subItem.path} 
-                                  onClick={isMobile ? closeMobileMenu : undefined}
-                                  className={`
-                                    flex items-center px-3 py-2 text-sm rounded-md transition-colors
-                                    ${location.pathname === subItem.path ? 
-                                      'bg-sidebar-primary text-sidebar-primary-foreground' : 
-                                      'text-sidebar-foreground hover:bg-sidebar-accent'
-                                    }
-                                  `}
-                                >
-                                  {subItem.icon}
-                                  <span className="ml-2">{subItem.name}</span>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ) : (
-                      <Link 
-                        to={item.path} 
-                        onClick={isMobile ? closeMobileMenu : undefined}
-                        className={`
-                          flex items-center px-3 py-2 rounded-md transition-colors
-                          ${location.pathname === item.path ? 
-                            'bg-sidebar-primary text-sidebar-primary-foreground' : 
-                            'text-sidebar-foreground hover:bg-sidebar-accent'
-                          } 
-                          ${(isCollapsed && !isMobile) ? 'justify-center' : ''}
-                        `}
-                      >
-                        {item.icon}
-                        {(!isCollapsed || isMobile) && (
-                          <div className="flex items-center ml-3">
-                            <span>{item.name}</span>
-                          </div>
-                        )}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </ScrollArea>
 
-          <div className="absolute bottom-0 w-full border-t border-sidebar-border">
-            {(!isCollapsed || isMobile) && (
-              <div className="p-4 space-y-2">
-                <div className="flex items-center text-white">
-                  <User className="h-5 w-5 mr-2" />
-                  <div>
-                    <p className="text-sm font-medium">Super Admin</p>
-                    <p className="text-xs opacity-70">John Doe</p>
+            <div className="border-t border-sidebar-border">
+              {(!isCollapsed || isMobile) && (
+                <div className="p-4 space-y-2">
+                  <div className="flex items-center justify-between text-white">
+                    <div className="flex items-center">
+                      <User className="h-5 w-5 mr-2" />
+                      <div>
+                        <p className="text-sm font-medium">Super Admin</p>
+                        <p className="text-xs opacity-70">John Doe</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="p-1 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
+                      title="Logout"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </button>
                   </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center w-full px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
-                >
-                  <LogOut className="h-5 w-5 mr-2" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            )}
-            {(isCollapsed && !isMobile) && (
-              <div className="p-4 space-y-2">
-                <div className="flex justify-center">
-                  <User className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex justify-center">
                   <button
                     onClick={handleLogout}
-                    className="p-2 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
-                    title="Logout"
+                    className="flex items-center w-full px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
                   >
-                    <LogOut className="h-5 w-5" />
+                    <LogOut className="h-5 w-5 mr-2" />
+                    <span>Logout</span>
                   </button>
                 </div>
-              </div>
-            )}
+              )}
+              {(isCollapsed && !isMobile) && (
+                <div className="p-4 space-y-2">
+                  <div className="flex justify-center">
+                    <User className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={handleLogout}
+                      className="p-2 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
+                      title="Logout"
+                    >
+                      <LogOut className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
