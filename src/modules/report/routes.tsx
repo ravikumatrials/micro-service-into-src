@@ -7,7 +7,7 @@ import ReportDashboard from "./pages/ReportDashboard";
 export function ReportRoutes() {
   return (
     <Routes>
-      <Route path="/reports" element={
+      <Route path="/dashboard" element={
         <PermissionGuard requiredPermission="View Reports">
           <Layout><ReportDashboard /></Layout>
         </PermissionGuard>

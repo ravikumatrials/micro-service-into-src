@@ -16,14 +16,14 @@ export function MasterRoutes() {
           <Layout><EmployeeMaster /></Layout>
         </PermissionGuard>
       } />
-      <Route path="/roles" element={
-        <PermissionGuard requiredPermission="Manage Roles">
-          <Layout><RoleMaster /></Layout>
-        </PermissionGuard>
-      } />
       <Route path="/projects" element={
         <PermissionGuard requiredPermission="Manage Projects">
           <Layout><ProjectMaster /></Layout>
+        </PermissionGuard>
+      } />
+      <Route path="/roles" element={
+        <PermissionGuard requiredPermission="Manage Roles">
+          <Layout><RoleMaster /></Layout>
         </PermissionGuard>
       } />
       <Route path="/attendance-type" element={
