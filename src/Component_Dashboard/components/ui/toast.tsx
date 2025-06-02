@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import {
   type ReactNode,
@@ -10,7 +11,7 @@ import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
+import { Icons } from "@/Component_Dashboard/components/icons"
 
 const ToastProvider = ToastPrimitives.Provider
 
@@ -117,120 +118,12 @@ const ToastDescription = forwardRef<
 ))
 ToastDescription.displayName = ToastPrimitives.Description.displayName
 
-type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
-
-type ToastViewportProps = React.ComponentPropsWithoutRef<typeof ToastViewport>
-
-const ToastContext = React.createContext<{
-  addToast: (toast: ToastProps) => void
-  updateToast: (toast: ToastProps) => void
-  removeToast: (toastId: string) => void
-  toasts: ToastProps[]
-}>({
-  addToast: () => {},
-  updateToast: () => {},
-  removeToast: () => {},
-  toasts: [],
-})
-
-const useToast = () => useContext(ToastContext)
-
-type ToasterProps = {
-  children?: ReactNode
-  position?:
-    | "top-left"
-    | "top-center"
-    | "top-right"
-    | "bottom-left"
-    | "bottom-center"
-    | "bottom-right"
-  hotkey?: string[]
-  closeDelay?: number
-}
-
-const Toaster = ({
-  children,
-  position = "bottom-right",
-  hotkey,
-  closeDelay = 2000,
-}: ToasterProps) => {
-  const [toasts, setToasts] = useState<ToastProps[]>([])
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (hotkey && hotkey.every((key) => event.key === key)) {
-        event.preventDefault()
-        dismiss()
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown)
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [hotkey])
-
-  const addToast = (toast: ToastProps) => {
-    const id = String(Math.random())
-    setToasts((prevToasts) => [...prevToasts, { id, ...toast }])
-
-    if (toast.duration !== null) {
-      setTimeout(() => {
-        removeToast(id)
-      }, toast.duration || closeDelay)
-    }
-  }
-
-  const updateToast = (toast: ToastProps) => {
-    setToasts((prevToasts) =>
-      prevToasts.map((t) => (t.id === toast.id ? { ...t, ...toast } : t))
-    )
-  }
-
-  const removeToast = (toastId: string) => {
-    setToasts((prevToasts) => prevToasts.filter((t) => t.id !== toastId))
-  }
-
-  const dismiss = () => {
-    toasts.forEach((toast) => {
-      removeToast(toast.id as string)
-    })
-  }
-
-  const contextValue = React.useMemo(
-    () => ({
-      addToast,
-      updateToast,
-      removeToast,
-      toasts,
-    }),
-    [addToast, updateToast, removeToast, toasts]
-  )
-
-  return (
-    <ToastContext.Provider value={contextValue}>
-      {children}
-      <ToastProvider>
-        <ToastViewport
-          className={position}
-          style={{
-            "--radix-toast-swipe-move-x": "calc(var(--radix-toast-swipe-end-x) * -1)",
-          }}
-        />
-      </ToastProvider>
-    </ToastContext.Provider>
-  )
-}
-
 export {
-  Toaster,
-  ToastAction,
-  ToastClose,
-  ToastDescription,
   ToastProvider,
-  ToastTitle,
-  Toast,
   ToastViewport,
-  useToast,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
 }

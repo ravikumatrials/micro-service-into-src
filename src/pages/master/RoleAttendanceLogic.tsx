@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { RoleAttendanceLogicForm } from "@/components/master/RoleAttendanceLogicForm";
+import { RoleAttendanceLogicForm } from "@/Component_master/components/RoleAttendanceLogicForm";
 import { Switch } from "@/components/ui/switch";
 
 // Default role attendance logic entries

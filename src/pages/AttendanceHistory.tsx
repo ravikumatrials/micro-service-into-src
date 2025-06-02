@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import AttendanceDetailModal from '@/components/attendance/AttendanceDetailModal';
+import AttendanceDetailModal from '@/Component_attendence/components/AttendanceDetailModal';
 
 // Updated mock data with realistic examples
 const MOCK_ATTENDANCE = [

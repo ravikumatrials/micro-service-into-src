@@ -1,10 +1,11 @@
+
 import * as React from "react"
 
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/Component_Dashboard/components/ui/toaster"
 
 const Action = React.forwardRef<
-  React.HTMLAnchorElement,
-  React.AnchorHTMLAttributes<HTMLAnchorElement>
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
 >(({ className, ...props }, ref) => (
   <a
     ref={ref}
@@ -37,13 +38,6 @@ interface UseToastOptions {
 
 function useToast() {
   const [toasts, setToasts] = React.useState<ToastProps[]>([])
-  const [visibleToasts, setVisibleToasts] = React.useState<ToastProps[]>([])
-
-  React.useEffect(() => {
-    if (toasts.length && visibleToasts.length < 3) {
-      setVisibleToasts((v) => [...v, toasts[toasts.length - 1]])
-    }
-  }, [toasts])
 
   const addToast = React.useCallback(
     (props: ToastProps & UseToastOptions) => {
@@ -53,13 +47,12 @@ function useToast() {
         setToasts((curr) => curr.map((c) => (c.id === toast.id ? { ...c, ...toast } : c)))
 
       const dismiss = (toastId: string) => {
-        update({ id: toastId, open: false })
+        setToasts((curr) => curr.filter((c) => c.id !== toastId))
       }
 
       const toast = {
         ...props,
         id,
-        open: true,
         onDismiss: () => dismiss(id),
       }
 
@@ -81,7 +74,7 @@ function useToast() {
 
   const dismiss = React.useCallback(
     (toastId: string) => {
-      setToasts((curr) => curr.map((c) => (c.id === toastId ? { ...c, open: false } : c)))
+      setToasts((curr) => curr.filter((c) => c.id !== toastId))
     },
     [setToasts]
   )
@@ -95,7 +88,6 @@ function useToast() {
 
   return {
     toasts,
-    visibleToasts,
     addToast,
     updateToast,
     dismiss,

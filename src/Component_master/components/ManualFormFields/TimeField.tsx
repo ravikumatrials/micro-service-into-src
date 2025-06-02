@@ -1,10 +1,8 @@
-import { useState } from "react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "lucide-react";
-import { format } from "date-fns";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Clock } from "lucide-react";
 
 interface TimeFieldProps {
   label: string;
@@ -13,44 +11,30 @@ interface TimeFieldProps {
 }
 
 const TimeField = ({ label, value, onChange }: TimeFieldProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+  const setCurrentTime = () => {
+    const now = new Date();
+    const timeString = now.toTimeString().slice(0, 5);
+    onChange(timeString);
   };
 
   return (
     <div>
-      <Label>{label}</Label>
-      <div className="relative">
+      <Label htmlFor="time">{label}</Label>
+      <div className="flex gap-2">
         <Input
-          placeholder="HH:MM AM/PM"
+          type="time"
+          id="time"
           value={value}
-          onChange={handleTimeChange}
-          className="pr-10"
+          onChange={(e) => onChange(e.target.value)}
         />
-        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-          <PopoverTrigger asChild>
-            <button
-              variant={"ghost"}
-              className={cn(
-                "absolute right-2.5 top-0 h-10 rounded-md p-2 text-muted-foreground hover:bg-secondary",
-                !value && "text-muted-foreground"
-              )}
-              aria-label="Set Time"
-            >
-              <Calendar className="h-4 w-4" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-4">
-            <input
-              type="time"
-              value={value}
-              onChange={handleTimeChange}
-              className="w-full"
-            />
-          </PopoverContent>
-        </Popover>
+        <Button
+          type="button"
+          onClick={setCurrentTime}
+          className="shrink-0"
+          aria-label="Set current time"
+        >
+          <Clock className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
