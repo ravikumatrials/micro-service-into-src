@@ -20,6 +20,12 @@ import ManualAttendanceRecords from "./pages/ManualAttendanceRecords";
 import RoleAttendanceLogic from "./pages/master/RoleAttendanceLogic";
 import AttendanceType from "./pages/master/AttendanceType";
 
+// Microservice route imports
+import { CoreRoutes } from "./modules/core/routes";
+import { AttendanceRoutes } from "./modules/attendance/routes";
+import { MasterRoutes } from "./modules/master/routes";
+import { ReportRoutes } from "./modules/report/routes";
+
 // Create a new QueryClient instance inside the component to ensure it's created when React is ready
 const App = () => {
   // Initialize QueryClient inside the component
@@ -32,6 +38,13 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Microservice Routes - New modular structure */}
+            <Route path="/core/*" element={<CoreRoutes />} />
+            <Route path="/attendance/*" element={<AttendanceRoutes />} />
+            <Route path="/master/*" element={<MasterRoutes />} />
+            <Route path="/report/*" element={<ReportRoutes />} />
+            
+            {/* Existing Routes - Maintained for backward compatibility */}
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
