@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Settings, Users, Calendar, FileText, User, ChevronDown, ChevronRight, ChevronLeft, Briefcase, CheckCircle, Tag, Menu, X, LogOut } from "lucide-react";
+import { Home, Settings, Users, Calendar, FileText, User, ChevronDown, ChevronRight, ChevronLeft, Briefcase, CheckCircle, Tag, Menu, X, LogOut, Clock, UserCog } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -42,22 +43,27 @@ const menuItems: MenuItem[] = [{
   subMenus: [{
     name: "Employees",
     path: "/master/employees",
+    icon: <Users className="h-4 w-4" />,
     requiredPermission: "Manage Employees"
   }, {
     name: "Roles",
     path: "/master/roles",
+    icon: <UserCog className="h-4 w-4" />,
     requiredPermission: "Manage Roles"
   }, {
     name: "Projects",
     path: "/master/projects",
+    icon: <Briefcase className="h-4 w-4" />,
     requiredPermission: "Manage Projects"
   }, {
     name: "Attendance Type",
     path: "/master/attendance-type",
+    icon: <Clock className="h-4 w-4" />,
     requiredPermission: "Manage Projects"
   }, {
     name: "Role Attendance Logic",
     path: "/master/role-attendance-logic",
+    icon: <Settings className="h-4 w-4" />,
     requiredPermission: "Attendance Role Logic"
   }]
 }, {
