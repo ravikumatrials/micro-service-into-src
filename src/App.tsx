@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,20 +6,28 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import { PermissionGuard } from "./components/auth/PermissionGuard";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Attendance from "./pages/Attendance";
-import AttendanceHistory from "./pages/AttendanceHistory";
-import BulkAttendance from "./pages/BulkAttendance";
-import Reports from "./pages/Reports";
-import Profile from "./pages/Profile";
-import Employees from "./pages/master/Employees";
-import Roles from "./pages/master/Roles";
-import Projects from "./pages/master/Projects";
+
+// Core microservice imports
+import Login from "./core/pages/Login";
+import Dashboard from "./core/pages/Dashboard";
+import Profile from "./core/pages/Profile";
+
+// Attendance microservice imports
+import ManualAttendanceRecords from "./attendance/pages/ManualAttendance";
+import BulkAttendance from "./attendance/pages/BulkAttendance";
+import AttendanceHistory from "./attendance/pages/AttendanceHistory";
+
+// Master microservice imports
+import Employees from "./master/pages/Employees";
+import Roles from "./master/pages/Roles";
+import Projects from "./master/pages/Projects";
+import AttendanceType from "./master/pages/AttendanceType";
+import RoleAttendanceLogic from "./master/pages/RoleAttendanceLogic";
+
+// Reports microservice imports
+import Reports from "./reports/pages/Reports";
+
 import NotFound from "./pages/NotFound";
-import ManualAttendanceRecords from "./pages/ManualAttendanceRecords";
-import RoleAttendanceLogic from "./pages/master/RoleAttendanceLogic";
-import AttendanceType from "./pages/master/AttendanceType";
 
 // Create a new QueryClient instance inside the component to ensure it's created when React is ready
 const App = () => {
@@ -37,11 +46,6 @@ const App = () => {
             <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
             
             {/* Protected routes with permission guards */}
-            <Route path="/attendance" element={
-              <PermissionGuard requiredPermission="Manual Attendance">
-                <Layout><Attendance /></Layout>
-              </PermissionGuard>
-            } />
             <Route path="/manual-attendance" element={
               <PermissionGuard requiredPermission="Manual Attendance">
                 <Layout><ManualAttendanceRecords /></Layout>

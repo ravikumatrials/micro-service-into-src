@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Tag
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type SubMenuItem = {
   name: string;
@@ -30,6 +31,7 @@ type MenuItem = {
   subMenus?: SubMenuItem[];
   hidden?: boolean;
   requiredPermission?: string;
+  microservice?: string;
 };
 
 // Mock function to get current user permissions - in a real app, this would come from an auth context
@@ -54,12 +56,14 @@ const menuItems: MenuItem[] = [
   {
     name: "Dashboard",
     path: "/dashboard",
-    icon: <Home className="h-5 w-5" />
+    icon: <Home className="h-5 w-5" />,
+    microservice: "Core"
   },
   {
     name: "Master",
     path: "/master",
     icon: <Settings className="h-5 w-5" />,
+    microservice: "Master",
     subMenus: [
       {
         name: "Employees",
@@ -92,30 +96,35 @@ const menuItems: MenuItem[] = [
     name: "Manual Attendance",
     path: "/manual-attendance",
     icon: <Calendar className="h-5 w-5" />,
-    requiredPermission: "Manual Attendance"
+    requiredPermission: "Manual Attendance",
+    microservice: "Attendance"
   },
   {
     name: "Bulk Attendance",
     path: "/bulk-attendance",
     icon: <CheckCircle className="h-5 w-5" />,
-    requiredPermission: "Manual Attendance"
+    requiredPermission: "Manual Attendance",
+    microservice: "Attendance"
   },
   {
     name: "Attendance History",
     path: "/attendance-history",
     icon: <Calendar className="h-5 w-5" />,
-    hidden: true
+    hidden: true,
+    microservice: "Attendance"
   },
   {
     name: "Reports",
     path: "/reports",
     icon: <FileText className="h-5 w-5" />,
-    requiredPermission: "View Reports"
+    requiredPermission: "View Reports",
+    microservice: "Reports"
   },
   {
     name: "Profile",
     path: "/profile",
-    icon: <User className="h-5 w-5" />
+    icon: <User className="h-5 w-5" />,
+    microservice: "Core"
   }
 ];
 
@@ -164,6 +173,16 @@ export function Sidebar() {
     })
     .filter(item => !item.subMenus || item.subMenus.length > 0); // Hide parent menus with no visible children
 
+  const getMicroserviceColor = (microservice?: string) => {
+    switch (microservice) {
+      case "Core": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "Master": return "bg-green-100 text-green-700 border-green-200";
+      case "Attendance": return "bg-purple-100 text-purple-700 border-purple-200";
+      case "Reports": return "bg-orange-100 text-orange-700 border-orange-200";
+      default: return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
   return (
     <div className="relative">
       <div className={`fixed h-screen bg-sidebar transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
@@ -211,7 +230,19 @@ export function Sidebar() {
                       >
                         <div className="flex items-center">
                           {item.icon}
-                          {!isCollapsed && <span className="ml-3">{item.name}</span>}
+                          {!isCollapsed && (
+                            <div className="flex items-center ml-3">
+                              <span>{item.name}</span>
+                              {item.microservice && (
+                                <Badge 
+                                  variant="outline" 
+                                  className={`ml-2 text-xs ${getMicroserviceColor(item.microservice)}`}
+                                >
+                                  {item.microservice}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
                         </div>
                         {!isCollapsed && (
                           expanded === item.name ? (
@@ -251,7 +282,19 @@ export function Sidebar() {
                       } ${isCollapsed ? 'justify-center' : ''}`}
                     >
                       {item.icon}
-                      {!isCollapsed && <span className="ml-3">{item.name}</span>}
+                      {!isCollapsed && (
+                        <div className="flex items-center ml-3">
+                          <span>{item.name}</span>
+                          {item.microservice && (
+                            <Badge 
+                              variant="outline" 
+                              className={`ml-2 text-xs ${getMicroserviceColor(item.microservice)}`}
+                            >
+                              {item.microservice}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </Link>
                   )}
                 </li>
