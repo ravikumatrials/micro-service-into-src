@@ -8,24 +8,24 @@ import { Layout } from "./components/layout/Layout";
 import { PermissionGuard } from "./components/auth/PermissionGuard";
 
 // Core microservice imports
-import Login from "./core/pages/Login";
-import Dashboard from "./core/pages/Dashboard";
-import Profile from "./core/pages/Profile";
+import Login from "./Component_Dashabord/pages/Login";
+import Dashboard from "./Component_Dashabord/pages/Dashboard";
+import Profile from "./Component_Dashabord/pages/Profile";
 
 // Attendance microservice imports
-import ManualAttendanceRecords from "./attendance/pages/ManualAttendance";
-import BulkAttendance from "./attendance/pages/BulkAttendance";
-import AttendanceHistory from "./attendance/pages/AttendanceHistory";
+import ManualAttendanceRecords from "./Component_Folder/pages/ManualAttendance";
+import BulkAttendance from "./Component_Folder/pages/BulkAttendance";
+import AttendanceHistory from "./Component_Folder/pages/AttendanceHistory";
 
 // Master microservice imports
-import Employees from "./master/pages/Employees";
-import Roles from "./master/pages/Roles";
-import Projects from "./master/pages/Projects";
-import AttendanceType from "./master/pages/AttendanceType";
-import RoleAttendanceLogic from "./master/pages/RoleAttendanceLogic";
+import Employees from "./Component_master/pages/Employees";
+import Roles from "./Component_master/pages/Roles";
+import Projects from "./Component_master/pages/Projects";
+import AttendanceType from "./Component_master/pages/AttendanceType";
+import RoleAttendanceLogic from "./Component_master/pages/RoleAttendanceLogic";
 
 // Reports microservice imports
-import Reports from "./reports/pages/Reports";
+import Reports from "./Component_report/pages/Reports";
 
 import NotFound from "./pages/NotFound";
 
