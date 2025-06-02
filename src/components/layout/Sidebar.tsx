@@ -27,12 +27,12 @@ const menuItems: MenuItem[] = [{
   name: "Dashboard",
   path: "/dashboard",
   icon: <Home className="h-5 w-5" />,
-  microservice: "Core"
+  
 }, {
   name: "Master",
   path: "/master",
   icon: <Settings className="h-5 w-5" />,
-  microservice: "Master",
+ 
   subMenus: [{
     name: "Employees",
     path: "/master/employees",
@@ -59,30 +59,30 @@ const menuItems: MenuItem[] = [{
   path: "/manual-attendance",
   icon: <Calendar className="h-5 w-5" />,
   requiredPermission: "Manual Attendance",
-  microservice: "Attendance"
+  
 }, {
   name: "Bulk Attendance",
   path: "/bulk-attendance",
   icon: <CheckCircle className="h-5 w-5" />,
   requiredPermission: "Manual Attendance",
-  microservice: "Attendance"
+  
 }, {
   name: "Attendance History",
   path: "/attendance-history",
   icon: <Calendar className="h-5 w-5" />,
   hidden: true,
-  microservice: "Attendance"
+ 
 }, {
   name: "Reports",
   path: "/reports",
   icon: <FileText className="h-5 w-5" />,
   requiredPermission: "View Reports",
-  microservice: "Reports"
+ 
 }, {
   name: "Profile",
   path: "/profile",
   icon: <User className="h-5 w-5" />,
-  microservice: "Core"
+ 
 }];
 export function Sidebar() {
   const location = useLocation();
