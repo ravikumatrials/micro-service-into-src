@@ -30,7 +30,6 @@ type MenuItem = {
   subMenus?: SubMenuItem[];
   hidden?: boolean;
   requiredPermission?: string;
-  microservice?: string;
 };
 
 // Mock function to get current user permissions - in a real app, this would come from an auth context
@@ -55,14 +54,12 @@ const menuItems: MenuItem[] = [
   {
     name: "Dashboard",
     path: "/dashboard",
-    icon: <Home className="h-5 w-5" />,
-    microservice: "core"
+    icon: <Home className="h-5 w-5" />
   },
   {
     name: "Master",
     path: "/master",
     icon: <Settings className="h-5 w-5" />,
-    microservice: "master",
     subMenus: [
       {
         name: "Employees",
@@ -95,35 +92,30 @@ const menuItems: MenuItem[] = [
     name: "Manual Attendance",
     path: "/manual-attendance",
     icon: <Calendar className="h-5 w-5" />,
-    requiredPermission: "Manual Attendance",
-    microservice: "attendance"
+    requiredPermission: "Manual Attendance"
   },
   {
     name: "Bulk Attendance",
     path: "/bulk-attendance",
     icon: <CheckCircle className="h-5 w-5" />,
-    requiredPermission: "Manual Attendance",
-    microservice: "attendance"
+    requiredPermission: "Manual Attendance"
   },
   {
     name: "Attendance History",
     path: "/attendance-history",
     icon: <Calendar className="h-5 w-5" />,
-    hidden: true,
-    microservice: "attendance"
+    hidden: true
   },
   {
     name: "Reports",
     path: "/reports",
     icon: <FileText className="h-5 w-5" />,
-    requiredPermission: "View Reports",
-    microservice: "report"
+    requiredPermission: "View Reports"
   },
   {
     name: "Profile",
     path: "/profile",
-    icon: <User className="h-5 w-5" />,
-    microservice: "core"
+    icon: <User className="h-5 w-5" />
   }
 ];
 
@@ -216,7 +208,6 @@ export function Sidebar() {
                         className={`flex items-center w-full px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors ${
                           expanded === item.name ? 'bg-sidebar-accent' : ''
                         } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                        title={isCollapsed ? `${item.name} (${item.microservice} microservice)` : undefined}
                       >
                         <div className="flex items-center">
                           {item.icon}
@@ -258,7 +249,6 @@ export function Sidebar() {
                           ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                           : 'text-sidebar-foreground hover:bg-sidebar-accent'
                       } ${isCollapsed ? 'justify-center' : ''}`}
-                      title={isCollapsed ? `${item.name} (${item.microservice} microservice)` : undefined}
                     >
                       {item.icon}
                       {!isCollapsed && <span className="ml-3">{item.name}</span>}
