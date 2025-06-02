@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Filter, Eye } from 'lucide-react';
@@ -28,7 +27,7 @@ import {
 } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import AttendanceDetailModal from '@/components/attendance/AttendanceDetailModal';
+import AttendanceDetailModal from '@/Component_attendence/components/AttendanceDetailModal';
 
 // Updated mock data with realistic examples
 const MOCK_ATTENDANCE = [
@@ -414,8 +413,8 @@ const AttendanceHistory = () => {
       {/* Detail Modal */}
       <AttendanceDetailModal
         record={selectedRecord}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
       />
     </div>
   );

@@ -413,8 +413,8 @@ const AttendanceHistory = () => {
       {/* Detail Modal */}
       <AttendanceDetailModal
         record={selectedRecord}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
       />
     </div>
   );

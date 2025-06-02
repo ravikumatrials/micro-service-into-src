@@ -1,7 +1,7 @@
 
 import * as React from "react"
 
-import { Toaster } from "@/Component_Dashboard/components/ui/toaster"
+import Toaster from "@/Component_Dashboard/components/ui/toaster"
 
 const Action = React.forwardRef<
   React.ElementRef<"a">,
