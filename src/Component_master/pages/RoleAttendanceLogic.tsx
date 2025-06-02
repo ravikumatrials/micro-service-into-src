@@ -25,7 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { RoleAttendanceLogicForm } from "@/components/master/RoleAttendanceLogicForm";
+import { RoleAttendanceLogicForm } from "../components/RoleAttendanceLogicForm";
 import { Switch } from "@/components/ui/switch";
 
 // Default role attendance logic entries
