@@ -1,17 +1,17 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import ManualAttendanceFilters from "../components/ManualAttendanceFilters";
 import ManualAttendanceTabs from "../components/ManualAttendanceTabs";
-import { filterRecords, initialFilters, AttendanceFilters } from "../components/AttendanceFilterUtils";
-import { mockProjects } from "@/data/mockProjects";
+import { filterRecords, initialFilters } from "../components/AttendanceFilterUtils";
+import { attendanceMockProjects } from "../data/attendanceData";
+import { AttendanceFilters } from "../types/attendance";
 import { toast } from "@/hooks/use-toast";
 
 const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
   const [activeTab, setActiveTab] = useState("check-in");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Default to today's date
-  const [dateSelected, setDateSelected] = useState<boolean>(true); // Default to true since we're auto-selecting today
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [dateSelected, setDateSelected] = useState<boolean>(true);
   
   // Apply the filter function to get filtered records
   const filteredRecords = filterRecords(filters);
@@ -71,7 +71,7 @@ const ManualAttendanceRecords = () => {
         setActiveTab={setActiveTab}
         filteredRecords={filteredRecords}
         filters={filters}
-        projects={mockProjects}
+        projects={attendanceMockProjects}
         selectedDate={selectedDate}
         setSelectedDate={handleDateChange}
         dateSelected={dateSelected}

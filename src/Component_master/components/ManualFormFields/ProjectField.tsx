@@ -1,9 +1,15 @@
+
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+interface Project {
+  id: number;
+  name: string;
+}
+
 interface ProjectFieldProps {
-  projects: { id: number; name: string }[];
+  projects: Project[];
   value: string;
   onChange: (value: string) => void;
 }

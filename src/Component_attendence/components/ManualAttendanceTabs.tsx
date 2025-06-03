@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import CheckInTab from "./CheckInTab";
 import CheckOutTab from "./CheckOutTab";
 import ExceptionTab from "./ExceptionTab";
-import { AttendanceFilters } from "./AttendanceFilterUtils";
+import { AttendanceFilters } from "../types/attendance";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";

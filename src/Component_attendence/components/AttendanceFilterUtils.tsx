@@ -1,14 +1,18 @@
-import { mockAttendanceRecords } from "./ManualAttendanceTable";
 
-export interface AttendanceFilters {
-  employeeId: string;
-  name: string;
-  category: string;
-  classification: string;
-  status: string;
-  project: string;
-  entity: string;
-}
+import { AttendanceFilters } from "../types/attendance";
+
+const mockAttendanceRecords = [
+  {
+    id: 1,
+    employeeId: "EMP123",
+    employeeName: "John Doe",
+    category: "Engineer",
+    classification: "Staff",
+    status: "Active",
+    checkInProject: "Project A",
+    entity: "Tanseeq LLC"
+  }
+];
 
 // Initial filter state
 export const initialFilters: AttendanceFilters = {
