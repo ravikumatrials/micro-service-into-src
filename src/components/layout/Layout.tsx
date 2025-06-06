@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
-import { Sidebar } from "./Sidebar";
-import { TopBar } from "./TopBar";
+import { Sidebar } from "../../modules/sidebar";
+import { TopBar } from "../../modules/topbar";
 
 interface LayoutProps {
   children: ReactNode;
