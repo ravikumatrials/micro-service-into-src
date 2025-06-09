@@ -1,28 +1,24 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+
+import React, { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../src/components/ui/dialog";
+import { Button } from "../../src/components/ui/button";
+import { Label } from "../../src/components/ui/label";
+import { Input } from "../../src/components/ui/input";
+import { Textarea } from "../../src/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../src/components/ui/select";
+
+interface Employee {
+  id: number;
+  employeeId: string;
+  name: string;
+  project: string;
+  projectId: number;
+}
 
 interface ManualCheckOutDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  employee: { id: number; name: string } | null;
+  employee: Employee | null;
   projects: { id: number; name: string }[];
   onComplete: (projectId: string, time: string, reason: string) => void;
 }
@@ -34,14 +30,18 @@ const ManualCheckOutDialog = ({
   projects,
   onComplete
 }: ManualCheckOutDialogProps) => {
-  const [projectId, setProjectId] = useState("");
-  const [time, setTime] = useState("");
+  const [selectedProject, setSelectedProject] = useState("");
+  const [checkOutTime, setCheckOutTime] = useState("");
   const [reason, setReason] = useState("");
 
-  const handleSubmit = () => {
-    if (employee && projectId && time) {
-      onComplete(projectId, time, reason);
-      onOpenChange(false);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedProject && checkOutTime) {
+      onComplete(selectedProject, checkOutTime, reason);
+      // Reset form
+      setSelectedProject("");
+      setCheckOutTime("");
+      setReason("");
     }
   };
 
@@ -50,49 +50,61 @@ const ManualCheckOutDialog = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Manual Check Out</DialogTitle>
-          <DialogDescription>
-            Mark attendance for <b>{employee?.name}</b>
-          </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="project" className="text-right">
-              Project
-            </Label>
-            <Select onValueChange={setProjectId} defaultValue={projectId} >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a project" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id.toString()}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="time" className="text-right">
-              Time
-            </Label>
-            <Input id="time" value={time} onChange={(e) => setTime(e.target.value)} className="col-span-3" type="time" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="reason" className="text-right">
-              Reason
-            </Label>
-            <Textarea id="reason" value={reason} onChange={(e) => setReason(e.target.value)} className="col-span-3" />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button type="submit" onClick={handleSubmit}>
-            Mark Attendance
-          </Button>
-        </DialogFooter>
+        {employee && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Employee</Label>
+              <Input value={`${employee.employeeId} - ${employee.name}`} disabled />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="project">Project</Label>
+              <Select value={selectedProject} onValueChange={setSelectedProject}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id.toString()}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="time">Check Out Time</Label>
+              <Input
+                id="time"
+                type="time"
+                value={checkOutTime}
+                onChange={(e) => setCheckOutTime(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reason">Reason (Optional)</Label>
+              <Textarea
+                id="reason"
+                placeholder="Enter reason for manual check out"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                Submit
+              </Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

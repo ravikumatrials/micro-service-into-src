@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Edit, UserCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Avatar } from "@/components/ui/avatar";
+import { Button } from "../src/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../src/components/ui/table";
+import { Avatar } from "../src/components/ui/avatar";
 import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { isSameDay } from "@/lib/utils";
+import { isSameDay } from "../src/lib/utils";
 
 interface Employee {
   id: number;
