@@ -26,6 +26,7 @@
     "@radix-ui/react-calendar": "^1.0.0",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-alert-dialog": "^1.0.5",
+    "@radix-ui/react-tooltip": "^1.0.7",
     "sonner": "^1.4.3"
   },
   "devDependencies": {
@@ -33,7 +34,7 @@
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react-swc": "^3.3.2",
+    "@vitejs/plugin-react": "^4.0.3",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
