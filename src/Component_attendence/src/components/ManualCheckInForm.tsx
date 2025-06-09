@@ -5,8 +5,8 @@ import EmployeeField from "./form-fields/EmployeeField";
 import ProjectField from "./form-fields/ProjectField";
 import TimeField from "./form-fields/TimeField";
 import ReasonField from "./form-fields/ReasonField";
-import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "../hooks/use-toast";
+import { Alert, AlertDescription } from "./ui/alert";
 
 interface ManualCheckInFormProps {
   projects: { id: number; name: string; coordinates?: { geofenceData: string } }[];

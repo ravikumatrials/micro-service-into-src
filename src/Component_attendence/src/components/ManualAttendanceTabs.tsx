@@ -1,15 +1,15 @@
 
 import React, { useEffect } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import CheckInTab from "./CheckInTab";
 import CheckOutTab from "./CheckOutTab";
 import ExceptionTab from "./ExceptionTab";
 import { AttendanceFilters } from "../types/attendance";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "./ui/button";
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface ManualAttendanceTabsProps {
   activeTab: string;

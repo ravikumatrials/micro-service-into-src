@@ -5,7 +5,7 @@ import EmployeeField from "./form-fields/EmployeeField";
 import ProjectField from "./form-fields/ProjectField";
 import TimeField from "./form-fields/TimeField";
 import ReasonField from "./form-fields/ReasonField";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "../hooks/use-toast";
 
 interface ManualCheckOutFormProps {
   projects: { id: number; name: string }[];

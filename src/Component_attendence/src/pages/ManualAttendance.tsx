@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 import ManualAttendanceFilters from "../components/ManualAttendanceFilters";
 import ManualAttendanceTabs from "../components/ManualAttendanceTabs";
 import { initialFilters, filterRecords } from "../components/AttendanceFilterUtils";
