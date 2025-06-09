@@ -1,80 +1,48 @@
-
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import ManualAttendanceFilters from "../components/ManualAttendanceFilters";
 import ManualAttendanceTabs from "../components/ManualAttendanceTabs";
-import { filterRecords, initialFilters } from "../components/AttendanceFilterUtils";
-import { attendanceMockProjects } from "../data/attendanceData";
+import { initialFilters, filterRecords } from "../components/AttendanceFilterUtils";
+import { mockProjects } from "../data/attendanceData";
 import { AttendanceFilters } from "../types/attendance";
-import { toast } from "@/hooks/use-toast";
 
-const ManualAttendanceRecords = () => {
-  const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
+const ManualAttendance = () => {
   const [activeTab, setActiveTab] = useState("check-in");
+  const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
+  const [filteredRecords, setFilteredRecords] = useState(filterRecords(initialFilters));
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [dateSelected, setDateSelected] = useState<boolean>(true);
-  
-  // Apply the filter function to get filtered records
-  const filteredRecords = filterRecords(filters);
-  
-  // Reset all filters
+  const [dateSelected, setDateSelected] = useState(true);
+
+  const handleApplyFilters = () => {
+    setFilteredRecords(filterRecords(filters));
+  };
+
   const handleResetFilters = () => {
     setFilters(initialFilters);
+    setFilteredRecords(filterRecords(initialFilters));
   };
-
-  // Apply filters
-  const handleApplyFilters = () => {
-    // In a real application, this might trigger a data fetch or other operations
-    console.log("Applying filters:", filters);
-    console.log("Selected date:", selectedDate);
-    
-    toast({
-      title: "Filters applied",
-      description: `Showing attendance data for ${format(selectedDate, "PPP")}`,
-    });
-  };
-
-  // Handle date change
-  const handleDateChange = (date: Date | undefined) => {
-    if (date) {
-      setSelectedDate(date);
-      setDateSelected(true);
-      
-      toast({
-        title: "Date selected",
-        description: `Attendance date set to ${format(date, "PPP")}`,
-      });
-    }
-  };
-
-  // Log to help with debugging
-  useEffect(() => {
-    console.log("ManualAttendanceRecords rendered with activeTab:", activeTab);
-  }, [activeTab]);
 
   return (
-    <div className="space-y-5 px-1 pt-5">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Manual Attendance Records</h1>
-      </div>
-      
-      {/* Filters Section */}
-      <ManualAttendanceFilters 
+    <div className="container mx-auto py-10">
+      <h1 className="text-3xl font-semibold mb-6">Manual Attendance</h1>
+
+      {/* Filters */}
+      <ManualAttendanceFilters
         filters={filters}
         setFilters={setFilters}
-        onReset={handleResetFilters}
         onApply={handleApplyFilters}
+        onReset={handleResetFilters}
       />
-      
-      {/* Tabs Section with Date Picker */}
-      <ManualAttendanceTabs 
+
+      {/* Tabs */}
+      <ManualAttendanceTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         filteredRecords={filteredRecords}
         filters={filters}
-        projects={attendanceMockProjects}
+        projects={mockProjects}
         selectedDate={selectedDate}
-        setSelectedDate={handleDateChange}
+        setSelectedDate={setSelectedDate}
         dateSelected={dateSelected}
         setDateSelected={setDateSelected}
       />
@@ -82,4 +50,4 @@ const ManualAttendanceRecords = () => {
   );
 };
 
-export default ManualAttendanceRecords;
+export default ManualAttendance;

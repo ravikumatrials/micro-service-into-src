@@ -1,10 +1,10 @@
 
 import { useState } from "react";
 import { User } from "lucide-react";
-import EmployeeField from "../form-fields/EmployeeField";
-import ProjectField from "../form-fields/ProjectField";
-import TimeField from "../form-fields/TimeField";
-import ReasonField from "../form-fields/ReasonField";
+import EmployeeField from "./form-fields/EmployeeField";
+import ProjectField from "./form-fields/ProjectField";
+import TimeField from "./form-fields/TimeField";
+import ReasonField from "./form-fields/ReasonField";
 import { useToast } from "@/hooks/use-toast";
 
 interface ManualCheckOutFormProps {
