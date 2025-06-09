@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { Edit, AlertCircle, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar } from "@/components/ui/avatar";
-import ManualCheckOutDialog from "./dialogs/ManualCheckOutDialog";
+import ManualCheckOutDialog from "../src/components/dialogs/ManualCheckOutDialog";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";

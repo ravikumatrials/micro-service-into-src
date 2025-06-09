@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import ManualAttendanceFilters from "../components/ManualAttendanceFilters";
-import ManualAttendanceTabs from "../components/ManualAttendanceTabs";
-import { filterRecords, initialFilters } from "../components/AttendanceFilterUtils";
-import { attendanceMockProjects } from "../data/attendanceData";
-import { AttendanceFilters } from "../types/attendance";
+import ManualAttendanceFilters from "../src/components/ManualAttendanceFilters";
+import ManualAttendanceTabs from "../src/components/ManualAttendanceTabs";
+import { filterRecords, initialFilters } from "../src/components/AttendanceFilterUtils";
+import { attendanceMockProjects } from "../src/data/attendanceData";
+import { AttendanceFilters } from "../src/types/attendance";
 import { toast } from "@/hooks/use-toast";
 
 const ManualAttendanceRecords = () => {
