@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import ManualAttendanceFilters from "../src/components/ManualAttendanceFilters";
@@ -5,7 +6,7 @@ import ManualAttendanceTabs from "../src/components/ManualAttendanceTabs";
 import { filterRecords, initialFilters } from "../src/components/AttendanceFilterUtils";
 import { mockProjects } from "../src/data/attendanceData";
 import { AttendanceFilters } from "../src/types/attendance";
-import { toast } from "../src/hooks/use-toast";
+import { toast } from "sonner";
 
 const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
@@ -27,10 +28,7 @@ const ManualAttendanceRecords = () => {
     console.log("Applying filters:", filters);
     console.log("Selected date:", selectedDate);
     
-    toast({
-      title: "Filters applied",
-      description: `Showing attendance data for ${format(selectedDate, "PPP")}`,
-    });
+    toast(`Filters applied - Showing attendance data for ${format(selectedDate, "PPP")}`);
   };
 
   // Handle date change
@@ -39,10 +37,7 @@ const ManualAttendanceRecords = () => {
       setSelectedDate(date);
       setDateSelected(true);
       
-      toast({
-        title: "Date selected",
-        description: `Attendance date set to ${format(date, "PPP")}`,
-      });
+      toast(`Date selected - Attendance date set to ${format(date, "PPP")}`);
     }
   };
 
