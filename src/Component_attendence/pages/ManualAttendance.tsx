@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import ManualAttendanceFilters from "../src/components/ManualAttendanceFilters";
 import ManualAttendanceTabs from "../src/components/ManualAttendanceTabs";
 import { filterRecords, initialFilters } from "../src/components/AttendanceFilterUtils";
-import { attendanceMockProjects } from "../src/data/attendanceData";
+import { mockProjects } from "../src/data/attendanceData";
 import { AttendanceFilters } from "../src/types/attendance";
 import { toast } from "@/hooks/use-toast";
 
@@ -72,7 +72,7 @@ const ManualAttendanceRecords = () => {
         setActiveTab={setActiveTab}
         filteredRecords={filteredRecords}
         filters={filters}
-        projects={attendanceMockProjects}
+        projects={mockProjects}
         selectedDate={selectedDate}
         setSelectedDate={handleDateChange}
         dateSelected={dateSelected}
