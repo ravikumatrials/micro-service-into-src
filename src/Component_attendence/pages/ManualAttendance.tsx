@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import ManualAttendanceFilters from "../src/components/ManualAttendanceFilters";
@@ -6,7 +5,7 @@ import ManualAttendanceTabs from "../src/components/ManualAttendanceTabs";
 import { filterRecords, initialFilters } from "../src/components/AttendanceFilterUtils";
 import { mockProjects } from "../src/data/attendanceData";
 import { AttendanceFilters } from "../src/types/attendance";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "../src/hooks/use-toast";
 
 const ManualAttendanceRecords = () => {
   const [filters, setFilters] = useState<AttendanceFilters>(initialFilters);
