@@ -20,7 +20,7 @@ import AttendanceHistory from "./Component_attendence/pages/AttendanceHistory";
 // Master microservice imports
 import Employees from "./Component_master/pages/Employees";
 import Roles from "./Component_master/pages/Roles";
-import Projects from "./Component_master/pages/Projects";
+import { Projects } from "./Component_projects"; // Using the new independent Projects
 import AttendanceType from "./Component_master/pages/AttendanceType";
 import RoleAttendanceLogic from "./Component_master/pages/RoleAttendanceLogic";
 
